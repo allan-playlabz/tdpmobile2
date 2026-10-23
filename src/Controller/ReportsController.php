@@ -63,12 +63,12 @@ class ReportsController extends AppController
           }
           $first_date_allowed = (new Time())->subMonths(Configure::read('Default.previous_orders_months_to_view'));
           $start_date = $first_date_allowed;
-          $start_date->hour(0)->minute(0)->second(0);
+          $start_date = $start_date->hour(0)->minute(0)->second(0);
           $end_date = Time::now();
           if ($this->request->getData('issue_start_date')) {
             $start_date = Time::createFromFormat('d M Y',$this->request->getData('issue_start_date'));;
             if ($start_date) {
-              $start_date->hour(0)->minute(0)->second(0);
+              $start_date = $start_date->hour(0)->minute(0)->second(0);
             }
           }
           $conditions['Orders.created >='] = $start_date;
@@ -78,7 +78,7 @@ class ReportsController extends AppController
           if ($this->request->getData('issue_end_date')) {
             $end_date = Time::createFromFormat('d M Y',$this->request->getData('issue_end_date'));;
             if ($end_date) {
-              $end_date->hour(23)->minute(59)->second(59);
+              $end_date = $end_date->hour(23)->minute(59)->second(59);
             }
             
             $conditions['Orders.created <='] = $end_date;

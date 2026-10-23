@@ -287,7 +287,7 @@ class AgentsController extends AppController
                     }
                 }
               }
-              $agentUser = $this->Agents->AgentUsers->newEntity();
+              $agentUser = $this->Agents->AgentUsers->newEmptyEntity();
               $agentUser->name = $agent->first_name.' '.$agent->last_name;
               $agentUser->email = $agent->email;
               if ($data['password']) {

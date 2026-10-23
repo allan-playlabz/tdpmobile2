@@ -22,7 +22,7 @@ return $schema->addField('name', 'string')
 ->addField('body', ['type' => 'text']);
 }
 
-public function validationDefault(Validator $validator)
+public function validationDefault(Validator $validator): Validator
 {
     $validator
         ->allowEmptyString('id', null, 'create');
@@ -82,7 +82,7 @@ public function validationDefault(Validator $validator)
     return $validator;
 }
 
-    protected function process(array $data)
+    protected function process(array $data): bool
     {
         $api_url = Configure::read('Api.url');
         $http = new Client();

@@ -491,7 +491,7 @@ class OrdersController extends AppController
       if ($this->request->is(['post','put','patch'])) {
         $sorted_data = $this->request->getData();
         sort($sorted_data);
-        $request_nonce = md5(json_encode($sorted_data) . date('YmdHis') . $this->request->getParam('_csrfToken'));
+        $request_nonce = md5(json_encode($sorted_data) . date('YmdHis') . $this->request->getAttribute('csrfToken'));
         if ($this->request->getSession()->read('request_nonce') == $request_nonce) {
           return $this->redirect($this->request->getRequestTarget());
         } else {
@@ -1148,7 +1148,7 @@ class OrdersController extends AppController
             for ($i = 0 ; $i< $order_item->qty; $i++) {
               /*BEGIN PACKAGE TICKETS*/
               if ($ticket && !empty($ticket->child_tickets)) {
-                $package_voucher = $this->Vouchers->newEntity();
+                $package_voucher = $this->Vouchers->newEmptyEntity();
                 $package_voucher->ticket_name = $ticket->name;
                 $package_voucher->order_item_id = $order_item->id;
                 $len = 10;
@@ -1179,7 +1179,7 @@ class OrdersController extends AppController
                     $api_purchases++;
                     continue;
                   }
-                  $voucher = $this->Vouchers->newEntity();
+                  $voucher = $this->Vouchers->newEmptyEntity();
                   $voucher->created = Time::now();
                   $voucher->ticket_name = $ticket->name;
                   $voucher->order_item_id = $order_item->id;
@@ -1424,7 +1424,7 @@ class OrdersController extends AppController
               /* END PACKAGE TICKETS */
               /* BEGIN ATTRACTION TICKETS */
               else {
-                $voucher = $this->Vouchers->newEntity();
+                $voucher = $this->Vouchers->newEmptyEntity();
                 $voucher->created = Time::now();
                 $voucher->ticket_name = $ticket->name;
                 $voucher->order_item_id = $order_item->id;
@@ -1960,7 +1960,7 @@ class OrdersController extends AppController
         $from = $first_date_allowed;        
         if ($this->request->getQuery('from')) {
           $from = Time::createFromFormat('d M Y', $this->request->getQuery('from'));
-          $from->hour(0)->minute(0)->second(0);
+          $from = $from->hour(0)->minute(0)->second(0);
           if ($from < $first_date_allowed) {
             $from = $first_date_allowed;
           }
@@ -1968,12 +1968,12 @@ class OrdersController extends AppController
           if ($this->request->getQuery('to')) {
             $to = Time::createFromFormat('d M Y', $this->request->getQuery('to'));
           }
-          $to->hour(23)->minute(59)->second(59);
+          $to = $to->hour(23)->minute(59)->second(59);
           $conditions['Vouchers.created <='] = $to;
         } else {
           $from = (new \Cake\I18n\DateTime('-6 months'))->hour(0)->minute(0)->second(0);
         }
-        $from->hour(0)->minute(0)->second(0);
+        $from = $from->hour(0)->minute(0)->second(0);
         $conditions['Vouchers.created >='] = $from;
         $this->paginate = [
           'conditions' => $conditions,

@@ -6,7 +6,7 @@ use Cake\Utility\Text;
 use App\Lib\Translator;
 use Cake\Core\Configure;
 use App\Controller\AppController;
-use Cake\Auth\DefaultPasswordHasher;
+use Authentication\PasswordHasher\DefaultPasswordHasher;
 
 /**
  * AgentUsers Controller
@@ -38,11 +38,11 @@ class AgentUsersController extends AppController
       $this->request->getSession()->delete('Subdomain');
       $host = explode('.',$this->request->host());
       /*if ($this->request->getSession()->check('login')) {
-        if (!empty($this->request->data['g-recaptcha-response'])) {
+        if (!empty($this->request->getData('g-recaptcha-response'))) {
           $http = new Client();
           $response = $http->post('https://www.google.com/recaptcha/api/siteverify', [
             'secret' => Configure::read('Recaptcha.secret'),
-            'response' => $this->request->data['g-recaptcha-response']
+            'response' => $this->request->getData('g-recaptcha-response')
           ]);
           if ($response->json['success'] == false) {
             $this->Flash->error('Invalid reCAPTCHA response');
@@ -343,7 +343,7 @@ class AgentUsersController extends AppController
             return $this->redirect(['controller'=>'AgentUsers','action'=>'login']);
           } else {
             $this->Flash->error('Unable to save new password.');
-            $this->log($agent->getErrors(), 'debug');
+            $this->log(json_encode($agent->getErrors()), 'debug');
           }
         }
         $this->Flash->error('Wrong confirm password. Please check and try again.');
@@ -383,7 +383,7 @@ class AgentUsersController extends AppController
     public function forgotPassword() {
       $this->viewBuilder()->setLayout('login');
       $this->loadModel('PasswordResets');
-      $password_reset = $this->PasswordResets->newEntity();
+      $password_reset = $this->PasswordResets->newEmptyEntity();
       if ($this->request->is('post')) {
         $email = $this->request->getData('email');
         $agent = $this->AgentUsers->find()->where(['email'=>$email])->first();

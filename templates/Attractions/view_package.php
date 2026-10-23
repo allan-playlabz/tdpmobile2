@@ -191,7 +191,7 @@ var select_time_text = '<?= __('Select time') ?>';
 var currency_sign = '<?= __('$') ?>';
 var attraction_pricing_type = '<?= $attraction->pricing_type ?>';
 var attraction_id = '<?= $attraction->id ?>';
-var csrf_token = '<?= $this->request->getParam('_csrfToken') ?>';
+var csrf_token = '<?= $this->request->getAttribute('csrfToken') ?>';
 var available_dates = <?= json_encode($available_dates ?? []) ?>;
 var tickets_max_quantity = 0;
 var sku_id = '<?= $attraction->tickets[0]->sku_id ?>';
@@ -205,7 +205,7 @@ var checkTickets = function() {
     type: 'GET',
     data: {date:$('#date').val(),time: $('#time').val()},
     dataType: 'JSON',
-    headers :{'X-CSRF-Token':'<?= $this->request->getParam('_csrfToken')?>'},
+    headers :{'X-CSRF-Token':'<?= $this->request->getAttribute('csrfToken')?>'},
   }).done(function(res) {
     $('.tickets').empty();
     $('.total').html('<div class="total"><strong>' + total_text + '</strong>: $0.00</div>');

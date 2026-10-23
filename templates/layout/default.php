@@ -176,7 +176,7 @@ $available_languages = Configure::read('Translation.languages');
       url:'<?= $this->Url->build(['controller'=>'AgentUsers','action'=>'read',$auth_user['id']]) ?>',
       type:'POST',
       dataType: "JSON",
-      headers :{'X-CSRF-Token':'<?= $this->request->getParam('_csrfToken')?>'},
+      headers :{'X-CSRF-Token':'<?= $this->request->getAttribute('csrfToken')?>'},
     })
     .done(function(res) {
       if (res.status == 200) {

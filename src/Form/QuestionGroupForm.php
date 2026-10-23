@@ -30,7 +30,7 @@ class QuestionGroupForm extends Form
         return $schema;
     }
 
-    public function validationDefault(Validator $validator)
+    public function validationDefault(Validator $validator): Validator
     {
 
         if (!empty($this->question_group['fields'])) {

@@ -134,7 +134,7 @@ var checkTickets = function() {
     type: 'GET',
     data: {departure_date:$('#departure-date').val(),departure_time: $('#departure-time').val(), return_date:$('#return-date').val(),return_time: $('#return-time').val()},
     dataType: 'JSON',
-    headers :{'X-CSRF-Token':'<?= $this->request->getParam('_csrfToken')?>'},
+    headers :{'X-CSRF-Token':'<?= $this->request->getAttribute('csrfToken')?>'},
   }).done(function(res) {
     clearTickets()
     $('.total').html('<div class="total"><strong>' + total_text + '</strong>: $0.00</div>');
@@ -320,7 +320,7 @@ $(document).ready(function() {
           type: 'GET',
           data: {date:datepicker.val(), type: type},
           dataType: 'JSON',
-          headers :{'X-CSRF-Token':'<?= $this->request->getParam('_csrfToken') ?>'}
+          headers :{'X-CSRF-Token':'<?= $this->request->getAttribute('csrfToken') ?>'}
         }).done(function(res) {
           populateTimings(type, res);
         });
@@ -346,7 +346,7 @@ $(document).ready(function() {
           type: 'GET',
           data: {date:$('#date').val()},
           dataType: 'JSON',
-          headers :{'X-CSRF-Token':'<?= $this->request->getParam('_csrfToken') ?>'}
+          headers :{'X-CSRF-Token':'<?= $this->request->getAttribute('csrfToken') ?>'}
         }).done(function(res) {
           console.log(res);
         });
@@ -522,7 +522,7 @@ $(document).ready(function() {
     }
 
     $('.btn-favorite').on('click',function() {
-      toggleFavorite($(this), '<?= $attraction->id ?>', '<?= $this->request->getParam('_csrfToken') ?>');
+      toggleFavorite($(this), '<?= $attraction->id ?>', '<?= $this->request->getAttribute('csrfToken') ?>');
     });
 })
 

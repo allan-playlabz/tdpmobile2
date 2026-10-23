@@ -16,7 +16,8 @@ namespace App\Controller;
 
 use Cake\I18n\I18n;
 use Cake\I18n\Time;
-use Cake\Event\Event;
+use App\View\AjaxView;
+use Cake\Event\EventInterface;
 use Cake\I18n\Number;
 use Cake\Core\Configure;
 use Cake\Routing\Router;
@@ -47,9 +48,6 @@ class AppController extends Controller
     {
         parent::initialize();
 
-        $this->loadComponent('RequestHandler', [
-            'enableBeforeRedirect' => false,
-        ]);
         $this->loadComponent('Flash');
         //$this->loadComponent('Security', ['blackHoleCallback' => 'forceSSL']);
         $this->loadComponent('Auth', [
@@ -85,6 +83,19 @@ class AppController extends Controller
         //$this->loadComponent('Security');
     }
 
+    /**
+     * Render XHR requests with AjaxView (ajax layout), as RequestHandlerComponent did in 3.x.
+     *
+     * @param \Cake\Event\EventInterface $event The beforeRender event.
+     * @return void
+     */
+    public function beforeRender(EventInterface $event)
+    {
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setClassName(AjaxView::class);
+        }
+    }
+
     public function isAuthorized() {
       return true;
     }
@@ -104,7 +115,7 @@ class AppController extends Controller
           }
         }
       }
-      Number::defaultCurrency("SGD");
+      Number::setDefaultCurrency("SGD");
       if ($this->request->getSession()->check('language')) {
         I18n::setLocale($this->request->getSession()->read('language'));
         
@@ -142,7 +153,7 @@ class AppController extends Controller
 
     }
 
-    public function forceSSL($error = '', SecurityException $exception = null) {
+    public function forceSSL($error = '', ?SecurityException $exception = null) {
         if ($exception instanceof SecurityException && $exception->getType() === 'secure') {
             return $this->redirect('https://' . env('SERVER_NAME') . Router::url($this->request->getRequestTarget()));
         }
