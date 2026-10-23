@@ -82,7 +82,7 @@ public function validationDefault(Validator $validator)
     return $validator;
 }
 
-    protected function _execute(array $data)
+    protected function process(array $data)
     {
         $api_url = Configure::read('Api.url');
         $http = new Client();
