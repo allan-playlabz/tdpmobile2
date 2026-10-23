@@ -12,7 +12,7 @@ use Cake\TestSuite\TestCase;
  */
 class GenerateReportCommandTest extends TestCase
 {
-    use ConsoleIntegrationTestTrait;
+    use \Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 
     /**
      * setUp method

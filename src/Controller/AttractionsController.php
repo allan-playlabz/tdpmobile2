@@ -138,7 +138,7 @@ class AttractionsController extends AppController
           }
           // List title matches first, then tag-only matches, keeping the
           // existing favorites/position/title order within each group.
-          $title_match = $attraction_query->newExpr()->add(['Attractions.title LIKE' => $search_like]);
+          $title_match = $attraction_query->expr()->add(['Attractions.title LIKE' => $search_like]);
           $attraction_query
             ->select(['title_match' => $title_match])
             ->order([
