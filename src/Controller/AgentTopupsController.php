@@ -21,7 +21,7 @@ use App\Controller\AppController;
 class AgentTopupsController extends AppController
 {
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('S3');
     }
@@ -157,7 +157,7 @@ class AgentTopupsController extends AppController
         $this->Flash->error('You are not authorized to access that location.');
         return $this->redirect('/');
       }
-      $agentTopup = $this->AgentTopups->newEntity();
+      $agentTopup = $this->AgentTopups->newEmptyEntity();
       if ($this->request->is('post')) {
           $agentTopup = $this->AgentTopups->patchEntity($agentTopup, $this->request->getData());
           $agentTopup->amount = floatval($agentTopup->amount);

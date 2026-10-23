@@ -14,7 +14,7 @@ use Cake\Validation\Validator;
  */
 class FdatesettlementsAgentsTable extends Table
 {
-    public function initialize(array $config)
+    public function initialize(array $config): void
     {
         parent::initialize($config);
 
@@ -38,7 +38,7 @@ class FdatesettlementsAgentsTable extends Table
         ]);
     }
 
-    public function validationDefault(Validator $validator)
+    public function validationDefault(Validator $validator): \Cake\Validation\Validator
     {
         $validator
             ->integer('id')
@@ -47,7 +47,7 @@ class FdatesettlementsAgentsTable extends Table
         return $validator;
     }
 
-    public function buildRules(RulesChecker $rules)
+    public function buildRules(RulesChecker $rules): \Cake\ORM\RulesChecker
     {
         $rules->add($rules->existsIn(['ticket_id'], 'Tickets'));
         $rules->add($rules->existsIn(['fdatesettlement_id'], 'Fdatesettlements'));

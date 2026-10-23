@@ -18,7 +18,7 @@ use Cake\Auth\DefaultPasswordHasher;
 class AgentUsersController extends AppController
 {
 
-    public function initialize() {
+    public function initialize(): void {
       parent::initialize();
       $this->Auth->allow(['otp','resendOtp','forgotPassword','resetPassword']);
       $this->loadModel('Logins');
@@ -110,11 +110,11 @@ class AgentUsersController extends AppController
 
             /* save user ip address */
             $clientIp = $this->request->getHeaderLine('CF-Connecting-IP');
-            
+
             if(empty($clientIp)) {
               $clientIp = $this->request->clientIp();
             }
-            
+
             $agent_ipaddress = $this->UsersIpaddress->find('all',['valueField'=>'ip_address'])
               ->where(['ip_address'=>$clientIp,'user_id'=>$auth_agent['id'],'type'=>'agent'])->limit(3)->order(['modified'=>'desc'])->first();
             if (empty($agent_ipaddress)) {
@@ -452,7 +452,7 @@ class AgentUsersController extends AppController
         $this->Flash->error('You are not authorized to access that location.');
         return $this->redirect('/');
       }
-      $agent_user = $this->AgentUsers->newEntity();
+      $agent_user = $this->AgentUsers->newEmptyEntity();
       if ($this->request->is('post')) {
         $clientIp = $this->request->getHeaderLine('CF-Connecting-IP');
         if(empty($clientIp)) {

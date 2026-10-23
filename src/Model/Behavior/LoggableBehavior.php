@@ -8,12 +8,12 @@ use Cake\Log\Log;
 class LoggableBehavior extends Behavior
 {
 	private $Logs;
-	public function initialize(array $config)
+	public function initialize(array $config): void
 	{
 	    $this->Logs = TableRegistry::getTableLocator()->get('Logs');
 	}
 
-	public function afterSave($event, $entity, $options)
+	public function afterSave(\Cake\Event\EventInterface $event, $entity, $options)
   {
       $log = $this->Logs->newEntity(['user_table'=>'agent_users']);
       if (!$entity->isNew()) {
@@ -97,7 +97,7 @@ class LoggableBehavior extends Behavior
 
     // }
 
-  public function afterDelete($event, $entity, $options) { 
+  public function afterDelete(\Cake\Event\EventInterface $event, $entity, $options) { 
   	$log = $this->Logs->newEntity(['user_table'=>'user_agents','type'=>'delete']);
     if (!empty($_SESSION['Auth']) && !empty($_SESSION['Auth']['User'])) {
       $log->user_id = $_SESSION['Auth']['User']['id'];

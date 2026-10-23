@@ -16,7 +16,7 @@ use App\Controller\AppController;
  */
 class ReportsController extends AppController
 {
-    public function initialize() {
+    public function initialize(): void {
       parent::initialize();
       $this->paginate = ['maxLimit'=>500];
     }

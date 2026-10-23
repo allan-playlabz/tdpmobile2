@@ -32,7 +32,7 @@ class AgentsController extends AppController
     ,"Turkey","Turkmenistan","Turks &amp; Caicos","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","United States Minor Outlying Islands","Uruguay"
     ,"Uzbekistan","Venezuela","Vietnam","Virgin Islands (US)","Yemen","Zambia","Zimbabwe"];
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('S3Public');
         $this->loadModel('Attractions');
@@ -270,7 +270,7 @@ class AgentsController extends AppController
      */
     public function add()
     {
-        $agent = $this->Agents->newEntity();
+        $agent = $this->Agents->newEmptyEntity();
         if ($this->request->is('post')) {
           $data = $this->request->getData();
           $data['password'] = $this->_getRandomPassword();
@@ -332,7 +332,7 @@ class AgentsController extends AppController
             $this->Flash->error('This agent is not allowed to have sub agents.');
             return $this->redirect(['controller'=>'Agents']);
         }
-        $agent = $this->Agents->newEntity();
+        $agent = $this->Agents->newEmptyEntity();
         if ($this->request->is('post')) {
             $agent = $this->Agents->patchEntity($agent, $this->request->getData());
             $agent->role = 'sub';

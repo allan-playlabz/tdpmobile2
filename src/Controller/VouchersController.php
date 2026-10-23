@@ -16,7 +16,7 @@ use App\Controller\AppController;
 class VouchersController extends AppController
 {
 
-    public function initialize()
+    public function initialize(): void
     {
         parent::initialize();
         $this->loadComponent('S3');

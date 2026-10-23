@@ -12,7 +12,7 @@ use Aws\S3\Exception\S3Exception;
 class S3Component extends Component
 { 
   private $_main_folder = '';
-  public function beforeFilter($e) {
+  public function beforeFilter(\Cake\Event\EventInterface $e) {
 
     $this->_main_folder = Configure::read('AWS.prefix');
   }

@@ -15,7 +15,7 @@ class TicketsHelperComponent extends Component
   private $Tickets;
   private $Allotments;
   
-	public function initialize(array $config) {
+	public function initialize(array $config): void {
 		$this->Tickets = TableRegistry::getTableLocator()->get('Tickets');
     $this->Allotments = TableRegistry::getTableLocator()->get('Allotments');
 	}

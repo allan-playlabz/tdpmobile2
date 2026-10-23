@@ -43,7 +43,7 @@ class AppController extends Controller
      *
      * @return void
      */
-    public function initialize()
+    public function initialize(): void
     {
         parent::initialize();
 
@@ -89,7 +89,7 @@ class AppController extends Controller
       return true;
     }
 
-    public function beforeFilter(Event $event) {
+    public function beforeFilter(\Cake\Event\EventInterface $event) {
       //$this->Security->requireSecure();
       if ($this->request->getQuery('l')) {
         $l = $this->request->getQuery('l');

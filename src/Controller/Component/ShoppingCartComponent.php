@@ -10,7 +10,7 @@ class ShoppingCartComponent extends Component
 {    
 	private $session;
 
-	public function initialize(array $config) {
+	public function initialize(array $config): void {
 		$controller = $this->_registry->getController();
 		$this->session = $controller->request->getSession();
 	}

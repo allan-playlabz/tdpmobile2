@@ -29,7 +29,7 @@ use App\Lib\PricingType;
  */
 class OrdersController extends AppController
 {
-  public function initialize() {
+  public function initialize(): void {
     parent::initialize();
     $this->Auth->allow(['sps','notificationReceiver','frontendNotificationReceiver']);
     $this->loadComponent('InputCleaner');
@@ -50,7 +50,7 @@ class OrdersController extends AppController
     Payments::config();
   }
 
-  public function beforeFilter(Event $event) {
+  public function beforeFilter(\Cake\Event\EventInterface $event) {
     parent::beforeFilter($event);
     $viewerBlockedActions = ['addToCart', 'subtractQuantity', 'removeFromCart', 'cart', 'checkout', 'removeTicket', 'index', 'myTickets'];
     if ($this->Auth->user('role') == 'viewer' && in_array($this->request->getParam('action'), $viewerBlockedActions)) {
@@ -242,7 +242,7 @@ class OrdersController extends AppController
     public function checkout() {
 
       /* begin old checkout */
-      $order = $this->Orders->newEntity();
+      $order = $this->Orders->newEmptyEntity();
       // if ($this->request->getSession()->check('order_id')) {
       //   $existing_order = $this->Orders->find()->where(['id'=>$this->request->getSession()->read('order_id')])->first();
       //   if ($existing_order) {
@@ -352,7 +352,7 @@ class OrdersController extends AppController
         } else {
           $data = $this->_buildData($ticket_list, $tickets_with_question_group);
         }
-        
+
         if (empty($data)) {
           return $this->redirect(['action'=>'checkout']);
         }
@@ -385,15 +385,15 @@ class OrdersController extends AppController
             $order->setError('tracking_no','Duplicate Tracking Number');
           } else {
             $this->log($res_data,'error');
-            
+
             // Handle both data directly or inside response key
             $error_data = !empty($res_data['response']['data']['error']) ? $res_data['response']['data']['error'] : 
                           (!empty($res_data['data']['error']) ? $res_data['data']['error'] : null);
-            
+
             if (!empty($error_data)) {
               $mapped_status = $this->_getMappedStatus($res_data['status']);
               $error_message = 'Error: ' . $mapped_status;
-              
+
               // Check if error is a string or array
               if (is_string($error_data)) {
                 $error_message .= '. ' . $error_data;
@@ -405,7 +405,7 @@ class OrdersController extends AppController
                 }
                 $error_message .= '. ' . implode(', ', $error_details);
               }
-              
+
               $this->Flash->error($error_message);
             } elseif (is_array($res_data) && $res_data['status'] == '8001') {
               $this->Flash->error($errorMessage, ['escape' => false]);
@@ -571,11 +571,11 @@ class OrdersController extends AppController
                   // Handle both data directly or inside response key
                   $error_data = !empty($res_data['response']['data']['error']) ? $res_data['response']['data']['error'] : 
                                 (!empty($res_data['data']['error']) ? $res_data['data']['error'] : null);
-                  
+
                   if (!empty($error_data)) {
                     $mapped_status = $this->_getMappedStatus($res_data['status']);
                     $error_message = 'Error: ' . $mapped_status;
-                    
+
                     // Check if error is a string or array
                     if (is_string($error_data)) {
                       $error_message .= '. ' . $error_data;
@@ -587,7 +587,7 @@ class OrdersController extends AppController
                       }
                       $error_message .= '. ' . implode(', ', $error_details);
                     }
-                    
+
                     $this->Flash->error($error_message);
                   } elseif (!empty($res_data['message'])) {
                     $mapped_status = $this->_getMappedStatus($res_data['status']);
@@ -638,7 +638,7 @@ class OrdersController extends AppController
               }
               $this->Flash->error(__('Selected payment method cannot be processed'));
             }
-            
+
             /* End payment */
             // if ($this->request->getData('pay_by') == 'credit_card') {
             //   return $this->redirect(['action'=>'executeStripe']);

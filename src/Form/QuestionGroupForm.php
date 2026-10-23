@@ -25,7 +25,7 @@ class QuestionGroupForm extends Form
         $this->question_group = $question_group;
     }
 
-    protected function _buildSchema(Schema $schema)
+    protected function _buildSchema(Schema $schema): \Cake\Form\Schema
     {
         return $schema;
     }

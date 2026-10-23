@@ -15,7 +15,7 @@ use Cake\Validation\Validator;
  */
 class SignupForm extends Form
 {
-protected function _buildSchema(Schema $schema)
+protected function _buildSchema(Schema $schema): \Cake\Form\Schema
 {
 return $schema->addField('name', 'string')
 ->addField('email', ['type' => 'string'])
