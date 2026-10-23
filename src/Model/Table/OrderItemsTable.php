@@ -50,10 +50,7 @@ class OrderItemsTable extends Table
             'foreignKey' => 'ticket_id',
             'joinType' => 'INNER'
         ]);
-        $this->belongsTo('Vouchers', [
-            'foreignKey' => 'voucher_id'
-        ]);
-
+        // 3.x silently replaced this belongsTo('Vouchers') with the hasMany below; 5.x throws on duplicate aliases.
         $this->hasMany('Vouchers', [
             'foreignKey' => 'order_item_id',
         ]);

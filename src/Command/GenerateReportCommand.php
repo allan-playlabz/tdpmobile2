@@ -79,7 +79,7 @@ class GenerateReportCommand extends Command
             'agent_user_id IN' => explode(',', $agent_user_ids),
             'Orders.status NOT IN' => ['pending', 'waiting', 'void'],
         ];
-        Log::debug($conditions);
+        Log::debug(json_encode($conditions));
         $agent_user = $this->AgentUsers->find()->where([
             'AgentUsers.id' => $agent_user_id
         ])->contain(['Agents'])

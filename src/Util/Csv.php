@@ -30,7 +30,7 @@ class Csv
         $save_file_name = $output_file_name;
         $csv = fopen($tmp . DS . $save_file_name, 'w');
         foreach ($input_array as $line) {
-            fputcsv($csv, $line, $delimiter);
+            fputcsv($csv, $line, $delimiter, '"', '\\');
         }
         fclose($csv);
 
@@ -56,7 +56,7 @@ class Csv
         $save_file_name = $output_file_name;
         $csv = fopen($tmp . DS . $save_file_name, 'a');
         foreach ($input_array as $line) {
-            fputcsv($csv, $line, $delimiter);
+            fputcsv($csv, $line, $delimiter, '"', '\\');
         }
         fclose($csv);
 

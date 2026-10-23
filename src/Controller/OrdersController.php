@@ -376,14 +376,14 @@ class OrdersController extends AppController
               return $this->redirect(['action'=>'confirmation']);
             }
           } else if (is_array($res_data) && $res_data['status'] == '5008') {
-            $this->log($res_data,'error');
+            $this->log(json_encode($res_data),'error');
             $mapped_status = $this->_getMappedStatus($res_data['status']);
             $this->Flash->error('Error: ' . $mapped_status);
           } else if (is_array($res_data) && $res_data['status'] == '5007') {
             $this->Flash->error(__('Order Tracking Number already exists. Tracking Number should be unique or empty.'));
             $order->setError('tracking_no','Duplicate Tracking Number');
           } else {
-            $this->log($res_data,'error');
+            $this->log(json_encode($res_data),'error');
 
             // Handle both data directly or inside response key
             $error_data = !empty($res_data['response']['data']['error']) ? $res_data['response']['data']['error'] : 
@@ -543,7 +543,7 @@ class OrdersController extends AppController
               if ($response->isOk()) {
                 $res_data = $response->getJson();
                 if (empty($res_data)) {
-                  Log::debug($res_data);
+                  Log::debug(json_encode($res_data));
                   $this->Flash->error('Internal server error. There is an error processing your order. Please contact admin.');
                 }
                 if ($res_data['status'] == '1000' || $res_data['status'] == '5006') {
@@ -562,7 +562,7 @@ class OrdersController extends AppController
 
                     }
                   } else {
-                    $this->log($res_data,'debug');
+                    $this->log(json_encode($res_data),'debug');
                     $this->Flash->error(__('Order not found. Please contact admin.'));
                     // return $this->response->withStatus(200)->withStringBody(json_encode(['status'=>1000,'message'=>'Order not found.']));
                   }
@@ -724,7 +724,7 @@ class OrdersController extends AppController
 
                 }
               } else {
-                $this->log($res_data,'debug');
+                $this->log(json_encode($res_data),'debug');
                 return $this->response->withStatus(200)->withStringBody(json_encode(['status'=>1000,'data'=>['order'=>['status'=>$order->status,'order_ref_id'=>$order->order_ref_id]]]));
               }
             } else {
@@ -874,7 +874,7 @@ class OrdersController extends AppController
             $response = $http->post($api_url.'/order/complete',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
             if ($response->isOk()) {
               $res_data = $response->getJson();
-              // $this->log($res_data,'debug');
+              // $this->log(json_encode($res_data),'debug');
             } else {
               $cat_mailer = new CatMailer(Configure::read('Default.from_email'));
               $cat_mailer->mail('exception_email', 'Error completing order ' . $order->order_ref_id, Configure::read('Default.admin_email'), [
@@ -1600,7 +1600,7 @@ class OrdersController extends AppController
               else {
                 foreach ($vouchers as $key => $ev) {
                   if (!empty($ev->getErrors())) {
-                    $this->log(['voucher'=>$ev,'order_ref_id'=>$order->order_ref_id],'debug');
+                    $this->log(json_encode(['voucher'=>$ev,'order_ref_id'=>$order->order_ref_id]),'debug');
                   }
                 }
                 return "Error saving vouchers";
@@ -2113,7 +2113,7 @@ class OrdersController extends AppController
         foreach ($input_array as $line) {
           // debug($line);
           /** default php csv handler * */
-          fputcsv($temp_memory, $line, $delimiter);
+          fputcsv($temp_memory, $line, $delimiter, '"', '\\');
         }
         /** rewrind the "file" with the csv lines * */
         fseek($temp_memory, 0);

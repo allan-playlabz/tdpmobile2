@@ -259,7 +259,7 @@ class PaymentPaypal
                     $error = '8004';
                     Log::debug(json_encode(['reason' => 'Total amount discrepancy', 'error_loc' => 'capturePaypal', 'error_handle' => 'Booking in pending_payment', 'error_action' => 'Check paypal order status', 'result' => $capture, 'error_code' => $error, 'order_id' => $order->order_ref_id]));
                 } else {
-                    Log::debug($capture, 'debug');
+                    Log::debug(json_encode($capture), 'debug');
                     $error = '9004'; // capture order status is not completed
                     Log::debug(json_encode(['reason' => 'Capture status from paypal is not completed', 'error_loc' => 'capturePaypal', 'error_handle' => 'Booking in pending_payment', 'error_action' => 'Check paypal order status', 'result' => $capture, 'error_code' => $error, 'order_id' => $order->order_ref_id]));
                 }
@@ -331,7 +331,7 @@ class PaymentPaypal
                     $error = '8004';
                     Log::debug(json_encode(['reason' => 'Total amount discrepancy', 'error_loc' => 'capturePaypal', 'error_handle' => 'Booking in pending_payment', 'error_action' => 'Check paypal order status', 'result' => $capture, 'error_code' => $error, 'order_id' => $order->order_ref_id]));
                 } else {
-                    Log::debug($capture, 'debug');
+                    Log::debug(json_encode($capture), 'debug');
                     $error = '9004'; // capture order status is not completed
                     Log::debug(json_encode(['reason' => 'Capture status from paypal is not completed', 'error_loc' => 'capturePaypal', 'error_handle' => 'Booking in pending_payment', 'error_action' => 'Check paypal order status', 'result' => $capture, 'error_code' => $error, 'order_id' => $order->order_ref_id]));
                 }

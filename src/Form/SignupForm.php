@@ -95,7 +95,7 @@ public function validationDefault(Validator $validator): Validator
             if (!empty($res['response']['data']['error'])) {
                 $this->setErrors($res['response']['data']['error']);
             }
-            Log::debug($res);
+            Log::debug(json_encode($res));
         }
         return false;
     }
