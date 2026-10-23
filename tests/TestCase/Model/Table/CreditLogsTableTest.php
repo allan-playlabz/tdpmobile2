@@ -22,7 +22,7 @@ class CreditLogsTableTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.CreditLogs',
         'app.Agents'
     ];

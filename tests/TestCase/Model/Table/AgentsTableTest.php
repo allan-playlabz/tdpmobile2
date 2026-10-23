@@ -22,7 +22,7 @@ class AgentsTableTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.Agents',
         'app.MasterAgents',
         'app.AgentTopups',

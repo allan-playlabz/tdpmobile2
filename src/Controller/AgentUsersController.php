@@ -149,7 +149,7 @@ class AgentUsersController extends AppController
           // otherwise send an OTP to verify the unfamiliar IP.
           $last_three_ips = $this->LastOtpIps->getLatestIps($auth_agent['id']);
           if (!in_array($clientIp, $last_three_ips, true)) {
-            $agent = $this->AgentUsers->get($auth_agent['id'], ['contain' => ['Agents']]);
+            $agent = $this->AgentUsers->get($auth_agent['id'], contain: ['Agents']);
             $this->request->getSession()->write('agent_id',$agent->id);
             $otp_code = mt_rand(100001, 999999);
             $agent->otp = $otp_code;
@@ -192,9 +192,7 @@ class AgentUsersController extends AppController
           $this->Flash->error(__('You are not authorized to access that location.'));
           return $this->redirect('/');
         }
-        $agent_user = $this->AgentUsers->get($this->Auth->user('id'), [
-            'contain' => []
-        ]);
+        $agent_user = $this->AgentUsers->get($this->Auth->user('id'), contain: []);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $dph = new DefaultPasswordHasher();
             if ($dph->check($this->request->getData('old_password'),$agent_user->password)) {
@@ -427,9 +425,7 @@ class AgentUsersController extends AppController
     }
 
     public function view() {
-        $agent = $this->AgentUsers->get($this->Auth->user('id'), [
-            'contain' => ['Agents']
-        ]);
+        $agent = $this->AgentUsers->get($this->Auth->user('id'), contain: ['Agents']);
 
         $this->set(compact('agent'));
     }
@@ -441,7 +437,7 @@ class AgentUsersController extends AppController
       }
       $agents = $this->AgentUsers->find('all')
                   ->where(['agent_id'=>$this->Auth->user('agent_id'),'role IN'=>['normal','viewer']])
-                  ->order(['created'=>'DESC']);
+                  ->orderBy(['created'=>'DESC']);
 
       $this->set('agents', $agents);
     }

@@ -9,10 +9,10 @@ use Cake\ORM\Entity;
  * @property $id
  * @property string $subject
  * @property string $message
- * @property \Cake\I18n\FrozenTime $publish_start_date
- * @property \Cake\I18n\FrozenTime $publish_end_date
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime $publish_start_date
+ * @property \Cake\I18n\DateTime $publish_end_date
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  */
 class Announcement extends Entity
 {
@@ -25,7 +25,7 @@ class Announcement extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'subject' => true,
         'message' => true,
         'publish_start_date' => true,

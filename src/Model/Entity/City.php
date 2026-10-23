@@ -9,8 +9,8 @@ use Cake\ORM\Entity;
  * @property  $id
  * @property string $country
  * @property string $name
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  */
 class City extends Entity
 {
@@ -23,7 +23,7 @@ class City extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'country' => true,
         'name' => true,
         'created' => true,

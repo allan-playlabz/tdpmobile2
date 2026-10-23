@@ -8,10 +8,10 @@ use Cake\ORM\Entity;
  *
  * @property int $id
  * @property string $order_id
- * @property \Cake\I18n\FrozenTime|null $check_after
+ * @property \Cake\I18n\DateTime|null $check_after
  * @property string|null $status
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\Order $order
  */
@@ -26,7 +26,7 @@ class OrdersToComplete extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'order_id' => true,
         'check_after' => true,
         'status' => true,

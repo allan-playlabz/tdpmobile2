@@ -22,7 +22,7 @@ class PdfsTableTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.Pdfs',
         'app.PurchasedTicketSkus',
         'app.TicketSkus'

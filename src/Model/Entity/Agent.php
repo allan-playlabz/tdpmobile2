@@ -24,8 +24,8 @@ use Cake\Auth\DefaultPasswordHasher;
  * @property |null $master_agent_id
  * @property bool|null $enable_generation_confirmation
  * @property string|null $status
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\MasterAgent $master_agent
  * @property \App\Model\Entity\AgentTopup[] $agent_topups
@@ -46,7 +46,7 @@ class Agent extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'first_name' => true,
         'last_name' => true,
         'email' => true,
@@ -81,7 +81,7 @@ class Agent extends Entity
      *
      * @var array
      */
-    protected $_hidden = [
+    protected array $_hidden = [
         'password'
     ];
 

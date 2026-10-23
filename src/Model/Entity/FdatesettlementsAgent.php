@@ -10,8 +10,8 @@ use Cake\ORM\Entity;
  * @property $ticket_id
  * @property int $fdatesettlement_id
  * @property $agent_id
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\Ticket $ticket
  * @property \App\Model\Entity\Fdatesettlement $fdatesettlement
@@ -19,7 +19,7 @@ use Cake\ORM\Entity;
  */
 class FdatesettlementsAgent extends Entity
 {
-    protected $_accessible = [
+    protected array $_accessible = [
         'ticket_id' => true,
         'fdatesettlement_id' => true,
         'agent_id' => true,

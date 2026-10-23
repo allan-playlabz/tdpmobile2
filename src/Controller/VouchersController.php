@@ -29,9 +29,7 @@ class VouchersController extends AppController
     {
         $this->autoRender = false;
         $this->loadModel('AgentUsers');
-        $voucher = $this->Vouchers->get($id, [
-            'contain' => ['OrderItems' => ['Orders' => ['AgentUsers']]]
-        ]);
+        $voucher = $this->Vouchers->get($id, contain: ['OrderItems' => ['Orders' => ['AgentUsers']]]);
         $is_agent_allowed = $voucher->order_item->order->agent_user->id == $this->Auth->user('id');
         if ($this->Auth->user('role') == 'master') {
             $agent_user_ids = $this->AgentUsers->find('list', ['valueField' => 'id'])->where(['agent_id' => $this->Auth->user('agent_id')])->toList();
@@ -268,9 +266,7 @@ class VouchersController extends AppController
         if ($check != md5($id . Configure::read('Api.secret')) && $check != md5($id . Configure::read('App.secret'))) {
             return $this->response->withStatus(404);
         }
-        $voucher = $this->Vouchers->get($id, [
-            'contain' => ['OrderItems' => ['Orders' => ['AgentUsers']]]
-        ]);
+        $voucher = $this->Vouchers->get($id, contain: ['OrderItems' => ['Orders' => ['AgentUsers']]]);
 
         if ($voucher->order_item && $voucher->order_item->order) {
 

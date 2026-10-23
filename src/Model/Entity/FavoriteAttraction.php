@@ -9,8 +9,8 @@ use Cake\ORM\Entity;
  * @property int $id
  * @property $attraction_id
  * @property |null $agent_user_id
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\Attraction $attraction
  * @property \App\Model\Entity\AgentUser $agent_user
@@ -26,7 +26,7 @@ class FavoriteAttraction extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'attraction_id' => true,
         'agent_user_id' => true,
         'created' => true,

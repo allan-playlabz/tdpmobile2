@@ -32,7 +32,7 @@ class CreditLogsController extends AppController
           'contain' => ['Agents']
       ];
       $days_to_show = Configure::read('CreditLogs.days_to_show') ?? 100;
-      $first_date_allowed = new FrozenTime('-' . $days_to_show . ' days');
+      $first_date_allowed = new \Cake\I18n\DateTime('-' . $days_to_show . ' days');
       $query = $this->Agents->CreditLogs->find()
       ->contain(['Orders'])
       ->where(['CreditLogs.agent_id'=>$agent_id, 'CreditLogs.created >=' => $first_date_allowed])

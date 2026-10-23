@@ -22,7 +22,6 @@ class GenerateReportCommandTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->useCommandRunner();
     }
     /**
      * Test buildOptionParser method

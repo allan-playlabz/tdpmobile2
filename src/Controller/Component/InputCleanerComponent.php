@@ -11,7 +11,7 @@ class InputCleanerComponent extends Component
   protected $ignore_strip_tags_fields = null;
   protected $ignore_strip_tags_actions = null;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
         'ignore_fields' => null,
         'ignore_actions' => null
     ];

@@ -10,8 +10,8 @@ use Cake\ORM\Entity;
  * @property $user_id
  * @property string $ip_address
  * @property string $type
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\User $user
  */
@@ -26,7 +26,7 @@ class UsersIpaddres extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'user_id' => true,
         'ip_address' => true,
         'type' => true,

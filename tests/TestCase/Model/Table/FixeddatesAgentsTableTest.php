@@ -22,7 +22,7 @@ class FixeddatesAgentsTableTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.FixeddatesAgents',
         'app.Attractions',
         'app.Tickets',

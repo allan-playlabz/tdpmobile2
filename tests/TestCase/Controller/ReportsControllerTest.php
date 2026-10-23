@@ -19,7 +19,7 @@ class ReportsControllerTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.Reports'
     ];
 

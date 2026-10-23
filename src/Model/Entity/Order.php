@@ -14,8 +14,8 @@ use Cake\ORM\Entity;
  * @property float|null $subtotal
  * @property float|null $convinience_fee
  * @property float|null $total
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\OrderRef $order_ref
  * @property \App\Model\Entity\Agent $agent
@@ -32,7 +32,7 @@ class Order extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'order_ref_id' => true,
         'tracking_no' => true,
         'agent_user_id' => true,

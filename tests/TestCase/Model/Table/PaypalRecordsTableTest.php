@@ -22,7 +22,7 @@ class PaypalRecordsTableTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.PaypalRecords',
         'app.Orders'
     ];

@@ -123,7 +123,7 @@ class AttractionsController extends AppController
         ->select(['fav_id' => 'FavoriteAttractions.id','Attractions.status','Attractions.id','Attractions.title','Attractions.title_chinese','Attractions.pricing_type','Attractions.featured_image'])
         ->where(['Attractions.status'=>'published', 'Attractions.id IN' => $agent_attraction_ids])
         ->where($conditions)
-        ->order(['FavoriteAttractions.id is not null' => 'DESC','display_position'=>'ASC','title'=>'ASC']);
+        ->orderBy(['FavoriteAttractions.id is not null' => 'DESC','display_position'=>'ASC','title'=>'ASC']);
         if ($search) {
           $search_like = '%'.$search.'%';
           // Match by title OR by a tag hit; keep both within the agent scope
@@ -141,7 +141,7 @@ class AttractionsController extends AppController
           $title_match = $attraction_query->expr()->add(['Attractions.title LIKE' => $search_like]);
           $attraction_query
             ->select(['title_match' => $title_match])
-            ->order([
+            ->orderBy([
               'title_match' => 'DESC',
               'FavoriteAttractions.id is not null' => 'DESC',
               'display_position' => 'ASC',
@@ -225,7 +225,7 @@ class AttractionsController extends AppController
           ->innerJoinWith('RecommendedAttractions')
           ->where(['Attractions.status'=>'published', 'Attractions.id IN' => $agent_attraction_ids])
           ->where($conditions)
-          ->order(['RecommendedAttractions.display_order' => 'ASC'])
+          ->orderBy(['RecommendedAttractions.display_order' => 'ASC'])
           ->distinct(['Attractions.id']);
         foreach ($recommended_query->toArray() as $rec) {
           if ($this->_attachTicketInfo($rec)) {
@@ -343,10 +343,9 @@ class AttractionsController extends AppController
     public function view($id = null)
     {
         $now = Time::now();
-        $attraction = $this->Attractions->get($id, [
-            'contain' => ['Merchants', 'Categories', 'AttractionMedias'],
-            'conditions' => ['Attractions.status'=>'published']
-        ]);
+        $attraction = $this->Attractions->get($id,
+        contain: ['Merchants', 'Categories', 'AttractionMedias'],
+        conditions: ['Attractions.status'=>'published']);
         $attraction->is_favorite = $this->Attractions->FavoriteAttractions->exists(['attraction_id'=>$id,'agent_user_id'=>$this->Auth->user('id')]);
         if ($this->request->getSession()->check('language')) {
           Translator::translateAttraction($this->request, $attraction);
@@ -595,9 +594,7 @@ class AttractionsController extends AppController
     public function viewTwoWay($id = null)
     {
         $now = Time::now();
-        $attraction = $this->Attractions->get($id, [
-            'contain' => ['Merchants', 'Categories', 'AttractionMedias']
-        ]);
+        $attraction = $this->Attractions->get($id, contain: ['Merchants', 'Categories', 'AttractionMedias']);
         $attraction->is_favorite = $this->Attractions->FavoriteAttractions->exists(['attraction_id'=>$id,'agent_user_id'=>$this->Auth->user('id')]);
         if ($this->request->getSession()->check('language')) {
           Translator::translateAttraction($this->request, $attraction);
@@ -1000,7 +997,7 @@ class AttractionsController extends AppController
           });
 
           $tickets = $tickets_query->toArray();
-          $now = \Cake\I18n\FrozenTime::now();
+          $now = \Cake\I18n\DateTime::now();
           if (!empty($tickets)) {
             foreach ($tickets as $key => $ticket) {
               if ($this->request->getQuery('type')) {

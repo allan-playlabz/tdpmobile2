@@ -929,13 +929,13 @@ class OrdersController extends AppController
     private function _getTicketApiPrice($ticket, $strdatetime, $return_ticket = null, $str_return_datetime = null) {
       $http = new \Cake\Http\Client();
       $api_url = Configure::read('Api.url');
-      $datetime = new FrozenTime($strdatetime);
+      $datetime = new \Cake\I18n\DateTime($strdatetime);
       $return_datetime = null;
       $time_from = $datetime->format('Y-m-d');
       $time_to = null;
       if ($ticket->pricing_type === PricingType::TWO_WAY_FDATETIME) {
         $time_from = $datetime->format('Y-m-d H:i');
-        $return_datetime = new FrozenTime($str_return_datetime);
+        $return_datetime = new \Cake\I18n\DateTime($str_return_datetime);
         $time_to = $return_datetime->format('Y-m-d H:i');
       }
       if ($ticket->pricing_type === PricingType::TWO_WAY_FDATETIME) {
@@ -1870,7 +1870,7 @@ class OrdersController extends AppController
               });
             }
           } else {
-            $start_date = (new FrozenTime('-6 months'))->hour(0)->minute(0)->second(0);
+            $start_date = (new \Cake\I18n\DateTime('-6 months'))->hour(0)->minute(0)->second(0);
             $query = $query->matching('OrderItems', function ($q) use($start_date) {
               return $q->where(['date_of_visit >=' => $start_date]);
             });
@@ -1904,7 +1904,7 @@ class OrdersController extends AppController
               $query = $query->where(['Orders.created >=' => $start_date->hour(0)->minute(0)->second(0)]);
             }
           } else {
-            $start_date = (new FrozenTime('-6 months'))->hour(0)->minute(0)->second(0);
+            $start_date = (new \Cake\I18n\DateTime('-6 months'))->hour(0)->minute(0)->second(0);
             $query = $query->where(['Orders.created >=' => $start_date->hour(0)->minute(0)->second(0)]);
           }
           if ($this->request->getQuery('to')) {
@@ -1971,7 +1971,7 @@ class OrdersController extends AppController
           $to->hour(23)->minute(59)->second(59);
           $conditions['Vouchers.created <='] = $to;
         } else {
-          $from = (new FrozenTime('-6 months'))->hour(0)->minute(0)->second(0);
+          $from = (new \Cake\I18n\DateTime('-6 months'))->hour(0)->minute(0)->second(0);
         }
         $from->hour(0)->minute(0)->second(0);
         $conditions['Vouchers.created >='] = $from;

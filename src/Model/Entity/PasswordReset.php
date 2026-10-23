@@ -10,8 +10,8 @@ use Cake\ORM\Entity;
  * @property string $email
  * @property string $reset_code
  * @property string $type
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  */
 class PasswordReset extends Entity
 {
@@ -24,7 +24,7 @@ class PasswordReset extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'email' => true,
         'reset_code' => true,
         'type' => true,

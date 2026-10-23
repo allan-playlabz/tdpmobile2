@@ -25,7 +25,7 @@ $color_map = [
     'partially_redeemed_expired'=>'warning',
     'partially_redeemed_cancelled'=>'danger',
 ];
-$hide_before_date = new FrozenTime('-6 months');
+$hide_before_date = new \Cake\I18n\DateTime('-6 months');
 ?>
 <h3><?= __('My Tickets') ?></h3>
 <div class="row">

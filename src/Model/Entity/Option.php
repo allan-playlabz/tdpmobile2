@@ -5,7 +5,7 @@ use Cake\ORM\Entity;
 
 class Option extends Entity
 {
-    protected $_accessible = [
+    protected array $_accessible = [
         'name' => true,
         'value' => true,
         'autoload' => true,

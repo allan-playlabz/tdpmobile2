@@ -10,8 +10,8 @@ use Cake\ORM\Entity;
  * @property $order_id
  * @property string|null $txn_id
  * @property string|null $data
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\Order $order
  */
@@ -26,7 +26,7 @@ class PaypalRecord extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'order_id' => true,
         'txn_id' => true,
         'data' => true,

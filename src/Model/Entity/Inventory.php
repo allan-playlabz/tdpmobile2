@@ -14,7 +14,7 @@ use Cake\ORM\Entity;
  * @property int|null $sold
  * @property int|null $stock
  * @property string|null $type
- * @property \Cake\I18n\FrozenTime|null $created
+ * @property \Cake\I18n\DateTime|null $created
  *
  * @property \App\Model\Entity\Ticket $ticket
  * @property \App\Model\Entity\Order $order
@@ -31,7 +31,7 @@ class Inventory extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'ticket_id' => true,
         'order_id' => true,
         'user_id' => true,

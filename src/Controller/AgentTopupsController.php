@@ -38,13 +38,13 @@ class AgentTopupsController extends AppController
         return $this->redirect('/');
       }
       $months_to_show = Configure::read('AgentTopups.months_to_show') ?? 6;
-      $first_date_allowed = new FrozenTime('-' . $months_to_show . ' months');
+      $first_date_allowed = new \Cake\I18n\DateTime('-' . $months_to_show . ' months');
       $start_date = null;
-      $end_date = FrozenTime::now(Configure::read('App.defaultTimezone'));;
-      $query = $this->AgentTopups->find('all', ['contain' => ['Agents'],
-        'conditions'=>['agent_id'=>$this->Auth->user('agent_id')],
-        'order' => ['AgentTopups.created'=>'desc']
-      ]);
+      $end_date = \Cake\I18n\DateTime::now(Configure::read('App.defaultTimezone'));;
+      $query = $this->AgentTopups->find('all',
+      contain: ['Agents'],
+      conditions: ['agent_id'=>$this->Auth->user('agent_id')],
+      order: ['AgentTopups.created'=>'desc']);
       if ($this->request->getQuery('from')) {
         
         try {
@@ -140,10 +140,9 @@ class AgentTopupsController extends AppController
         $this->Flash->error('You are not authorized to access that location.');
         return $this->redirect('/');
       }
-      $agentTopup = $this->AgentTopups->get($id, [
-          'contain' => ['Agents'],
-          'conditions'=>['agent_id'=>$this->Auth->user('agent_id')]
-      ]);
+      $agentTopup = $this->AgentTopups->get($id,
+      contain: ['Agents'],
+      conditions: ['agent_id'=>$this->Auth->user('agent_id')]);
       if ($agentTopup && $agentTopup->status == 'approved') {
         $this->AgentTopups->loadInto($agentTopup,['Admins']);
       }

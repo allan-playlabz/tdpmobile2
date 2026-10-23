@@ -22,7 +22,7 @@ class AllotmentsTableTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.Allotments',
         'app.Merchants',
         'app.AutoPopulateAllotments',

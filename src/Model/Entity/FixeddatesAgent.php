@@ -10,8 +10,8 @@ use Cake\ORM\Entity;
  * @property $attraction_id
  * @property $ticket_id
  * @property $agent_id
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\Attraction $attraction
  * @property \App\Model\Entity\Ticket $ticket
@@ -28,7 +28,7 @@ class FixeddatesAgent extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'attraction_id' => true,
         'ticket_id' => true,
         'agent_id' => true,

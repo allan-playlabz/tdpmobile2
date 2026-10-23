@@ -7,8 +7,8 @@ use Cake\ORM\Entity;
  * AgentSession Entity
  *
  * @property string $id
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  * @property string|resource|null $data
  * @property int|null $expires
  * @property |null $agent_user_id
@@ -26,7 +26,7 @@ class AgentSession extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'created' => true,
         'modified' => true,
         'data' => true,

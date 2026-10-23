@@ -22,7 +22,7 @@ class MerchantsTableTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.Merchants',
         'app.Attractions',
         'app.Invcharts',

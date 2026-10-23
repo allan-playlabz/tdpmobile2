@@ -13,7 +13,7 @@ use Cake\ORM\Entity;
  * @property string|null $password
  * @property string|null $verification_code
  * @property int|null $otp
- * @property \Cake\I18n\FrozenTime|null $otp_created
+ * @property \Cake\I18n\DateTime|null $otp_created
  * @property string $company_name
  * @property string $image
  * @property string|null $general_category
@@ -34,9 +34,9 @@ use Cake\ORM\Entity;
  * @property string|null $email_displayname
  * @property string|null $status
  * @property bool|null $can_add_sub
- * @property \Cake\I18n\FrozenTime|null $last_activity
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $last_activity
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\MasterAgent $master_agent
  */
@@ -51,7 +51,7 @@ class AgentsSignup extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'first_name' => true,
         'last_name' => true,
         'email' => true,
@@ -90,7 +90,7 @@ class AgentsSignup extends Entity
      *
      * @var array
      */
-    protected $_hidden = [
+    protected array $_hidden = [
         'password',
     ];
 }

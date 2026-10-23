@@ -83,7 +83,7 @@ class UsersIpaddressTable extends Table
     public function addOrUpdate($data) {
         $clean_data = ['ip_address'=>$data['ip_address'],'user_id'=>$data['user_id'],'type'=>$data['type']];
         $user_ip_address = $this->find()
-            ->where($clean_data)->limit(3)->order(['modified'=>'desc'])->first();
+            ->where($clean_data)->limit(3)->orderBy(['modified'=>'desc'])->first();
         if (empty($user_ip_address)) {
             $user_ip_address = $this->newEntity($clean_data);
         }

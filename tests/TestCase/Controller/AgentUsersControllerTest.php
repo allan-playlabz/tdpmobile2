@@ -19,7 +19,7 @@ class AgentUsersControllerTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.AgentUsers',
         'app.Agents',
         'app.Orders'

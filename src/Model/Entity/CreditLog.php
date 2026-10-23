@@ -11,8 +11,8 @@ use Cake\ORM\Entity;
  * @property string $debit_credit
  * @property float $amount
  * @property float $credits
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\Agent $agent
  */
@@ -27,7 +27,7 @@ class CreditLog extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'agent_id' => true,
         'order_id' => true,
         'debit_credit' => true,

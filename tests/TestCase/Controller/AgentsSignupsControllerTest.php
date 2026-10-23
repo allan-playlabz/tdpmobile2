@@ -19,7 +19,7 @@ class AgentsSignupsControllerTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.AgentsSignups',
         'app.MasterAgents',
     ];

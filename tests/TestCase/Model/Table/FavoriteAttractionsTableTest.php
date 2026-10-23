@@ -22,7 +22,7 @@ class FavoriteAttractionsTableTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.FavoriteAttractions',
         'app.Attractions',
         'app.AgentUsers',

@@ -12,8 +12,8 @@ use Cake\ORM\Entity;
  * @property int|null $duration
  * @property int|null $available
  * @property string|null $pricing_type
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\Merchant $merchant
  * @property \App\Model\Entity\AutoPopulateAllotment[] $auto_populate_allotments
@@ -31,7 +31,7 @@ class Allotment extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'merchant_id' => true,
         'name' => true,
         'duration' => true,

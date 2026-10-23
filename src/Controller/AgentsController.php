@@ -72,11 +72,9 @@ class AgentsController extends AppController
      */
     public function view($id = null)
     {
-        $agent = $this->Agents->get($id, [
-            'contain' => ['AgentTopups'=>function($q) {
-                return $q->order(['AgentTopups.created'=>'DESC'])->contain(['Admins']);
-            }, 'AgentUsers','MasterAgents']
-        ]);
+        $agent = $this->Agents->get($id, contain: ['AgentTopups'=>function($q) {
+            return $q->order(['AgentTopups.created'=>'DESC'])->contain(['Admins']);
+        }, 'AgentUsers','MasterAgents']);
         if ($agent) {
           $topup_query = $this->Agents->CreditLogs->find()->where(['agent_id'=>$agent->id,'debit_credit'=>'debit']);
           $total_topup = $topup_query->select(['total_topup'=>$topup_query->func()->sum('amount')])->first();
@@ -91,9 +89,7 @@ class AgentsController extends AppController
 
     public function creditLogs($id = null)
     {
-        $agent = $this->Agents->get($id, [
-            'contain' => ['MasterAgents']
-        ]);
+        $agent = $this->Agents->get($id, contain: ['MasterAgents']);
         if ($agent) {
           $agent->credit_logs = $this->paginate($this->Agents->CreditLogs->find()->where(['agent_id'=>$agent->id])->contain(['Orders'])->order(['CreditLogs.created'=>'DESC']));
           $topup_query = $this->Agents->CreditLogs->find()->where(['agent_id'=>$agent->id,'debit_credit'=>'debit']);
@@ -109,11 +105,9 @@ class AgentsController extends AppController
 
     public function SubAgents($id = null)
     {
-        $agent = $this->Agents->get($id, [
-            'contain' => ['SubAgents'=>function($q) {
-                return $q->order(['created'=>'DESC']);
-            }, 'MasterAgents']
-        ]);
+        $agent = $this->Agents->get($id, contain: ['SubAgents'=>function($q) {
+            return $q->order(['created'=>'DESC']);
+        }, 'MasterAgents']);
         if ($agent) {
           $topup_query = $this->Agents->CreditLogs->find()->where(['agent_id'=>$agent->id,'debit_credit'=>'debit']);
           $total_topup = $topup_query->select(['total_topup'=>$topup_query->func()->sum('amount')])->first();
@@ -128,13 +122,11 @@ class AgentsController extends AppController
 
     public function agentUsers($id = null)
     {
-        $agent = $this->Agents->get($id, [
-            'contain' => ['AgentUsers'=>function($q) {
-                return $q->where(['role'=>'normal'])->order(['created'=>'DESC'])->contain(['UsersIpaddress'=>function($uiq) {
-              return $uiq->order(['UsersIpaddress.modified'=>'desc'])->limit(1);
-            }]);
-            }, 'MasterAgents']
-        ]);
+        $agent = $this->Agents->get($id, contain: ['AgentUsers'=>function($q) {
+            return $q->where(['role'=>'normal'])->order(['created'=>'DESC'])->contain(['UsersIpaddress'=>function($uiq) {
+          return $uiq->order(['UsersIpaddress.modified'=>'desc'])->limit(1);
+        }]);
+        }, 'MasterAgents']);
         if ($agent) {
           $topup_query = $this->Agents->CreditLogs->find()->where(['agent_id'=>$agent->id,'debit_credit'=>'debit']);
           $total_topup = $topup_query->select(['total_topup'=>$topup_query->func()->sum('amount')])->first();
@@ -170,11 +162,9 @@ class AgentsController extends AppController
         if ($this->request->getData('categories')) {
             $selected_categories = $this->request->getData('categories');
         }
-        $agent = $this->Agents->get($id, [
-            'contain' => ['CreditLogs'=>function($q) {
-                return $q->order(['created'=>'DESC']);
-            }, 'MasterAgents']
-        ]);
+        $agent = $this->Agents->get($id, contain: ['CreditLogs'=>function($q) {
+            return $q->order(['created'=>'DESC']);
+        }, 'MasterAgents']);
         if ($agent) {
           $topup_query = $this->Agents->CreditLogs->find()->where(['agent_id'=>$agent->id,'debit_credit'=>'debit']);
           $total_topup = $topup_query->select(['total_topup'=>$topup_query->func()->sum('amount')])->first();
@@ -320,7 +310,7 @@ class AgentsController extends AppController
           }
           $this->Flash->error(__('The agent could not be saved. Please, try again.'));
         }
-        $masters = $this->Agents->find('list',['keyField'=>'id','valueField'=>'fullname'])->where(['role'=>'master'])->limit(200);
+        $masters = $this->Agents->find('list', keyField: 'id', valueField: 'fullname')->where(['role'=>'master'])->limit(200);
         $this->set('countries',$this->_countries);
         $this->set(compact('agent','masters'));
     }
@@ -358,9 +348,7 @@ class AgentsController extends AppController
      */
     public function edit($id = null)
     {
-        $agent = $this->Agents->get($id, [
-            'contain' => []
-        ]);
+        $agent = $this->Agents->get($id, contain: []);
         $agentUser = $this->Agents->AgentUsers->find()->where(['agent_id'=>$agent->id,'role'=>'master'])->first();
         if ($this->request->is(['patch', 'post', 'put'])) {
             $data = $this->request->getData();
@@ -402,16 +390,14 @@ class AgentsController extends AppController
             }
             $this->Flash->error(__('The agent could not be saved. Please, try again.'));
         }
-        $masters = $this->Agents->find('list',['keyField'=>'id','valueField'=>'fullname'])->where(['role'=>'master'])->limit(200);
+        $masters = $this->Agents->find('list', keyField: 'id', valueField: 'fullname')->where(['role'=>'master'])->limit(200);
         $this->set('countries',$this->_countries);
         $this->set(compact('agent','masters','agentUser'));
     }
 
      public function api($id = null)
      {
-         $agent = $this->Agents->get($id, [
-             'contain' => []
-         ]);
+         $agent = $this->Agents->get($id, contain: []);
          if ($this->request->is(['patch', 'post', 'put'])) {
              $data = $this->request->getData();
              if (!empty($data['image'])) {

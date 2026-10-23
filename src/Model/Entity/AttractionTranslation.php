@@ -12,8 +12,8 @@ use Cake\ORM\Entity;
  * @property string $title
  * @property string $description
  * @property string $terms_and_conditions
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\Attraction $attraction
  */
@@ -28,7 +28,7 @@ class AttractionTranslation extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'attraction_id' => true,
         'language' => true,
         'title' => true,

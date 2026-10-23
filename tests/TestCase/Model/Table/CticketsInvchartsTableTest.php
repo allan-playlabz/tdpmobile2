@@ -22,7 +22,7 @@ class CticketsInvchartsTableTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.CticketsInvcharts',
         'app.Tickets',
         'app.Invcharts'

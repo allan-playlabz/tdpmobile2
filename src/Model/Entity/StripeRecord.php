@@ -9,7 +9,7 @@ use Cake\ORM\Entity;
  * @property int $id
  * @property string $pi_id
  * @property string $data
- * @property \Cake\I18n\FrozenTime|null $created
+ * @property \Cake\I18n\DateTime|null $created
  *
  * @property \App\Model\Entity\Pi $pi
  */
@@ -24,7 +24,7 @@ class StripeRecord extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'pi_id' => true,
         'data' => true,
         'created' => true,

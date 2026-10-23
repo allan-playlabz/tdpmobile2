@@ -13,7 +13,7 @@ class OrdersToCompleteFixture extends TestFixture
      *
      * @var string
      */
-    public $table = 'orders_to_complete';
+    public string $table = 'orders_to_complete';
     /**
      * Fields
      *

@@ -15,9 +15,9 @@ use Cake\ORM\Entity;
  * @property float $total
  * @property string|null $order_data
  * @property string|null $travellers_data
- * @property \Cake\I18n\FrozenDate|null $date_of_visit
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\Date|null $date_of_visit
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\Order $order
  * @property \App\Model\Entity\Ticket $ticket
@@ -34,7 +34,7 @@ class OrderItem extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'order_id' => true,
         'ticket_id' => true,
         'voucher_id' => true,

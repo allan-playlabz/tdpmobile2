@@ -22,7 +22,7 @@ class PaymentMethodsTableTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.PaymentMethods',
         'app.PaymentGateways',
         'app.PaymentMarkups',

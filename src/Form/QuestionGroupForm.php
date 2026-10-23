@@ -130,7 +130,7 @@ class QuestionGroupForm extends Form
                         }
                     }
                     if ($this->_getFieldType($field_name) === 'date') {
-                        $val = (new FrozenDate($val))->format('Y-m-d');
+                        $val = (new \Cake\I18n\Date($val))->format('Y-m-d');
                     }
                     $order_data['question_group'][$idx-1][$field_name] = $val;
 

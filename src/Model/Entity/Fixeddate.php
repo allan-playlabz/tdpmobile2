@@ -8,11 +8,11 @@ use Cake\ORM\Entity;
  *
  * @property int $id
  * @property $ticket_id
- * @property \Cake\I18n\FrozenDate|null $date
- * @property \Cake\I18n\FrozenTime|null $time
+ * @property \Cake\I18n\Date|null $date
+ * @property \Cake\I18n\DateTime|null $time
  * @property int|null $quantity
- * @property \Cake\I18n\FrozenTime $created
- * @property \Cake\I18n\FrozenTime $modified
+ * @property \Cake\I18n\DateTime $created
+ * @property \Cake\I18n\DateTime $modified
  *
  * @property \App\Model\Entity\Ticket $ticket
  */
@@ -27,7 +27,7 @@ class Fixeddate extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'ticket_id' => true,
         'date' => true,
         'time' => true,

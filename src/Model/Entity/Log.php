@@ -14,7 +14,7 @@ use Cake\ORM\Entity;
  * @property $record_id
  * @property string|null $values_before
  * @property string|null $values_after
- * @property \Cake\I18n\FrozenTime|null $created
+ * @property \Cake\I18n\DateTime|null $created
  *
  * @property \App\Model\Entity\User $user
  */
@@ -29,7 +29,7 @@ class Log extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'user_id' => true,
         'user_table' => true,
         'type' => true,

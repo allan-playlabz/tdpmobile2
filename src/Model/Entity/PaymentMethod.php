@@ -10,8 +10,8 @@ use Cake\ORM\Entity;
  * @property string $name
  * @property int|null $payment_gateway_id
  * @property string|null $status
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\PaymentGateway $payment_gateway
  * @property \App\Model\Entity\PaymentMarkup[] $payment_markups
@@ -27,7 +27,7 @@ class PaymentMethod extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'name' => true,
         'payment_gateway_id' => true,
         'status' => true,

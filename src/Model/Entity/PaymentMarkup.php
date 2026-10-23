@@ -12,8 +12,8 @@ use Cake\ORM\Entity;
  * @property float $rate
  * @property string $type
  * @property float $additional
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\PaymentMethod $payment_method
  * @property \App\Model\Entity\PaymentGateway $payment_gateway
@@ -29,7 +29,7 @@ class PaymentMarkup extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'payment_method_id' => true,
         'payment_gateway_id' => true,
         'rate' => true,

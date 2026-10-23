@@ -10,11 +10,11 @@ use Cake\ORM\Entity;
  * @property |null $agent_id
  * @property float|null $amount
  * @property string|null $image
- * @property \Cake\I18n\FrozenDate|null $topup_date
+ * @property \Cake\I18n\Date|null $topup_date
  * @property |null $approved_by
  * @property string|null $status
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\Agent $agent
  */
@@ -29,7 +29,7 @@ class AgentTopup extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'agent_id' => true,
         'amount' => true,
         'image' => true,

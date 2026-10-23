@@ -33,7 +33,7 @@ class TicketsHelperComponent extends Component
           $datetime_obj = Time::createFromFormat('d M Y H:i',$date);
           $allotment = $this->getTicketAllotment($ticket,$datetime_obj->format('Y-m-d'),$datetime_obj->format('H:i:00'));
         } else {
-          $datetime_obj = new FrozenTime($date);
+          $datetime_obj = new \Cake\I18n\DateTime($date);
           $allotment = $this->getTicketAllotment($ticket,$datetime_obj->format('Y-m-d'));
         }
       }
@@ -138,10 +138,10 @@ class TicketsHelperComponent extends Component
           if (Configure::read('Features.allotment')) {
           $allotment = $max_quantity;
             if ($ticket->attraction->pricing_type == 'fdatetime') {
-              $datetime_obj = new FrozenTime($date);
+              $datetime_obj = new \Cake\I18n\DateTime($date);
               $allotment = $this->getTicketAllotment($ticket,$datetime_obj->format('Y-m-d'),$datetime_obj->format('H:i:00'));
             } else {
-              $datetime_obj = new FrozenTime($date);
+              $datetime_obj = new \Cake\I18n\DateTime($date);
               $allotment = $this->getTicketAllotment($ticket,$datetime_obj->format('Y-m-d'));
             }
             if ($allotment < $max_quantity) {

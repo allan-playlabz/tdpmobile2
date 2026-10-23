@@ -10,7 +10,7 @@ use Cake\ORM\Entity;
  * @property string $ip
  * @property string $email
  * @property string|null $loc
- * @property \Cake\I18n\FrozenTime|null $created
+ * @property \Cake\I18n\DateTime|null $created
  */
 class Login extends Entity
 {
@@ -23,7 +23,7 @@ class Login extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'ip' => true,
         'email' => true,
         'loc' => true,

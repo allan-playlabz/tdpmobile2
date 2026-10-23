@@ -22,8 +22,8 @@ use Cake\ORM\Entity;
  * @property string|null $voucher_template
  * @property string|null $voucher_code_type
  * @property bool|null $multiple_redemption
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\Attraction[] $attractions
  * @property \App\Model\Entity\Ticket[] $tickets
@@ -41,7 +41,7 @@ class Merchant extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'name' => true,
         'email' => true,
         'contact_number' => true,

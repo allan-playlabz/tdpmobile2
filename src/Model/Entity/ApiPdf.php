@@ -12,13 +12,13 @@ use Cake\ORM\Entity;
  * @property string|null $purchased_ticket_sku_id
  * @property string $ticket_sku_id
  * @property string|null $pdf_filename
- * @property \Cake\I18n\FrozenDate $validity_start_date
- * @property \Cake\I18n\FrozenDate $validity_end_date
+ * @property \Cake\I18n\Date $validity_start_date
+ * @property \Cake\I18n\Date $validity_end_date
  * @property string $status
  * @property bool|null $sold
- * @property \Cake\I18n\FrozenTime|null $redeemed_datetime
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $redeemed_datetime
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\PurchasedTicketSkus $purchased_ticket_skus
  * @property \App\Model\Entity\TicketSkus $ticket_skus
@@ -34,7 +34,7 @@ class ApiPdf extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'package_code' => true,
         'code' => true,
         'filename' => true,

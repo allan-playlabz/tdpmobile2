@@ -22,7 +22,7 @@ class TicketTranslationsTableTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.TicketTranslations',
         'app.Tickets',
     ];

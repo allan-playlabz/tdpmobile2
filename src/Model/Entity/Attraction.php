@@ -20,8 +20,8 @@ use Cake\ORM\Entity;
  * @property bool|null $print_as_qr_code
  * @property string|null $gallery
  * @property string|null $type
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\Merchant $merchant
  * @property \App\Model\Entity\Category $category
@@ -42,7 +42,7 @@ class Attraction extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'merchant_id' => true,
         'category_id' => true,
         'title' => true,

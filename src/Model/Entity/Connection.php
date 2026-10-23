@@ -12,8 +12,8 @@ use Cake\ORM\Entity;
  * @property string|null $credentials
  * @property string|null $function_name
  * @property string|null $status
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\Ticket[] $tickets
  * @property \App\Model\Entity\Attraction[] $attractions
@@ -29,7 +29,7 @@ class Connection extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'name' => true,
         'api_url' => true,
         'credentials' => true,

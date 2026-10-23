@@ -10,8 +10,8 @@ use Cake\ORM\Entity;
  * @property string $provider
  * @property string|null $order_ref_id
  * @property string $data
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\OrderRef $order_ref
  */
@@ -26,7 +26,7 @@ class PaymentResponse extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'provider' => true,
         'order_ref_id' => true,
         'data' => true,

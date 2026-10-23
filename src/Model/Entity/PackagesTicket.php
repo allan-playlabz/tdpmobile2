@@ -24,7 +24,7 @@ class PackagesTicket extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'ticket_id' => true,
         'package_ticket_id' => true,
         'ticket' => true,

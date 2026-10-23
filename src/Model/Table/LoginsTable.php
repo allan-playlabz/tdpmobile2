@@ -97,7 +97,7 @@ class LoginsTable extends Table
         $max_login_count = Configure::read('Login.max_count_per_max_minutes');
 
         /* Delete first logins more than x minutes ago */
-        $this->deleteAll(['created < ' => FrozenTime::now()->subMinutes($max_login_minutes)]);
+        $this->deleteAll(['created < ' => \Cake\I18n\DateTime::now()->subMinutes($max_login_minutes)]);
 
         $clientIp = $request->getHeaderLine('CF-Connecting-IP');
         if(empty($clientIp)) {

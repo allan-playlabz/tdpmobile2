@@ -12,11 +12,11 @@ use Cake\ORM\Entity;
  * @property string $email
  * @property string $password
  * @property string|null $otp
- * @property \Cake\I18n\FrozenTime|null $otp_created
+ * @property \Cake\I18n\DateTime|null $otp_created
  * @property string|null $role
  * @property string|null $status
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  */
 class Admin extends Entity
 {
@@ -29,7 +29,7 @@ class Admin extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'first_name' => true,
         'last_name' => true,
         'email' => true,
@@ -47,7 +47,7 @@ class Admin extends Entity
      *
      * @var array
      */
-    protected $_hidden = [
+    protected array $_hidden = [
         'password'
     ];
 }

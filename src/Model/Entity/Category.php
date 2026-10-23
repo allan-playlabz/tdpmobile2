@@ -10,8 +10,8 @@ use Cake\ORM\Entity;
  * @property string $name
  * @property string|null $description
  * @property |null $parent_id
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\ParentCategory $parent_category
  * @property \App\Model\Entity\Attraction[] $attractions
@@ -29,7 +29,7 @@ class Category extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'name' => true,
         'description' => true,
         'parent_id' => true,

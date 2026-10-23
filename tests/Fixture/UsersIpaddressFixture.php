@@ -13,7 +13,7 @@ class UsersIpaddressFixture extends TestFixture
      *
      * @var string
      */
-    public $table = 'users_ipaddress';
+    public string $table = 'users_ipaddress';
     /**
      * Fields
      *

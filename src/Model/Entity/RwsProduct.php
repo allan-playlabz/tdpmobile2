@@ -15,8 +15,8 @@ use Cake\ORM\Entity;
  * @property string|null $choice_constrain
  * @property string|null $admission
  * @property string|null $purchase_with
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  */
 class RwsProduct extends Entity
 {
@@ -29,7 +29,7 @@ class RwsProduct extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'offer_no' => true,
         'product_no' => true,
         'price' => true,

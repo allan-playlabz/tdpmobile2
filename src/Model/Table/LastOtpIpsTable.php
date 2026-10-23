@@ -72,9 +72,9 @@ class LastOtpIpsTable extends Table
      */
     public function getLatestIps($agentUserId, $limit = 3)
     {
-        return $this->find('list', ['keyField' => 'id', 'valueField' => 'ip'])
+        return $this->find('list', keyField: 'id', valueField: 'ip')
             ->where(['agent_user_id' => $agentUserId])
-            ->order(['modified' => 'DESC', 'id' => 'DESC'])
+            ->orderBy(['modified' => 'DESC', 'id' => 'DESC'])
             ->limit($limit)
             ->toArray();
     }
@@ -102,7 +102,7 @@ class LastOtpIpsTable extends Table
         $ids = $this->find()
             ->select(['id'])
             ->where(['agent_user_id' => $agentUserId])
-            ->order(['modified' => 'DESC', 'id' => 'DESC'])
+            ->orderBy(['modified' => 'DESC', 'id' => 'DESC'])
             ->extract('id')
             ->toArray();
         if (count($ids) > $keep) {

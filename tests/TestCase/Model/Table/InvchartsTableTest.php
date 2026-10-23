@@ -22,7 +22,7 @@ class InvchartsTableTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.Invcharts',
         'app.Skus',
         'app.Merchants',

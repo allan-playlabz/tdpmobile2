@@ -22,7 +22,7 @@ class OrderItemsTableTest extends TestCase
      *
      * @var array
      */
-    public $fixtures = [
+    public array $fixtures = [
         'app.OrderItems',
         'app.Orders',
         'app.Tickets',

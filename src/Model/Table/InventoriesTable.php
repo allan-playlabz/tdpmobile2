@@ -97,7 +97,7 @@ class InventoriesTable extends Table
     }
 
     public function purchase($ticket_id, $qty,$user_id,$order_id) {
-        $last_inventory = $this->find()->where(['ticket_id'=>$ticket_id])->order(['created'=>'DESC','id'=>'DESC'])->first();
+        $last_inventory = $this->find()->where(['ticket_id'=>$ticket_id])->orderBy(['created'=>'DESC','id'=>'DESC'])->first();
         $new_inventory = $this->newEntity(['ticket_id'=>$ticket_id,'type'=>'sold','quantity'=>-$qty,'user_id'=>$user_id,'order_id'=>$order_id]);
         if ($last_inventory) {
             $new_inventory->sold = intval($last_inventory->sold) + intval($qty);

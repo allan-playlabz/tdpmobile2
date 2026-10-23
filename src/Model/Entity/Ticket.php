@@ -13,12 +13,12 @@ use Cake\ORM\Entity;
  * @property string $description
  * @property string $terms_and_conditions
  * @property int $sequence
- * @property \Cake\I18n\FrozenTime $publish_start_date
- * @property \Cake\I18n\FrozenTime $publish_end_date
+ * @property \Cake\I18n\DateTime $publish_start_date
+ * @property \Cake\I18n\DateTime $publish_end_date
  * @property float|null $price
  * @property int|null $release_period
- * @property \Cake\I18n\FrozenTime $redemption_start_date
- * @property \Cake\I18n\FrozenTime $redemption_end_date
+ * @property \Cake\I18n\DateTime $redemption_start_date
+ * @property \Cake\I18n\DateTime $redemption_end_date
  * @property bool|null $fixed_date_ticket
  * @property string|null $fixed_date_info
  * @property int|null $slot_allotment
@@ -28,8 +28,8 @@ use Cake\ORM\Entity;
  * @property string|null $type
  * @property |null $parent_id
  * @property string|null $flexi_options
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\DateTime|null $created
+ * @property \Cake\I18n\DateTime|null $modified
  *
  * @property \App\Model\Entity\Attraction $attraction
  * @property \App\Model\Entity\Skus $skus
@@ -51,7 +51,7 @@ class Ticket extends Entity
      *
      * @var array
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         'attraction_id' => true,
         'sku_id' => true,
         'api_sku' => true,
@@ -87,7 +87,7 @@ class Ticket extends Entity
         'child_tickets' => true
     ];
 
-    protected $_hidden = [
+    protected array $_hidden = [
         'cost_price'
     ];
 }

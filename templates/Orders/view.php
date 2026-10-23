@@ -8,8 +8,8 @@ use Cake\Utility\Inflector;
 
 $subtotal = 0;
 $other_fees = 0;
-$hide_before_date = new FrozenTime('-6 months');
-$order_created = new FrozenTime($order['created']);
+$hide_before_date = new \Cake\I18n\DateTime('-6 months');
+$order_created = new \Cake\I18n\DateTime($order['created']);
 
 function getBadgeInfo($voucher)
 {
@@ -212,7 +212,7 @@ function getBadgeInfo($voucher)
                 $voucher_merging_done = false;
                 $voucher_merging_created = '';
                 if ($voucher_merging) {
-                  $voucher_merging_created = (new FrozenTime($voucher_merging->created->format('Y-m-d H:i:s'), 'UTC'))->i18nFormat("d MMMM, HH:mm", Configure::read('App.defaultTimezone'));
+                  $voucher_merging_created = (new \Cake\I18n\DateTime($voucher_merging->created->format('Y-m-d H:i:s'), 'UTC'))->i18nFormat("d MMMM, HH:mm", Configure::read('App.defaultTimezone'));
                   if ($voucher_merging->status == 'done') {
                     $voucher_merging_done = true;
                   } else {
@@ -247,7 +247,7 @@ function getBadgeInfo($voucher)
                       <div class=""><?= $order_item['attraction_title'] ?></div>
                       <div class="text-muted"><?= $order_item['ticket_name'] ?>
                         <?php if (!empty($order_item['date_of_visit'])) : ?>
-                          <div><?php echo (new FrozenDate($order_item['date_of_visit']))->format('d M Y') ?></div>
+                          <div><?php echo (new \Cake\I18n\Date($order_item['date_of_visit']))->format('d M Y') ?></div>
                         <?php endif ?>
                         <?php if (!empty($order_item['time_of_visit'])) : ?>
                           <div><?php echo $order_item['time_of_visit'] ?></div>
@@ -341,7 +341,7 @@ function getBadgeInfo($voucher)
                 <div class="row py-2">
                   <div class="col-md-6">
                     <?php if (!empty($order_item['date_of_visit'])) : ?>
-                      <div><?php echo (new FrozenDate($order_item['date_of_visit']))->format('d M Y') ?></div>
+                      <div><?php echo (new \Cake\I18n\Date($order_item['date_of_visit']))->format('d M Y') ?></div>
                     <?php endif ?>
                     <?php if (!empty($order_item['time_of_visit'])) : ?>
                       <div><?php echo $order_item['time_of_visit'] ?></div>
