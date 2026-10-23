@@ -35,7 +35,7 @@ class AgentsController extends AppController
     public function initialize(): void {
         parent::initialize();
         $this->loadComponent('S3Public');
-        $this->loadModel('Attractions');
+        $this->Attractions = $this->fetchTable('Attractions');
     }
     /**
      * Index method

@@ -32,6 +32,7 @@ use Cake\Controller\Exception\SecurityException;
  *
  * @link https://book.cakephp.org/3.0/en/controllers.html#the-app-controller
  */
+#[\AllowDynamicProperties]
 class AppController extends Controller
 {
 
@@ -121,13 +122,13 @@ class AppController extends Controller
         
       }
       if ($this->Auth->user('agent_id')) {
-        $this->loadModel('Agents');
+        $this->Agents = $this->fetchTable('Agents');
         $auth_user = $this->Auth->user();
         //get agent to get the credit amount
         $agent = $this->Agents->find()->where(['id'=>$this->Auth->user('agent_id')])->first();
         //get agentuser to check the announcements_read
         $current_agentuser = $this->Agents->AgentUsers->find()->where(['id'=>$this->Auth->user('id')])->first();
-        $this->loadModel('Announcements');
+        $this->Announcements = $this->fetchTable('Announcements');
         $now = DateTime::now();
         $announcements = $this->Announcements->find()
                                             ->where(['publish_start_date <='=>$now])

@@ -13,6 +13,7 @@ use Cake\Console\ConsoleOptionParser;
 /**
  * GenerateReport command.
  */
+#[\AllowDynamicProperties]
 class GenerateReportCommand extends Command
 {
     /**
@@ -57,13 +58,13 @@ class GenerateReportCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io): ?int
     {
-        $this->loadModel('Agents');
-        $this->loadModel('AgentUsers');
-        $this->loadModel('ApiPdfs');
-        $this->loadModel('Barcodes');
-        $this->loadModel('GeneratedCodes');
-        $this->loadModel('Orders');
-        $this->loadModel('Pdfs');
+        $this->Agents = $this->fetchTable('Agents');
+        $this->AgentUsers = $this->fetchTable('AgentUsers');
+        $this->ApiPdfs = $this->fetchTable('ApiPdfs');
+        $this->Barcodes = $this->fetchTable('Barcodes');
+        $this->GeneratedCodes = $this->fetchTable('GeneratedCodes');
+        $this->Orders = $this->fetchTable('Orders');
+        $this->Pdfs = $this->fetchTable('Pdfs');
 
         $agent_user_id = $args->getOption('agent_user_id');
         $issue_start_date = $args->getOption('issue_start_date');

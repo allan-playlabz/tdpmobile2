@@ -26,8 +26,8 @@ class AttractionsController extends AppController
         parent::initialize();
         $this->loadComponent('ShoppingCart');
         $this->loadComponent('TicketsHelper');
-        $this->loadModel('SettlementAgents');
-        $this->loadModel('Tickets');
+        $this->SettlementAgents = $this->fetchTable('SettlementAgents');
+        $this->Tickets = $this->fetchTable('Tickets');
         // $this->Auth->allow(['index','view','getTickets']);
     } 
 
@@ -64,7 +64,7 @@ class AttractionsController extends AppController
         if ($this->request->getQuery('cities')) {
           $selected_cities = (array)$this->request->getQuery('cities');
         }
-        $this->loadModel('Cities');
+        $this->Cities = $this->fetchTable('Cities');
         // Filter by the explicitly checked cities. Fall back to expanding any
         // selected countries to their cities (backward compatibility with older
         // links that passed only `countries`).
@@ -81,7 +81,7 @@ class AttractionsController extends AppController
             }
         }
         $agent = $this->Auth->user();
-        $this->loadModel('FdatesettlementsAgents');
+        $this->FdatesettlementsAgents = $this->fetchTable('FdatesettlementsAgents');
         $settlement_attraction_ids = $this->SettlementAgents->find()
           ->select(['attraction_id'])
           ->where(['agent_id' => $agent['agent_id']])
@@ -203,7 +203,7 @@ class AttractionsController extends AppController
           }
         }
         // Pass cities grouped by country for the nested country/city filter.
-        $this->loadModel('Cities');
+        $this->Cities = $this->fetchTable('Cities');
         $cities = $this->Cities->find()
           ->select(['id', 'country', 'name'])
           ->order(['country' => 'ASC', 'name' => 'ASC'])
@@ -1287,7 +1287,7 @@ class AttractionsController extends AppController
      */
     public function toggleFavorite(): Response {
         $this->request->allowMethod(['post', 'put', 'patch']);
-        $this->loadModel('FavoriteAttractions');
+        $this->FavoriteAttractions = $this->fetchTable('FavoriteAttractions');
         $favorite = $this->FavoriteAttractions->newEntity($this->request->getData());
         if ($favorite->hasErrors()) {
             return $this->response->withStatus(400)->withStringBody(json_encode($favorite->getErrors()));

@@ -14,7 +14,7 @@ class CategoriesController extends AppController
 {
     public function initialize(): void {
         parent::initialize();
-        $this->loadModel('Attractions');
+        $this->Attractions = $this->fetchTable('Attractions');
     }
     /**
      * View method

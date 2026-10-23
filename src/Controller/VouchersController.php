@@ -20,15 +20,15 @@ class VouchersController extends AppController
     {
         parent::initialize();
         $this->loadComponent('S3');
-        $this->loadModel('Orders');
-        $this->loadModel('VoucherMerging');
+        $this->Orders = $this->fetchTable('Orders');
+        $this->VoucherMerging = $this->fetchTable('VoucherMerging');
         $this->Auth->allow(['download', 'sdownload']);
     }
 
     public function view($id = null)
     {
         $this->autoRender = false;
-        $this->loadModel('AgentUsers');
+        $this->AgentUsers = $this->fetchTable('AgentUsers');
         $voucher = $this->Vouchers->get($id, contain: ['OrderItems' => ['Orders' => ['AgentUsers']]]);
         $is_agent_allowed = $voucher->order_item->order->agent_user->id == $this->Auth->user('id');
         if ($this->Auth->user('role') == 'master') {
@@ -196,8 +196,8 @@ class VouchersController extends AppController
     public function downloadAll($id = null)
     {
         $this->autoRender = false;
-        $this->loadModel('Orders');
-        $this->loadModel('AgentUsers');
+        $this->Orders = $this->fetchTable('Orders');
+        $this->AgentUsers = $this->fetchTable('AgentUsers');
         $order = $this->Orders->find()->where(['id' => $id, 'status' => 'done'])->first();
 
         if (!$order) {
@@ -222,7 +222,7 @@ class VouchersController extends AppController
                 $auth_user_email = $this->Auth->user('email');
                 $auth_user_id = $this->Auth->user('id');
                 if (empty($auth_user_email)) {
-                    $this->loadModel('Agents');
+                    $this->Agents = $this->fetchTable('Agents');
                     $agent = $this->Agents->find()->where(['id' => $order->agent_user->agent_id])->first();
                     if ($agent) {
                         $auth_user_email = $agent->email;
@@ -284,7 +284,7 @@ class VouchersController extends AppController
             $auth_user_email = $this->Auth->user('email');
             $auth_user_id = $this->Auth->user('id');
             if (empty($auth_user_email)) {
-                $this->loadModel('Agents');
+                $this->Agents = $this->fetchTable('Agents');
                 $agent = $this->Agents->find()->where(['id' => $voucher->order_item->order->agent_user->agent_id])->first();
                 if ($agent) {
                     $auth_user_email = $agent->email;

@@ -4,18 +4,19 @@ namespace App\View\Cell;
 use Cake\I18n\DateTime;
 use Cake\View\Cell;
 
+#[\AllowDynamicProperties]
 class CreditsCell extends Cell
 {
     public function display()
     {
         if ($_SESSION['Auth']) {
-            $this->loadModel('Agents');
+            $this->Agents = $this->fetchTable('Agents');
             $auth_user = $_SESSION['Auth']['User'];
             //get agent to get the credit amount
             $agent = $this->Agents->find()->where(['id'=>$_SESSION['Auth']['User']['agent_id']])->first();
             //get agentuser to check the announcements_read
             $current_agentuser = $this->Agents->AgentUsers->find()->where(['id'=>$_SESSION['Auth']['User']['id']])->first();
-            $this->loadModel('Announcements');
+            $this->Announcements = $this->fetchTable('Announcements');
             $now = DateTime::now();
             $announcements = $this->Announcements->find()
                                                 ->where(['publish_start_date <='=>$now])

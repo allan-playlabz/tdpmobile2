@@ -20,13 +20,13 @@ class VoucherMergingController extends AppController
     {
         parent::initialize();
         $this->loadComponent('S3');
-        $this->loadModel('VoucherMerging');
+        $this->VoucherMerging = $this->fetchTable('VoucherMerging');
     }
 
     public function getStatus()
     {
         $this->autoRender = false;
-        $this->loadModel('AgentUsers');
+        $this->AgentUsers = $this->fetchTable('AgentUsers');
         $voucher_merging = $this->VoucherMerging->find()->where(['order_ref_id' => $this->request->getQuery('order_ref_id'),
         'agent_id' => $this->Auth->user('agent_id')])->first();
 

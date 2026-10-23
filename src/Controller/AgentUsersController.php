@@ -21,14 +21,14 @@ class AgentUsersController extends AppController
     public function initialize(): void {
       parent::initialize();
       $this->Auth->allow(['otp','resendOtp','forgotPassword','resetPassword']);
-      $this->loadModel('Logins');
-      $this->loadModel('Logs');
+      $this->Logins = $this->fetchTable('Logins');
+      $this->Logs = $this->fetchTable('Logs');
     }
 
     public function login() {
 
-      $this->loadModel('UsersIpaddress');
-      $this->loadModel('LastOtpIps');
+      $this->UsersIpaddress = $this->fetchTable('UsersIpaddress');
+      $this->LastOtpIps = $this->fetchTable('LastOtpIps');
       $this->viewBuilder()->setLayout('login');
       $session = $this->request->getSession();
       if(isset($_GET['redirect'])) {
@@ -260,7 +260,7 @@ class AgentUsersController extends AppController
             $agent->agent->last_activity = date('Y-m-d H:i:s');
             $this->AgentUsers->Agents->save($agent->agent);
           }
-          $this->loadModel('UsersIpaddress');
+          $this->UsersIpaddress = $this->fetchTable('UsersIpaddress');
           $clientIp = $this->request->getHeaderLine('CF-Connecting-IP');
           if(empty($clientIp)) {
             $clientIp = $this->request->clientIp();
@@ -271,7 +271,7 @@ class AgentUsersController extends AppController
             $this->UsersIpaddress->save($user_ipaddress);
           }
           // Trust this newly-verified IP for the agent user, keeping newest 3.
-          $this->loadModel('LastOtpIps');
+          $this->LastOtpIps = $this->fetchTable('LastOtpIps');
           $this->LastOtpIps->addAndPrune($agent->id, $clientIp);
           if($agent->role == 'master2')  {
             $agent->role = 'master';
@@ -320,7 +320,7 @@ class AgentUsersController extends AppController
 
     public function resetPassword($email,$reset_code) {
       $this->viewBuilder()->setLayout('login');
-      $this->loadModel('PasswordResets');
+      $this->PasswordResets = $this->fetchTable('PasswordResets');
       $agent = null;
       $password_reset = $this->PasswordResets->find()->where(['email'=>$email,'reset_code'=>$reset_code])->first();
       if (!$password_reset || $password_reset->created < DateTime::now()->subHours(24)) {
@@ -382,7 +382,7 @@ class AgentUsersController extends AppController
 
     public function forgotPassword() {
       $this->viewBuilder()->setLayout('login');
-      $this->loadModel('PasswordResets');
+      $this->PasswordResets = $this->fetchTable('PasswordResets');
       $password_reset = $this->PasswordResets->newEmptyEntity();
       if ($this->request->is('post')) {
         $email = $this->request->getData('email');

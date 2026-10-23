@@ -32,12 +32,12 @@ class ReportsController extends AppController
        Quantity Issued is changed to Units Issued so it makes sense to do multiply by price
        Total Sales Price is units issued * unit price
       */
-      $this->loadModel('Orders');
-      $this->loadModel('Barcodes');
-      $this->loadModel('GeneratedCodes');
-      $this->loadModel('Pdfs');
-      $this->loadModel('ApiPdfs');
-      $this->loadModel('Agents');
+      $this->Orders = $this->fetchTable('Orders');
+      $this->Barcodes = $this->fetchTable('Barcodes');
+      $this->GeneratedCodes = $this->fetchTable('GeneratedCodes');
+      $this->Pdfs = $this->fetchTable('Pdfs');
+      $this->ApiPdfs = $this->fetchTable('ApiPdfs');
+      $this->Agents = $this->fetchTable('Agents');
       $agent = $this->Agents->find()
             ->where(['id'=>$this->Auth->user('agent_id')])
             ->first();
@@ -124,7 +124,7 @@ class ReportsController extends AppController
     }
 
     public function usage() {
-      $this->loadModel('CreditLogs');
+      $this->CreditLogs = $this->fetchTable('CreditLogs');
       $conditions = ['agent_id'=>$this->Auth->user('agent_id'),'debit_credit'=>'credit'];
 
       $query = $this->CreditLogs;

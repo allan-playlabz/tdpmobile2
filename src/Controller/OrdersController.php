@@ -37,16 +37,16 @@ class OrdersController extends AppController
     $this->loadComponent('Mailer');
     $this->loadComponent('TicketsHelper');
     $this->loadComponent('S3');
-    $this->loadModel('Tickets');
-    $this->loadModel('Agents');
-    $this->loadModel('AgentUsers');
-    $this->loadModel('Vouchers');
-    $this->loadModel('GeneratedCodes');
-    $this->loadModel('SettlementAgents');
-    $this->loadModel('CreditLogs');
-    $this->loadModel('Attractions');
-    $this->loadModel('Fixeddates');
-    $this->loadModel('Connections');
+    $this->Tickets = $this->fetchTable('Tickets');
+    $this->Agents = $this->fetchTable('Agents');
+    $this->AgentUsers = $this->fetchTable('AgentUsers');
+    $this->Vouchers = $this->fetchTable('Vouchers');
+    $this->GeneratedCodes = $this->fetchTable('GeneratedCodes');
+    $this->SettlementAgents = $this->fetchTable('SettlementAgents');
+    $this->CreditLogs = $this->fetchTable('CreditLogs');
+    $this->Attractions = $this->fetchTable('Attractions');
+    $this->Fixeddates = $this->fetchTable('Fixeddates');
+    $this->Connections = $this->fetchTable('Connections');
     Payments::config();
   }
 
@@ -421,7 +421,7 @@ class OrdersController extends AppController
         /* end new order using api */
 
       }
-      // $this->loadModel('Agents');
+      // $this->Agents = $this->fetchTable('Agents');
       // $agent = $this->Agents->find()->where(['id'=>$this->Auth->user('agent_id')])->first();
       $agent = $this->Auth->user();
 
@@ -840,7 +840,7 @@ class OrdersController extends AppController
      */
     public function notificationReceiver($provider) {
       if ($this->request->is('post')) {
-        $this->loadModel('PaymentResponses');
+        $this->PaymentResponses = $this->fetchTable('PaymentResponses');
         if ($provider == 'Paypal' && $this->request->getData('event_type') !== 'CHECKOUT.ORDER.APPROVED') {
           return $this->response->withStatus(200);
         }
@@ -1821,7 +1821,7 @@ class OrdersController extends AppController
      */
     public function index()
     {
-        $this->loadModel('AgentUsers');
+        $this->AgentUsers = $this->fetchTable('AgentUsers');
         $conditions = ['agent_user_id'=>$this->Auth->user('id')];
         if ($this->Auth->user('role') == 'master') {
           $agent_user_ids = $this->AgentUsers->find('list',['valueField'=>'id'])->where(['agent_id'=>$this->Auth->user('agent_id')])->toList();
@@ -1939,8 +1939,8 @@ class OrdersController extends AppController
      */
     public function myTickets()
     {
-        $this->loadModel('AgentUsers');
-        $this->loadModel('Vouchers');
+        $this->AgentUsers = $this->fetchTable('AgentUsers');
+        $this->Vouchers = $this->fetchTable('Vouchers');
         $conditions = [];
         $order_conditions = ['Orders.agent_user_id'=>$this->Auth->user('id')];
         $status_allowed = ['purchased','used','partially_redeemed_expired','partially_redeemed_cancelled','cancelled','expired'];
@@ -2018,7 +2018,7 @@ class OrdersController extends AppController
           $res_data = $response->getJson();
           if ($res_data['status'] == '1000') {
             $order = $res_data['data'];
-            $this->loadModel('VoucherMerging');
+            $this->VoucherMerging = $this->fetchTable('VoucherMerging');
             $voucher_merging = $this->VoucherMerging->find()->where(['order_ref_id' => $order['order_ref_id'], 'agent_id' => $this->Auth->user('agent_id')])->first();
             // $expired_voucher_merging = FrozenTime::now(Configure::read('App.defaultTimezone'))->subMinutes(Configure::read('Voucher.merged_expiration') ?? '60');
             // if ($voucher_merging && $voucher_merging->created < $expired_voucher_merging) {
