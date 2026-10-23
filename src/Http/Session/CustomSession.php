@@ -17,7 +17,7 @@ class CustomSession extends CustomDatabaseSession
     }
 
     // Read data from the session.
-    public function read($id)
+    public function read(string $id): string|false
     {
         // $result = Cache::read($id, $this->cacheKey);
         // if ($result) {
@@ -28,21 +28,21 @@ class CustomSession extends CustomDatabaseSession
     }
 
     // Write data into the session.
-    public function write($id, $data)
+    public function write(string $id, string $data): bool
     {
         // Cache::write($id, $data, $this->cacheKey);
         return parent::write($id, $data);
     }
 
     // Destroy a session.
-    public function destroy($id)
+    public function destroy(string $id): bool
     {
         // Cache::delete($id, $this->cacheKey);
         return parent::destroy($id);
     }
 
     // Removes expired sessions.
-    public function gc($expires = null)
+    public function gc(int $expires): int|false
     {
         return /*Cache::gc($this->cacheKey) &&*/ parent::gc($expires);
     }

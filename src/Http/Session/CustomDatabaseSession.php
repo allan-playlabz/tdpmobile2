@@ -85,7 +85,7 @@ class CustomDatabaseSession implements SessionHandlerInterface
      * @param string $name The session name.
      * @return bool Success
      */
-    public function open($savePath, $name)
+    public function open(string $savePath, string $name): bool
     {
         return true;
     }
@@ -95,7 +95,7 @@ class CustomDatabaseSession implements SessionHandlerInterface
      *
      * @return bool Success
      */
-    public function close()
+    public function close(): bool
     {
         return true;
     }
@@ -106,7 +106,7 @@ class CustomDatabaseSession implements SessionHandlerInterface
      * @param string|int $id ID that uniquely identifies session in database.
      * @return string Session data or empty string if it does not exist.
      */
-    public function read($id)
+    public function read(string $id): string|false
     {
         $result = $this->_table
             ->find('all')
@@ -139,7 +139,7 @@ class CustomDatabaseSession implements SessionHandlerInterface
      * @param mixed $data The data to be saved.
      * @return bool True for successful write, false otherwise.
      */
-    public function write($id, $data)
+    public function write(string $id, string $data): bool
     {
         if (!$id) {
             return false;
@@ -161,7 +161,8 @@ class CustomDatabaseSession implements SessionHandlerInterface
                 $record['agent_user_id'] = $decoded_data['Auth']['User']['id'];
                 // $record['user_type'] = 'participant';
             }
-            $old_record = $this->_table->find()->where(['id !='=>$record['id'],'agent_user_id'=>$record['agent_user_id']])->first();
+            // 3.x matched nothing for a null agent_user_id; 5.x throws on null in where()
+            $old_record = isset($record['agent_user_id']) ? $this->_table->find()->where(['id !='=>$record['id'],'agent_user_id'=>$record['agent_user_id']])->first() : null;
             if ($old_record) {
                 $this->_table->delete($old_record);
             }
@@ -180,7 +181,7 @@ class CustomDatabaseSession implements SessionHandlerInterface
      * @param string|int $id ID that uniquely identifies session in database.
      * @return bool True for successful delete, false otherwise.
      */
-    public function destroy($id)
+    public function destroy(string $id): bool
     {
         $this->_table->delete(new Entity(
             [$this->_table->getPrimaryKey() => $id],
@@ -196,10 +197,8 @@ class CustomDatabaseSession implements SessionHandlerInterface
      * @param int $maxlifetime Sessions that have not updated for the last maxlifetime seconds will be removed.
      * @return bool True on success, false on failure.
      */
-    public function gc($maxlifetime)
+    public function gc(int $maxlifetime): int|false
     {
-        $this->_table->deleteAll(['expires <' => time() - $maxlifetime]);
-
-        return true;
+        return $this->_table->deleteAll(['expires <' => time() - $maxlifetime]);
     }
 }

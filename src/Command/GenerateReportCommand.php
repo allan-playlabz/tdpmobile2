@@ -437,5 +437,7 @@ class GenerateReportCommand extends Command
 
             $finished_output_file_name = Csv::finishReport($output_file_name, $agent_user_id);
         }
+
+        return null;
     }
 }
