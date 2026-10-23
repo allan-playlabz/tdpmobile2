@@ -103,7 +103,7 @@ class LastOtpIpsTable extends Table
             ->select(['id'])
             ->where(['agent_user_id' => $agentUserId])
             ->orderBy(['modified' => 'DESC', 'id' => 'DESC'])
-            ->extract('id')
+            ->all()->extract('id')
             ->toArray();
         if (count($ids) > $keep) {
             $this->deleteAll(['id IN' => array_slice($ids, $keep)]);

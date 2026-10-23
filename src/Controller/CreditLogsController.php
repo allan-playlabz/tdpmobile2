@@ -28,9 +28,6 @@ class CreditLogsController extends AppController
       if (!$this->Auth->user('agent.enable_credit_logs_view')) {
         return $this->redirect('/');
       }
-      $this->paginate = [
-          'contain' => ['Agents']
-      ];
       $days_to_show = Configure::read('CreditLogs.days_to_show') ?? 100;
       $first_date_allowed = new \Cake\I18n\DateTime('-' . $days_to_show . ' days');
       $query = $this->Agents->CreditLogs->find()
@@ -121,7 +118,7 @@ class CreditLogsController extends AppController
         $this->Flash->error('No records found!');
         return $this->redirect(['controller' => 'CreditLogs', 'action' => 'index']);
       }
-      $creditLogs = $this->paginate($query);
+      $creditLogs = $this->paginate($query->contain(['Agents']));
 
       $this->set(compact('creditLogs'));
     }

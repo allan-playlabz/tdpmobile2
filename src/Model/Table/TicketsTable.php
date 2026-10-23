@@ -291,7 +291,7 @@ class TicketsTable extends Table
     }
 
     public function isValidReturnTicket($ticket_id, $return_ticket_id) {
-        $return_ticket_ids = $this->TicketTripTypes->find('list', ['valueField' => 'ticket_id', 'type' => 'return'])->where(['linked_ticket_id' => $ticket_id])->toArray();
+        $return_ticket_ids = $this->TicketTripTypes->find('list', valueField: 'ticket_id')->where(['linked_ticket_id' => $ticket_id])->toArray();
 
         if (!empty($return_ticket_ids)) {
             return in_array($return_ticket_id, $return_ticket_ids);

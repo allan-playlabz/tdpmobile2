@@ -50,15 +50,15 @@ class AgentsController extends AppController
       $query['Agents.role'] = 'master';
 
       $this->paginate = [
-        'conditions'=>$query,
         'order' => [
           'first_name' => 'asc'
         ],
-        'contain'=>['MasterAccount'=>['UsersIpaddress'=>function($uiq) {
-              return $uiq->orderBy(['UsersIpaddress.modified'=>'desc'])->limit(1);
-            }]]
       ];
-      $agents = $this->paginate($this->Agents);
+      $agents = $this->paginate($this->Agents->find()
+        ->where($query)
+        ->contain(['MasterAccount'=>['UsersIpaddress'=>function($uiq) {
+              return $uiq->orderBy(['UsersIpaddress.modified'=>'desc'])->limit(1);
+            }]]));
 
       $this->set(compact('agents','options'));
     }
@@ -248,7 +248,7 @@ class AgentsController extends AppController
                     ->contain(['ChildCategories' => [
                         'sort' => ['name' => 'asc']
                       ]])
-                    ->orderBy(['Categories.name'=>'asc'])->toList();
+                    ->orderBy(['Categories.name'=>'asc'])->all()->toList();
 
         $this->set(compact('attractions','categories','search','selected_categories','agent'));
     }

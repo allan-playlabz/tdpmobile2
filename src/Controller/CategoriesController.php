@@ -154,7 +154,7 @@ class CategoriesController extends AppController
                   ->contain(['ChildCategories' => [
                       'sort' => ['name' => 'asc']
                     ]])
-                  ->orderBy(['Categories.name'=>'asc'])->toList();
+                  ->orderBy(['Categories.name'=>'asc'])->all()->toList();
 
       $this->set(compact('attractions','categories','search','selected_categories'));
     }

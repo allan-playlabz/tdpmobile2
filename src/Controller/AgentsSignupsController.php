@@ -28,10 +28,7 @@ class AgentsSignupsController extends AppController
      */
     public function index()
     {
-        $this->paginate = [
-            'contain' => ['MasterAgents'],
-        ];
-        $agentsSignups = $this->paginate($this->AgentsSignups);
+        $agentsSignups = $this->paginate($this->AgentsSignups->find()->contain(['MasterAgents']));
 
         $this->set(compact('agentsSignups'));
     }

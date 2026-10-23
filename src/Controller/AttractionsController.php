@@ -74,7 +74,7 @@ class AttractionsController extends AppController
             $city_ids = $this->Cities->find()
               ->select(['id'])
               ->where(['country IN' => $selected_countries])
-              ->extract('id')
+              ->all()->extract('id')
               ->toArray();
             if (!empty($city_ids)) {
               $conditions['Attractions.city_id IN'] = $city_ids;
@@ -85,13 +85,13 @@ class AttractionsController extends AppController
         $settlement_attraction_ids = $this->SettlementAgents->find()
           ->select(['attraction_id'])
           ->where(['agent_id' => $agent['agent_id']])
-          ->extract('attraction_id')
+          ->all()->extract('attraction_id')
           ->toArray();
         $fdate_attraction_ids = $this->FdatesettlementsAgents->find()
           ->select(['Tickets.attraction_id'])
           ->contain(['Tickets'])
           ->where(['FdatesettlementsAgents.agent_id' => $agent['agent_id']])
-          ->extract('ticket.attraction_id')
+          ->all()->extract('ticket.attraction_id')
           ->toArray();
         $fdate_attraction_ids = array_unique($fdate_attraction_ids);
         $agent_attraction_ids = array_unique(array_merge($settlement_attraction_ids, $fdate_attraction_ids));
@@ -113,7 +113,7 @@ class AttractionsController extends AppController
             })
             ->where(['Attractions.id IN' => $agent_attraction_ids])
             ->distinct(['Attractions.id'])
-            ->extract('id')
+            ->all()->extract('id')
             ->toArray();
         }
         $attraction_query = $this->Attractions->find()
@@ -149,7 +149,7 @@ class AttractionsController extends AppController
             ], true);
         }
         if ($this->request->getQuery('filter') == 'favorites') {
-          $favorite_attraction_ids = $this->Attractions->FavoriteAttractions->find()->where(['agent_user_id'=>$this->Auth->user('id')])->extract('attraction_id')->toArray();
+          $favorite_attraction_ids = $this->Attractions->FavoriteAttractions->find()->where(['agent_user_id'=>$this->Auth->user('id')])->all()->extract('attraction_id')->toArray();
           if (is_array($favorite_attraction_ids) && count($favorite_attraction_ids) > 0) {
             $attraction_query = $attraction_query->where(['Attractions.id IN' => $favorite_attraction_ids]);
           }
@@ -196,7 +196,7 @@ class AttractionsController extends AppController
                     ->contain(['ChildCategories' => [
                         'sort' => ['name' => 'asc']
                       ]])
-                    ->orderBy(['Categories.name'=>'asc'])->toList();
+                    ->orderBy(['Categories.name'=>'asc'])->all()->toList();
         if ($this->request->getSession()->check('language')) {
           foreach ($categories as $category) {
             Translator::translateCategory($this->request, $category);

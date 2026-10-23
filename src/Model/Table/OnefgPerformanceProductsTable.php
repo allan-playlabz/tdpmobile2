@@ -98,7 +98,7 @@ class OnefgPerformanceProductsTable extends Table
     }
 
     public function add($data) {
-        $query = $this->query();
+        $query = $this->insertQuery();
         $query
         ->insert(['product_ak','product_name','product_description', 'performance_ak', 'performance_date','performance_time','seat_category_description','availability','price', 'created','modified'])
         ->values($data);

@@ -44,7 +44,7 @@ class ReportsController extends AppController
       $agent_user_ids = [];
       if (!empty($agent)) {
         if ($this->Auth->user('role') == 'master') {
-          $agent_user_ids = $this->Agents->AgentUsers->find('list',['valueField'=>'id'])->where(['agent_id'=>$this->Auth->user('agent_id')])->toList();
+          $agent_user_ids = $this->Agents->AgentUsers->find('list', valueField: 'id')->where(['agent_id'=>$this->Auth->user('agent_id')])->all()->toList();
           if (empty($agent_user_ids)) {
             $agent_user_ids = [$this->Auth->user('id')];
           }
@@ -127,9 +127,8 @@ class ReportsController extends AppController
       $this->CreditLogs = $this->fetchTable('CreditLogs');
       $conditions = ['agent_id'=>$this->Auth->user('agent_id'),'debit_credit'=>'credit'];
 
-      $query = $this->CreditLogs;
+      $query = $this->CreditLogs->find()->where($conditions);
       $this->paginate = [
-        'conditions' => $conditions,
         'order'=>['created'=>'desc'],
         'limit'=>500
       ];

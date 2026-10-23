@@ -1824,7 +1824,7 @@ class OrdersController extends AppController
         $this->AgentUsers = $this->fetchTable('AgentUsers');
         $conditions = ['agent_user_id'=>$this->Auth->user('id')];
         if ($this->Auth->user('role') == 'master') {
-          $agent_user_ids = $this->AgentUsers->find('list',['valueField'=>'id'])->where(['agent_id'=>$this->Auth->user('agent_id')])->toList();
+          $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id'=>$this->Auth->user('agent_id')])->all()->toList();
           if (empty($agent_user_ids)) {
             $agent_user_ids = [$this->Auth->user('id')];
           }
@@ -1848,8 +1848,6 @@ class OrdersController extends AppController
         $first_date_allowed = (new DateTime())->subMonths(Configure::read('Default.previous_orders_months_to_view'));
         $from = $first_date_allowed;
         $this->paginate = [
-          'conditions' => $conditions,
-          'contain'=>['OrderItems'=>['Tickets']],
           'order'=>['created'=>'desc']
         ];
         $query = $this->Orders->find();
@@ -1919,7 +1917,7 @@ class OrdersController extends AppController
             }
           }
         }
-        $orders = $this->paginate($query);
+        $orders = $this->paginate($query->where($conditions)->contain(['OrderItems'=>['Tickets']]));
 
         if ($this->request->getSession()->check('language')) {
           foreach ($orders as $order) {
@@ -1945,7 +1943,7 @@ class OrdersController extends AppController
         $order_conditions = ['Orders.agent_user_id'=>$this->Auth->user('id')];
         $status_allowed = ['purchased','used','partially_redeemed_expired','partially_redeemed_cancelled','cancelled','expired'];
         if ($this->Auth->user('role') == 'master') {
-          $agent_user_ids = $this->AgentUsers->find('list',['valueField'=>'id'])->where(['agent_id'=>$this->Auth->user('agent_id')])->toList();
+          $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id'=>$this->Auth->user('agent_id')])->all()->toList();
           if (empty($agent_user_ids)) {
             $agent_user_ids = [$this->Auth->user('id')];
           }
@@ -1976,14 +1974,12 @@ class OrdersController extends AppController
         $from = $from->hour(0)->minute(0)->second(0);
         $conditions['Vouchers.created >='] = $from;
         $this->paginate = [
-          'conditions' => $conditions,
-          'contain'=>['OrderItems'=>['Orders']],
           'order'=>['Vouchers.created'=>'desc'],
         ];
         $query = $this->Vouchers->find()->matching('OrderItems.Orders',function ($q) use ($order_conditions) {
           return $q->where($order_conditions);
         });
-        $vouchers = $this->paginate($query)->toArray();
+        $vouchers = $this->paginate($query->where($conditions)->contain(['OrderItems'=>['Orders']]))->toArray();
         foreach ($vouchers as $key => $voucher) {
           $voucher->code_status = $this->Vouchers->getStatus($voucher->code_id, $voucher->voucher_type);
           $voucher->is_cancellable = $this->Vouchers->isCancellable($voucher->code_id, $this->Auth->user('agent_id'));

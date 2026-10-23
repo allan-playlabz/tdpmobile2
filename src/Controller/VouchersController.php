@@ -32,7 +32,7 @@ class VouchersController extends AppController
         $voucher = $this->Vouchers->get($id, contain: ['OrderItems' => ['Orders' => ['AgentUsers']]]);
         $is_agent_allowed = $voucher->order_item->order->agent_user->id == $this->Auth->user('id');
         if ($this->Auth->user('role') == 'master') {
-            $agent_user_ids = $this->AgentUsers->find('list', ['valueField' => 'id'])->where(['agent_id' => $this->Auth->user('agent_id')])->toList();
+            $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id' => $this->Auth->user('agent_id')])->all()->toList();
             if (!empty($agent_user_ids)) {
                 $is_agent_allowed = in_array($voucher->order_item->order->agent_user_id, $agent_user_ids);
             }
@@ -142,7 +142,7 @@ class VouchersController extends AppController
         }
         $is_agent_allowed = $order_item->order->agent_user_id == $this->Auth->user('id');
         if ($this->Auth->user('role') == 'master') {
-            $agent_user_ids = $this->AgentUsers->find('list', ['valueField' => 'id'])->where(['agent_id' => $this->Auth->user('agent_id')])->toList();
+            $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id' => $this->Auth->user('agent_id')])->all()->toList();
             if (!empty($agent_user_ids)) {
                 $is_agent_allowed = in_array($order_item->order->agent_user_id, $agent_user_ids);
             }
@@ -206,7 +206,7 @@ class VouchersController extends AppController
 
         $is_agent_allowed = $order->agent_user_id == $this->Auth->user('id');
         if ($this->Auth->user('role') == 'master') {
-            $agent_user_ids = $this->AgentUsers->find('list', ['valueField' => 'id'])->where(['agent_id' => $this->Auth->user('agent_id')])->toList();
+            $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id' => $this->Auth->user('agent_id')])->all()->toList();
             if (!empty($agent_user_ids)) {
                 $is_agent_allowed = in_array($order->agent_user_id, $agent_user_ids);
             }
