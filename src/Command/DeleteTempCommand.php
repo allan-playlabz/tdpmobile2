@@ -29,24 +29,24 @@ class DeleteTempCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io): ?int
     {
-      $files_age = 172800;
-      $folders = [WWW_ROOT . 'files/pdf', TMP . 'merged_pdf', TMP . 'reports'];
-      foreach ($folders as $folder_name) {
-        if (!is_dir($folder_name)) {
-          continue;
+        $files_age = 172800;
+        $folders = [WWW_ROOT . 'files/pdf', TMP . 'merged_pdf', TMP . 'reports'];
+        foreach ($folders as $folder_name) {
+            if (!is_dir($folder_name)) {
+                continue;
+            }
+            $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder_name, RecursiveDirectoryIterator::SKIP_DOTS));
+            foreach ($files as $_file) {
+                if (!$_file->isFile()) {
+                    continue;
+                }
+                $last_changed = $_file->getMTime();
+                if ($last_changed && (time() - $last_changed > $files_age)) {
+                    $io->out(unlink($_file->getPathname()) ? '1' : '');
+                }
+            }
         }
-        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder_name, RecursiveDirectoryIterator::SKIP_DOTS));
-        foreach ($files as $_file) {
-          if (!$_file->isFile()) {
-            continue;
-          }
-          $last_changed = $_file->getMTime();
-          if ($last_changed && (time() - $last_changed > $files_age)) {
-            $io->out(unlink($_file->getPathname()) ? '1' : '');
-          }
-        }
-      }
 
-      return static::CODE_SUCCESS;
+        return static::CODE_SUCCESS;
     }
 }

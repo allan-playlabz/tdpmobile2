@@ -52,7 +52,8 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 - [x] cake5-code-apis (2026-10-23) — code-api scan 0 blockers; lint clean; `generate_report` runs on local DB. Total blockers 956 → 280 (auth 140, tests 140)
 - [x] cake5-auth (2026-10-23) — auth scan 0 blockers; login/logout/public actions/CSRF/single-session verified over HTTP; logged-in page sweep clean
 - [x] cake5-tests (2026-10-23) — `vendor/bin/phpunit`: OK, 202 tests (8 passing, 194 incomplete baked stubs); tests scan 0 blockers
-- [ ] final scan = 0 blockers, smoke test done
+- [x] final scan = 0 blockers (2026-10-23)
+- [ ] smoke test with real services (see Finish)
 
 ## Phase 1 — dependencies (2026-10-23)
 - Start: cakephp/cakephp 3.10.5, PHPUnit 6.5.14; 3.x lock backed up outside the repo (composer.lock is gitignored).
@@ -147,3 +148,27 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 - Baked associations to non-existent tables in the local DB (`records`, `txns`, `jobs`, `package_tickets`, `fixeddates_agents`).
 - `ReportsController` routes `/reports/topups` and `/reports/transactions` have no matching actions (404 Missing Method, also in 3.x).
 - `where(['col' => null])` throws in 5.x (3.x matched nothing). Request-sourced and route-reachable sites are guarded; other call sites with possibly-null values should be watched in logs.
+
+## Finish (2026-10-23)
+- Full scan: **0 blockers**. Remaining warnings: 4 `paginate-settings-query-options` hits are SQL join `conditions` (false positives).
+- `composer cs-check`: 11,237 errors / 427 warnings in 206 files (10,446 auto-fixable) — almost all pre-existing style of the 3.x code (2-space indent etc.). Not auto-fixed to keep the upgrade diff reviewable; run `composer cs-fix` as a separate commit if wanted. New files (`Application`, `Filesystem/*`, `DeleteTempCommand`, new tests) are clean.
+- Local verification data: a temporary agent user (`claude-upgrade-test@example.invalid`) was created in local `test_catdb` for the HTTP checks and removed afterwards, with its sessions, favourite, IP record and 20 audit-log rows. Its login also updated `agents.last_activity` for agent "Aahaas" (local DB only).
+
+### Smoke test still to do (real services)
+- [ ] Login with OTP (agent with `mobile_otp` on, new IP) → OTP email → `/agent-users/otp`
+- [ ] Forgot/reset password emails
+- [ ] Add to cart → checkout → confirmation → pay by credits; and each online gateway (2C2P, Stripe, PayPal) incl. notification/frontend callbacks
+- [ ] Voucher download / download-all / merged PDF (CakePdf WkHtmlToPdf), invoice PDF, barcode/QR images
+- [ ] Top-up with image upload (S3) — see `scalar('image')` note
+- [ ] Reports: generate (background `generate_report`), list, download
+- [ ] Two-way and fixed-date/time attractions (availability with the real API)
+- [ ] Chinese language (`?l=zh_CN`)
+
+### Deployment notes
+- Server needs PHP ≥ 8.3 with intl, mbstring, pdo_mysql; run `composer install --no-dev`.
+- Install on Linux to catch case issues Windows hides (`templates/Error`, `templates/element/flash`).
+- No DB migrations needed for the upgrade.
+- Cron: `bin/cake delete_temp` (unchanged name). `ReportsController` runs `php bin/cake.php generate_report ...` (unchanged).
+- Clear `tmp/cache/*` (old `_cake_core_` cache is now `_cake_translations_`), then restart PHP-FPM / reset OPcache.
+- Sessions: identity stays at `Auth.User`, so logged-in users stay logged in across the deploy (sessions written by 3.x are readable) — still, expect to verify.
+- `config/app_config.php` on servers needs no new keys; test DB URLs (`DATABASE_TEST_URL`, `DATABASE_TEST_LOG_URL`) are only for running tests.
