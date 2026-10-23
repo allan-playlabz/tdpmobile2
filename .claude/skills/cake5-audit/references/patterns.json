@@ -1,0 +1,446 @@
+{
+    "_comment": "CakePHP 3.x -> 5.x leftover patterns. severity: blocker = fatal/removed in 5.x, warning = deprecated or behaviour change, info = style/typing. phase = which cake5-* skill fixes it. Regexes are PCRE, matched per line.",
+    "patterns": [
+        {
+            "id": "table-registry-get",
+            "regex": "TableRegistry::get\\(",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "TableRegistry::getTableLocator()->get('X') or $this->fetchTable('X') inside controllers/commands (LocatorAwareTrait)."
+        },
+        {
+            "id": "load-model",
+            "regex": "->loadModel\\(",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "$this->fetchTable('X') (assign to a property if the old code relied on $this->X)."
+        },
+        {
+            "id": "query-order",
+            "regex": "->order\\(\\s*[\\[\\'\"]",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "->orderBy([...]). Query::order() was removed in 5.0."
+        },
+        {
+            "id": "query-group",
+            "regex": "->group\\(\\s*[\\[\\'\"]",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "->groupBy([...])."
+        },
+        {
+            "id": "find-options-array",
+            "regex": "->find\\(\\s*'(list|threaded)'\\s*,\\s*\\[",
+            "glob": "*.php",
+            "severity": "warning",
+            "phase": "cake5-code-apis",
+            "fix": "Named arguments: find('list', keyField: 'id', valueField: 'name'). Options arrays are deprecated in 5.x."
+        },
+        {
+            "id": "get-options-array",
+            "regex": "->get\\(\\s*\\$[A-Za-z_]+\\s*,\\s*\\[\\s*'contain'",
+            "glob": "*.php",
+            "severity": "warning",
+            "phase": "cake5-code-apis",
+            "fix": "->get($id, contain: [...])."
+        },
+        {
+            "id": "hydrate",
+            "regex": "->hydrate\\(",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "->enableHydration(false) / ->disableHydration()."
+        },
+        {
+            "id": "frozen-time",
+            "regex": "\\b(FrozenTime|FrozenDate|Cake\\\\I18n\\\\Time)\\b",
+            "glob": "*.php",
+            "severity": "warning",
+            "phase": "cake5-code-apis",
+            "fix": "Cake\\I18n\\DateTime / Cake\\I18n\\Date (immutable). Mutating calls (->modify) now return a new object: reassign the result."
+        },
+        {
+            "id": "orm-query-class",
+            "regex": "\\bCake\\\\ORM\\\\Query\\b(?!\\\\)",
+            "glob": "*.php",
+            "severity": "warning",
+            "phase": "cake5-code-apis",
+            "fix": "Type-hint Cake\\ORM\\Query\\SelectQuery (or UpdateQuery/DeleteQuery/InsertQuery)."
+        },
+        {
+            "id": "request-data-property",
+            "regex": "\\$this->request->(data|query|params)\\b(?!\\()",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "$this->request->getData() / getQuery() / getParam()."
+        },
+        {
+            "id": "request-env-mutators",
+            "regex": "\\$this->(request|response)->(header|type|body|statusCode|cookie)\\(",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "Immutable PSR-7 API: $this->response = $this->response->withHeader()/withType()/withStringBody()/withStatus(); request->getHeaderLine()/getCookie()."
+        },
+        {
+            "id": "cake-email",
+            "regex": "\\bCake\\\\(Mailer|Network)\\\\Email\\b|new Email\\(",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "Cake\\Mailer\\Mailer (viewBuilder()->setTemplate(), setViewVars(), deliver())."
+        },
+        {
+            "id": "auth-component",
+            "regex": "\\$this->Auth->|loadComponent\\(\\s*'Auth'",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-auth",
+            "fix": "AuthComponent was removed. Use cakephp/authentication (Authentication component, identity) - see cake5-auth."
+        },
+        {
+            "id": "cake-filesystem",
+            "regex": "\\bCake\\\\Filesystem\\\\(File|Folder)\\b",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "Cake\\Filesystem was removed in 5.0. Use native PHP / SplFileInfo, or the App\\Filesystem\\File/Folder shims (cake5-upgrade/references/gotchas.md)."
+        },
+        {
+            "id": "shell-class",
+            "regex": "extends\\s+(Shell|AppShell)\\b|\\bCake\\\\Console\\\\Shell\\b",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-structure",
+            "fix": "Convert to Cake\\Command\\Command in src/Command (execute(Arguments $args, ConsoleIo $io): ?int)."
+        },
+        {
+            "id": "ctp-template",
+            "regex": ".",
+            "glob": "*.ctp",
+            "file_only": true,
+            "severity": "blocker",
+            "phase": "cake5-structure",
+            "fix": "Rename .ctp -> .php and move src/Template -> templates/ (Element -> element, Layout -> layout)."
+        },
+        {
+            "id": "untyped-accessible",
+            "regex": "protected\\s+\\$(_accessible|_hidden|_virtual)\\b",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "protected array $_accessible = [...] (typed properties are required in 5.x)."
+        },
+        {
+            "id": "initialize-no-void",
+            "regex": "function\\s+initialize\\(\\s*(array\\s+\\$config)?\\s*\\)\\s*(\\{|$)",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "public function initialize(array $config): void (Tables/Behaviors) / initialize(): void (Controllers/Components)."
+        },
+        {
+            "id": "before-filter-event-type",
+            "regex": "function\\s+before(Filter|Render|Save|Find|Delete)\\(\\s*Event\\s+\\$",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "Type-hint Cake\\Event\\EventInterface $event."
+        },
+        {
+            "id": "validation-default-signature",
+            "regex": "function\\s+validationDefault\\(\\s*Validator\\s+\\$validator\\s*\\)\\s*(\\{|$)",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "public function validationDefault(Validator $validator): Validator."
+        },
+        {
+            "id": "paginate-sort-whitelist",
+            "regex": "sortWhitelist|'whitelist'\\s*=>",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "'sortWhitelist' -> 'sortableFields'. Move 'conditions'/'contain' out of $this->paginate into the query passed to paginate($query)."
+        },
+        {
+            "id": "paginator-counter-array",
+            "regex": "Paginator->counter\\(\\s*\\[",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "Paginator->counter('Page {{page}} of {{pages}}, ...') takes a format string, not an options array."
+        },
+        {
+            "id": "form-create-empty-string",
+            "regex": "Form->create\\(\\s*''",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "Form->create(null, [...])."
+        },
+        {
+            "id": "named-arg-misuse",
+            "regex": "->(find|get)\\([^)]*\\b(limit|order|conditions|fields|group|page|offset)\\s*:",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "Only finder options (keyField/valueField/groupField, contain:, custom finder params) are named args. limit/order/conditions/fields must be chained: ->where()->orderBy()->limit()."
+        },
+        {
+            "id": "find-all-conditions-array",
+            "regex": "->find\\(\\s*'all'\\s*,\\s*\\[",
+            "glob": "*.php",
+            "severity": "warning",
+            "phase": "cake5-code-apis",
+            "fix": "find()->where([...])->contain([...])->orderBy([...]) instead of an options array."
+        },
+        {
+            "id": "query-tolist-without-all",
+            "regex": "->find\\((?:(?!->all\\(\\)|->toArray\\(\\)|;).)*->(toList|indexBy|extract|combine)\\(",
+            "glob": "*.php",
+            "severity": "warning",
+            "phase": "cake5-code-apis",
+            "fix": "SelectQuery is no longer a collection: ->all()->toList() / ->all()->indexBy() / ->all()->extract(). (Single-line heuristic — also review multi-line chains.)"
+        },
+        {
+            "id": "removed-fqcn",
+            "regex": "\\b(Zend\\\\Diactoros|Cake\\\\Auth\\\\|Cake\\\\Controller\\\\Component\\\\(Auth|RequestHandler)Component|Cake\\\\Error\\\\(ErrorHandler|ConsoleErrorHandler|ExceptionRenderer)\\b|Cake\\\\Network\\\\(Request|Response|Session|Http)\\b|Cake\\\\Database\\\\Type\\b(?!\\\\))",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "Removed classes compile fine and only fatal when reached (also in catch/instanceof). Laminas\\Diactoros; Authentication\\PasswordHasher\\DefaultPasswordHasher; ErrorTrap/ExceptionTrap + WebExceptionRenderer; Cake\\Http\\ServerRequest/Response/Session; Cake\\Database\\TypeFactory."
+        },
+        {
+            "id": "request-handler",
+            "regex": "loadComponent\\(\\s*'RequestHandler'|\\$this->RequestHandler->",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "RequestHandlerComponent was removed. Use $this->request->is('json') and controller content-type negotiation (viewClasses() / addViewClasses())."
+        },
+        {
+            "id": "request-legacy-methods",
+            "regex": "->here\\(|getParam\\(\\s*'_csrfToken'\\s*\\)|->request->(env|input)\\(",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "here() -> getRequestTarget(); getParam('_csrfToken') -> getAttribute('csrfToken'); env() -> getEnv(); input() -> getBody()/getData()."
+        },
+        {
+            "id": "time-of-day-instanceof",
+            "regex": "instanceof\\s+\\\\?(Cake\\\\I18n\\\\)?Time\\b",
+            "glob": "*.php",
+            "severity": "warning",
+            "phase": "cake5-code-apis",
+            "fix": "In 5.x Cake\\I18n\\Time is a TIME-OF-DAY class: datetimes are Cake\\I18n\\DateTime. A lone `instanceof Time` meant for datetimes is silently false — use `instanceof \\DateTimeInterface`. (Safe if the same condition also checks DateTime/FrozenTime.)"
+        },
+        {
+            "id": "chronos-singular-methods",
+            "regex": "->(add|sub)(Second|Minute|Hour|Day|Weekday|Week|Month|Year)\\(\\s*\\)",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "Singular helpers were removed: ->subDay() -> ->subDays(1), ->addMonth() -> ->addMonths(1)."
+        },
+        {
+            "id": "immutable-result-discarded",
+            "regex": "^\\s*\\$[A-Za-z_][A-Za-z0-9_]*(->[A-Za-z_]+)*->(add|sub)(Second|Minute|Hour|Day|Weekday|Week|Month|Year)s?\\(|^\\s*\\$[A-Za-z_][A-Za-z0-9_]*->(modify|setTime|setDate|startOfDay|endOfDay|startOfMonth|endOfMonth)\\(",
+            "glob": "*.php",
+            "severity": "warning",
+            "phase": "cake5-code-apis",
+            "fix": "DateTime/Date are immutable: a bare `$d->addDays(1);` is a silent no-op. Reassign: `$d = $d->addDays(1);`. (Check each hit — the statement may be on the right side of an assignment on the previous line.)"
+        },
+        {
+            "id": "plugin-load-static",
+            "regex": "Plugin::load\\(|Plugin::loadAll\\(",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-structure",
+            "fix": "$this->addPlugin('Name', [...]) in Application::bootstrap() (CLI-only plugins in bootstrapCli())."
+        },
+        {
+            "id": "router-static-calls",
+            "regex": "Router::(scope|connect|prefix|plugin|extensions)\\(",
+            "glob": "config/routes.php",
+            "severity": "blocker",
+            "phase": "cake5-structure",
+            "fix": "routes.php returns `static function (RouteBuilder $routes) { $routes->scope(...) }`."
+        },
+        {
+            "id": "csrf-httponly-case",
+            "regex": "'httpOnly'\\s*=>",
+            "glob": "*.php",
+            "severity": "warning",
+            "phase": "cake5-structure",
+            "fix": "CsrfProtectionMiddleware option is 'httponly' (lowercase)."
+        },
+        {
+            "id": "new-entity-no-data",
+            "regex": "->newEntity\\(\\s*\\)",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "newEntity() requires a data array in 5.x: use ->newEmptyEntity() for a blank entity."
+        },
+        {
+            "id": "validator-removed-rules",
+            "regex": "->(notEmpty|allowEmpty)\\(",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "notEmpty()/allowEmpty() were removed: use notEmptyString()/allowEmptyString() (or ...Array/File/Date/Time/DateTime by field type)."
+        },
+        {
+            "id": "untyped-framework-property",
+            "regex": "^\\s*(public|protected)\\s+\\$(paginate|helpers|components|fixtures|autoFixtures|layout|uses|viewClass|name)\\s*(=|;)",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "Redeclared framework properties must match the parent's type (fatal otherwise): protected array $paginate = [...]; protected array $fixtures = [...]; protected string $layout = '...'. Components/helpers: load them in initialize() instead of $components/$helpers."
+        },
+        {
+            "id": "phpunit-hooks-untyped",
+            "regex": "function\\s+(setUp|tearDown|setUpBeforeClass|tearDownAfterClass)\\(\\s*\\)\\s*(\\{|$)",
+            "glob": "tests/*.php",
+            "severity": "blocker",
+            "phase": "cake5-tests",
+            "fix": "PHPUnit 10: protected function setUp(): void / tearDown(): void (and public static function setUpBeforeClass(): void)."
+        },
+        {
+            "id": "hidden-deprecations",
+            "regex": "E_ALL\\s*&\\s*~E_DEPRECATED",
+            "glob": "config/*.php",
+            "severity": "warning",
+            "phase": "cake5-code-apis",
+            "fix": "Deprecations are hidden, so deprecated APIs survive the upgrade. Use E_ALL while converting; only suppress after the scan is clean."
+        },
+        {
+            "id": "deprecated-helpers",
+            "regex": "->Html->(script|css)\\([^)]*'inline'|->Form->(input|inputs)\\(",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "Form->input() -> Form->control(); 'inline' => false -> 'block' => true."
+        },
+        {
+            "id": "router-classic-placeholders",
+            "regex": "->connect\\(\\s*'[^']*/:[a-z_]+",
+            "glob": "config/routes.php",
+            "severity": "blocker",
+            "phase": "cake5-structure",
+            "fix": "Route placeholders use braces: '/{controller}/{action}/*' (colon syntax removed in 5.0)."
+        },
+        {
+            "id": "fixture-fields",
+            "regex": "public\\s+\\$(fields|import)\\s*=",
+            "glob": "tests/*.php",
+            "severity": "blocker",
+            "phase": "cake5-tests",
+            "fix": "Fixtures no longer define schema; load schema via SchemaLoader/Migrator in tests/bootstrap.php, keep only $records."
+        },
+        {
+            "id": "integration-test-case",
+            "regex": "\\bIntegrationTestCase\\b",
+            "glob": "tests/*.php",
+            "severity": "blocker",
+            "phase": "cake5-tests",
+            "fix": "IntegrationTestCase was removed: extend Cake\\TestSuite\\TestCase and `use Cake\\TestSuite\\IntegrationTestTrait;`."
+        },
+        {
+            "id": "connection-connect",
+            "regex": "\\$(connection|conn|db)->connect\\(\\)",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "Connection::connect() was removed (the 3.x skeleton Pages/home.php used it). Replace the template with the 5.x skeleton one, or use $connection->getDriver()->connect()."
+        },
+        {
+            "id": "i18n-time-is-time-of-day",
+            "regex": "(?<![A-Za-z_\\\\])(new\\s+Time\\(|Time::(now|today|parse|createFromFormat|createFromTimestamp)\\()|\\\\Cake\\\\I18n\\\\Time::|^use Cake\\\\I18n\\\\Time;",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "Cake\\I18n\\Time is a time-of-day class in 5.x (no date part). The 3.x datetime class is Cake\\I18n\\DateTime: Time::now() -> DateTime::now(), new Time($s) -> new DateTime($s). Then audit mutations (3.x Time was mutable)."
+        },
+        {
+            "id": "immutable-setter-chain-discarded",
+            "regex": "^\\s*\\$[A-Za-z_][A-Za-z0-9_]*->(hour|minute|second|day|month|year|microsecond|setTimezone|timezone)\\([^;]*\\);\\s*$",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "Chronos setters return a new object: `$d->hour(23)->minute(59);` is a silent no-op. Reassign: `$d = $d->hour(23)->minute(59);`."
+        },
+        {
+            "id": "entity-errors-method",
+            "regex": "\\$[A-Za-z_][A-Za-z0-9_]*(\\[[^\\]]+\\])?->errors\\(\\)",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "EntityInterface::errors() was removed in 4.0: ->getErrors() / ->getError($field) / ->setErrors(). (Validator::errors() is a different method — check the receiver.)"
+        },
+        {
+            "id": "log-non-string-message",
+            "regex": "->log\\(\\s*\\$[A-Za-z_][A-Za-z0-9_]*(\\[[^\\]]+\\])?->getErrors\\(\\)",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "LogTrait::log() takes Stringable|string in 5.x (TypeError for arrays): ->log(json_encode($entity->getErrors()), ...)."
+        },
+        {
+            "id": "query-tolist-chained-line",
+            "regex": "^\\s*->(toList|indexBy|extract|combine)\\(",
+            "glob": "*.php",
+            "severity": "warning",
+            "phase": "cake5-code-apis",
+            "fix": "Multi-line chain ending in a collection method: if the receiver is a query, insert ->all() first (SelectQuery has no toList()/__call in 5.x — fatal)."
+        },
+        {
+            "id": "date-select-widgets",
+            "regex": "'(monthNames|minYear|maxYear|meridian|orderYear|yearStart|yearEnd)'\\s*=>|getData\\('[a-z_]+\\.(year|month|day|hour|minute)'\\)|\\[name=\"[a-z_]+\\[(year|month|day)\\]\"\\]",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "FormHelper 5.x renders dates as one HTML5 <input type=\"date|datetime-local\"> posting \"Y-m-d\" — the year/month/day select widgets (and their options) are gone. Controllers reading getData('x.year') / implode('-', getData('x')) and JS reading [name=\"x[year]\"] must be ported."
+        },
+        {
+            "id": "uploaded-file-array-access",
+            "regex": "getData\\('[a-z_]+\\.(tmp_name|error|size|type)'\\)|getData\\('[a-z_]+\\.name'\\)",
+            "glob": "*.php",
+            "severity": "warning",
+            "phase": "cake5-code-apis",
+            "fix": "5.x puts uploads in request data as UploadedFileInterface (no uploadedFilesAsObjects switch): getError(), getClientFilename(), getSize(), moveTo()/getStream()->getMetadata('uri'). Warning only if a shim middleware converts them back to arrays."
+        },
+        {
+            "id": "paginate-settings-query-options",
+            "regex": "\\$this->paginate\\s*=\\s*\\[.*'(conditions|contain|fields|group|join|where)'\\s*=>|^\\s*'(conditions|contain)'\\s*=>",
+            "glob": "*.php",
+            "severity": "warning",
+            "phase": "cake5-code-apis",
+            "fix": "Paginator settings no longer apply query options (5.x only warns and DROPS conditions/contain/fields): move them onto the query — $this->paginate($table->find()->where(...)->contain(...)) — keep order/limit/sortableFields in settings. Dropped conditions/contain can silently remove tenant scoping. Multi-line arrays: also grep `$this->paginate =` blocks. (Association options in Table classes also use conditions: — those hits are fine.)"
+        },
+        {
+            "id": "event-listener-returns-value",
+            "regex": "^\\s*return \\$query(->where\\(.*\\))?;",
+            "glob": "*Table.php",
+            "severity": "warning",
+            "phase": "cake5-code-apis",
+            "fix": "Returning a value from event listeners (beforeFind/beforeSave...) is deprecated since 5.2: modify the query in place and `return;`, or use $event->setResult(). (Check the hit is inside an event callback.)"
+        },
+        {
+            "id": "form-create-string-context",
+            "regex": "Form->create\\(\\s*'[^']*'",
+            "glob": "*.php",
+            "severity": "blocker",
+            "phase": "cake5-code-apis",
+            "fix": "FormHelper::create('name') has no context provider in 5.x (3.x fell back to a null context): use create(null, [...])."
+        }
+    ]
+}
