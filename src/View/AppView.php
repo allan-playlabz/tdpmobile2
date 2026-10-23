@@ -63,6 +63,6 @@ class AppView extends View
             'sortDesc' => '<a class="btn desc" href="{{url}}">{{text}}</a>',
             'sortAscLocked' => '<a class="btn asc locked" href="{{url}}">{{text}}</a>',
             'sortDescLocked' => '<a class="btn desc locked" href="{{url}}">{{text}}</a>']);
-        $this->loadHelper('QuestionGroup');
+        $this->addHelper('QuestionGroup');
     }
 }
