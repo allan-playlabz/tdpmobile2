@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
  * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
@@ -15,9 +17,12 @@
 namespace App;
 
 use Cake\Core\Configure;
-use Cake\Core\Exception\MissingPluginException;
+use Cake\Core\ContainerInterface;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
+use Cake\Event\EventManagerInterface;
 use Cake\Http\BaseApplication;
+use Cake\Http\Middleware\BodyParserMiddleware;
+use Cake\Http\MiddlewareQueue;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
 
@@ -26,78 +31,77 @@ use Cake\Routing\Middleware\RoutingMiddleware;
  *
  * This defines the bootstrapping logic and middleware layers you
  * want to use in your application.
+ *
+ * Plugins are registered in config/plugins.php.
+ *
+ * @extends \Cake\Http\BaseApplication<\App\Application>
  */
 class Application extends BaseApplication
 {
     /**
-     * {@inheritDoc}
+     * Load all the application configuration and bootstrap logic.
+     *
+     * Tables without a class (e.g. VoucherTemplates) rely on the ORM's
+     * fallback Table class, so the 5.x skeleton's allowFallbackClass(false)
+     * is intentionally not applied.
+     *
+     * @return void
      */
-    public function bootstrap()
+    public function bootstrap(): void
     {
-        $this->addPlugin('CakePdf', ['bootstrap' => true]);
-
-        $this->addPlugin('DatabaseLog',['routes' => false]);
         // Call parent to load bootstrap from files.
         parent::bootstrap();
-
-        if (PHP_SAPI === 'cli') {
-            $this->bootstrapCli();
-        }
-
-        /*
-         * Only try to load DebugKit in development mode
-         * Debug Kit should not be installed on a production system
-         */
-        if (Configure::read('debug')) {
-            $this->addPlugin(\DebugKit\Plugin::class);
-        }
-
-        // Load more plugins here
-        
     }
 
     /**
      * Setup the middleware queue your application will use.
      *
+     * CSRF protection is applied as scoped route middleware in config/routes.php
+     * so that payment gateway callbacks can be excluded.
+     *
      * @param \Cake\Http\MiddlewareQueue $middlewareQueue The middleware queue to setup.
      * @return \Cake\Http\MiddlewareQueue The updated middleware queue.
      */
-    public function middleware($middlewareQueue)
+    public function middleware(MiddlewareQueue $middlewareQueue): MiddlewareQueue
     {
         $middlewareQueue
             // Catch any exceptions in the lower layers,
             // and make an error page/response
-            ->add(new ErrorHandlerMiddleware(null, Configure::read('Error')))
+            ->add(new ErrorHandlerMiddleware(Configure::read('Error'), $this))
 
             // Handle plugin/theme assets like CakePHP normally does.
             ->add(new AssetMiddleware([
-                'cacheTime' => Configure::read('Asset.cacheTime')
+                'cacheTime' => Configure::read('Asset.cacheTime'),
             ]))
 
             // Add routing middleware.
-            // If you have a large number of routes connected, turning on routes
-            // caching in production could improve performance. For that when
-            // creating the middleware instance specify the cache config name by
-            // using it's second constructor argument:
-            // `new RoutingMiddleware($this, '_cake_routes_')`
-            ->add(new RoutingMiddleware($this));
+            ->add(new RoutingMiddleware($this))
+
+            // Parse various types of encoded request bodies so that they are
+            // available as array through $request->getData()
+            ->add(new BodyParserMiddleware());
 
         return $middlewareQueue;
     }
 
     /**
+     * Register application container services.
+     *
+     * @param \Cake\Core\ContainerInterface $container The Container to update.
      * @return void
      */
-    protected function bootstrapCli()
+    public function services(ContainerInterface $container): void
     {
-        try {
-            $this->addPlugin('Bake');
-        } catch (MissingPluginException $e) {
-            // Do not halt if the plugin is missing
-        }
+    }
 
-        $this->addPlugin('Migrations');
-
-        // Load more plugins here
+    /**
+     * Register custom event listeners here
+     *
+     * @param \Cake\Event\EventManagerInterface $eventManager
+     * @return \Cake\Event\EventManagerInterface
+     */
+    public function events(EventManagerInterface $eventManager): EventManagerInterface
+    {
+        return $eventManager;
     }
 }

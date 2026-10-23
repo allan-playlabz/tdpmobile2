@@ -14,6 +14,7 @@ use Cake\Core\Configure;
 use Cake\ORM\TableRegistry;
 use Cake\Log\Engine\BaseLog;
 use DatabaseLog\Log\Engine\DatabaseLog;
+use Stringable;
 
 /**
  * DatabaseLog Engine
@@ -25,7 +26,7 @@ class DbLog extends DatabaseLog {
 	 *
 	 * @param array $config
 	 */
-	public function __construct($config = []) {
+	public function __construct(array $config = []) {
 		parent::__construct($config);
 	}
 
@@ -33,12 +34,12 @@ class DbLog extends DatabaseLog {
 	 * Write the log to database
 	 * Overrides log function of parent
 	 *
-	 * @param string $level
-	 * @param mixed $message
+	 * @param mixed $level
+	 * @param \Stringable|string $message
 	 * @param array $context
-	 * @return bool Success
+	 * @return void
 	 */
-	public function log($level, $message, array $context = []) {
+	public function log($level, Stringable|string $message, array $context = []): void {
 		if ($this->getConfig('type')) {
 			$level = $this->getConfig('type');
 		} elseif ($this->getConfig('file')) {
@@ -50,7 +51,7 @@ class DbLog extends DatabaseLog {
         if (is_object($message) || is_array($message)) {
             $message = json_encode($message);
         }
-		return parent::log($level, $message, $context);
+		parent::log($level, $message, $context);
 	}
 
 }

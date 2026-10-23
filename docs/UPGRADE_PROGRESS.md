@@ -48,7 +48,7 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 
 ## Phases
 - [x] cake5-deps (2026-10-23) — CakePHP 5.4.3 installed
-- [ ] cake5-structure
+- [x] cake5-structure (2026-10-23) — structure scan 0 blockers; `bin/cake --help` lists `delete_temp`, `generate_report`
 - [ ] cake5-code-apis
 - [ ] cake5-auth
 - [ ] cake5-tests
@@ -66,7 +66,24 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 - `phpcs.xml` from skeleton; `cs-check`/`cs-fix` scripts use it.
 - Follow-up: `composer audit` reports CVE-2025-45769 (low) in firebase/php-jwt < 7 (pre-existing; used by Payment2C2P).
 
+## Phase 2 — structure (2026-10-23)
+- `src/Template` → `templates/` (79 files, `.ctp` → `.php`); `Element/Flash` → `element/flash` (5.x FlashComponent path); `Error/` kept capitalised.
+- Untouched 3.x skeleton files replaced with 5.4 versions: `ErrorController`, `AjaxView`, `Installer` (no `app_local.php` creation/salt rewrite — project uses `app_config.php`), `webroot/index.php`, `bin/cake.php`, `templates/Error/*`, `layout/{ajax,error}.php`, email layouts/templates.
+- Removed (3.x skeleton, unused or calling removed APIs): `ConsoleShell`, `config/requirements.php`, `config/bootstrap_cli.php` (its CLI log-file rename is in the 5.x bootstrap), `config/app.default.php`, `templates/Pages/home.php` (no PagesController/route), `templates/layout/rss` (RssHelper removed, unused).
+- `DeleteTempShell` → `DeleteTempCommand` (native PHP instead of Folder/File). Cron: `bin/cake delete_temp` — **unchanged name**.
+- `GenerateReportCommand`: base class + signatures. Called from `ReportsController` via `exec('php bin/cake.php generate_report --...')` — options unchanged.
+- `Application.php`: plugins via `config/plugins.php`; middleware ErrorHandler → Asset → Routing → BodyParser (replaces RequestHandler body parsing). **Not adopted from skeleton**: global CSRF (kept scoped in routes for gateway callbacks), `allowFallbackClass(false)` (tables like `VoucherTemplates` have no class), `HostHeaderMiddleware` (throws 500 in production unless `App.fullBaseUrl` is configured — see follow-ups).
+- `config/bootstrap.php`: 5.4 skeleton + project's `.env` loading, `app_config.php` override, HTTPS-only fullBaseUrl detection, and the project's `Configure::write` blocks verbatim; `Type::build()->useImmutable()` removed; `Email::setConfig` → `Mailer::setConfig`.
+- `config/routes.php`: closure format; `whitelistCallback` → `skipCheckCallback`; `httpOnly` → `httponly`; gateway callback scopes moved before `/`.
+- `Error.exceptionRenderer` left unset so CLI gets the console renderer.
+- `DbLog::log()` signature updated (needed to boot).
+
+## Follow-ups (not part of the upgrade)
+- Consider `HostHeaderMiddleware` with `APP_FULL_BASE_URL` set per environment (Host header injection protection).
+- firebase/php-jwt < 7 advisory (CVE-2025-45769, low).
+
 ## Found while upgrading
+- `ReportsController` builds the `generate_report` shell command from unescaped request data (`issue_start_date`, `issue_end_date`) — command injection risk; use `escapeshellarg()`.
 
 ## Decisions (2026-10-23)
 - Backup files `src/Controller/OrdersController - Copy.php` and `ignore/` deleted (kept in git history).

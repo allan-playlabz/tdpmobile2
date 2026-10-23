@@ -5,7 +5,7 @@ namespace App\Command;
 use App\Util\Csv;
 use Cake\Log\Log;
 use Cake\Core\Configure;
-use Cake\Console\Command;
+use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
@@ -23,7 +23,7 @@ class GenerateReportCommand extends Command
      * @param \Cake\Console\ConsoleOptionParser $parser The parser to be defined
      * @return \Cake\Console\ConsoleOptionParser The built parser.
      */
-    public function buildOptionParser(ConsoleOptionParser $parser)
+    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser = parent::buildOptionParser($parser);
         $parser
@@ -55,7 +55,7 @@ class GenerateReportCommand extends Command
      * @param \Cake\Console\ConsoleIo $io The console io
      * @return null|int The exit code or null for success
      */
-    public function execute(Arguments $args, ConsoleIo $io)
+    public function execute(Arguments $args, ConsoleIo $io): ?int
     {
         $this->loadModel('Agents');
         $this->loadModel('AgentUsers');
@@ -84,7 +84,7 @@ class GenerateReportCommand extends Command
         ])->contain(['Agents'])
             ->first();
         if (!$agent_user) {
-            return;
+            return null;
         }
         $agent = $agent_user->agent;
 

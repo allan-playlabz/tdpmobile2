@@ -4,7 +4,6 @@ use Cake\Cache\Engine\FileEngine;
 use Cake\Database\Connection;
 use Cake\Database\Driver\Mysql;
 use App\Log\Engine\DbLog;
-use Cake\Error\Renderer\WebExceptionRenderer;
 use Cake\Log\Engine\FileLog;
 use Cake\Mailer\Transport\MailTransport;
 use function Cake\Core\env;
@@ -177,7 +176,6 @@ return [
      */
     'Error' => [
         'errorLevel' => E_ALL,
-        'exceptionRenderer' => WebExceptionRenderer::class,
         'skipLog' => [
             'Cake\Http\Exception\MissingControllerException',
             'Cake\Http\Exception\UnauthorizedException',

@@ -42,15 +42,29 @@ use Cake\Routing\Route\DashedRoute;
  * constructor in your `src/Application.php` file to change this behavior.
  *
  */
-$routes->setRouteClass(DashedRoute::class);
+return static function (RouteBuilder $routes): void {
+    $routes->setRouteClass(DashedRoute::class);
 
-$routes->scope('/', function (RouteBuilder $routes) {
+    // Payment gateway callbacks: own scopes, connected before '/', so CSRF is not applied.
+    $routes->scope('/orders/sps', function (RouteBuilder $routes): void {
+        $routes->connect('/', ['controller' => 'Orders', 'action' => 'sps']);
+    });
+
+    $routes->scope('/frontend-notification-receiver', function (RouteBuilder $routes): void {
+        $routes->connect('/{provider}/{order_ref_id}', ['controller' => 'Orders', 'action' => 'frontendNotificationReceiver'],['pass'=>['provider', 'order_ref_id']]);
+    });
+
+    $routes->scope('/notification-receiver', function (RouteBuilder $routes): void {
+        $routes->connect('/{provider}', ['controller' => 'Orders', 'action' => 'notificationReceiver'],['pass'=>['provider']]);
+    });
+
+    $routes->scope('/', function (RouteBuilder $routes): void {
    // Register scoped middleware for in scopes.
    $csrf = new CsrfProtectionMiddleware([
-      'httpOnly' => true
+      'httponly' => true
    ]);
 
-   $csrf->whitelistCallback(function ($request) {
+   $csrf->skipCheckCallback(function ($request) {
       // Skip token check for notification receiver.
       if ($request->getParam('controller') === 'Orders' && in_array($request->getParam('action'), ['notificationReceiver', 'frontendNotificationReceiver'])) {
          return true;
@@ -167,27 +181,5 @@ $routes->scope('/', function (RouteBuilder $routes) {
      * routes you want in your application.
      */
    //  $routes->fallbacks(DashedRoute::class);
-});
-
-/**
- * If you need a different set of middleware or none at all,
- * open new scope and define routes there.
- *
- * ```
- * $routes->scope('/api', function (RouteBuilder $routes) {
- *     // No $routes->applyMiddleware() here.
- *     // Connect API actions here.
- * });
- * ```
- */
-  $routes->scope('/orders/sps', function (RouteBuilder $routes) {
-    $routes->connect('/', ['controller' => 'Orders', 'action' => 'sps']);
- });
-
- $routes->scope('/frontend-notification-receiver', function (RouteBuilder $routes) {
-   $routes->connect('/{provider}/{order_ref_id}', ['controller' => 'Orders', 'action' => 'frontendNotificationReceiver'],['pass'=>['provider', 'order_ref_id']]);
- });
-
- $routes->scope('/notification-receiver', function (RouteBuilder $routes) {
-    $routes->connect('/{provider}', ['controller' => 'Orders', 'action' => 'notificationReceiver'],['pass'=>['provider']]);
- });
+    });
+};
