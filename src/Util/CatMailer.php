@@ -5,7 +5,7 @@ namespace App\Util;
 use Cake\Log\Log;
 use Cake\View\View;
 use Cake\Http\Client;
-use Cake\Mailer\Email;
+use Cake\Mailer\Mailer;
 use Cake\Utility\Text;
 use Cake\Core\Configure;
 use Exception;
@@ -41,7 +41,7 @@ class CatMailer
      * @return void
      */
     public function mail($template, $subject, $to, $data, $cc = null,$bcc = null, $attachments = null) {
-        $Email = new Email();
+        $Email = new Mailer();
         
         $Email->addHeaders(['Content-Type: text/html; charset=UTF-8']);
         $Email->viewBuilder()->setTemplate($template);
@@ -70,27 +70,27 @@ class CatMailer
 
 
         try {
-          $Email->send();
+          $Email->deliver();
         } catch (\Cake\Network\Exception\SocketException $e) {
           $Email->setTransport('default');
           $Email->setSubject('[TDP Email Error] '.$Email->getSubject());
           if (Configure::read('Default.admin_email')) {
             $Email->setTo(Configure::read('Default.admin_email'));
           }
-          $Email->send();
+          $Email->deliver();
         } catch (Exception $e) {
           $Email->setTransport('default');
           $Email->setSubject('[TDP Email Error] '.$Email->getSubject());
           if (Configure::read('Default.admin_email')) {
             $Email->setTo(Configure::read('Default.admin_email'));
           }
-          $Email->send();
+          $Email->deliver();
         }
         
     }
     // public function mail($template, $subject, $to, $view_vars, $cc = null, $bcc = null, $attachments = null)
     // {
-    //     $Email = new Email();
+    //     $Email = new Mailer();
 
     //     $view = new View();
     //     $view->set(array('data' => $view_vars));

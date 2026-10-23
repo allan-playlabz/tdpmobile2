@@ -6,7 +6,6 @@ use Exception;
 use Cake\Log\Log;
 use Cake\Http\Client;
 use Cake\I18n\Number;
-use Cake\Mailer\Email;
 use App\Util\CatMailer;
 use Cake\Core\Configure;
 use Cake\Routing\Router;

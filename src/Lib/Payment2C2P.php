@@ -9,7 +9,6 @@ use Cake\Http\Client;
 use Cake\I18n\Number;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use Cake\Mailer\Email;
 use Cake\Utility\Text;
 use App\Util\CatMailer;
 use Cake\Core\Configure;

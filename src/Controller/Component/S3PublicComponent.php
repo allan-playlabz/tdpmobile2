@@ -5,7 +5,7 @@ use Cake\Controller\Component;
 use Cake\Core\Configure;
 use Aws\Resource\Aws;
 use Aws\S3\S3Client;
-use Cake\Filesystem\File;
+use App\Filesystem\File;
 use Mimey\MimeTypes;
 use Aws\S3\Exception\S3Exception;
 

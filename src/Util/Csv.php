@@ -26,7 +26,7 @@ class Csv
         if ($agent_user_id) {
             $tmp = TMP . 'reports' . DS . $agent_user_id;
         }
-        $dir = new \Cake\Filesystem\Folder($tmp , true, 0777);
+        $dir = new \App\Filesystem\Folder($tmp , true, 0777);
         $save_file_name = $output_file_name;
         $csv = fopen($tmp . DS . $save_file_name, 'w');
         foreach ($input_array as $line) {
@@ -52,7 +52,7 @@ class Csv
         if ($agent_user_id) {
             $tmp = TMP . 'reports' . DS . $agent_user_id;
         }
-        $dir = new \Cake\Filesystem\Folder($tmp , true, 0777);
+        $dir = new \App\Filesystem\Folder($tmp , true, 0777);
         $save_file_name = $output_file_name;
         $csv = fopen($tmp . DS . $save_file_name, 'a');
         foreach ($input_array as $line) {
@@ -76,7 +76,7 @@ class Csv
         if ($agent_user_id) {
             $tmp = TMP . 'reports' . DS . $agent_user_id;
         }
-        $dir = new \Cake\Filesystem\Folder($tmp , true, 0777);
+        $dir = new \App\Filesystem\Folder($tmp , true, 0777);
         $old_filename = $tmp . DS . $output_file_name;
         // $old_filename = '/tmp/reports/' . $agent_user_id . '/' . $output_file_name;
         $new_filename = str_replace('.tmp', '', $tmp . DS .$output_file_name);

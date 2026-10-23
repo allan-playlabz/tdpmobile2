@@ -2,7 +2,7 @@
 namespace App\Controller\Component;
 
 use Cake\Controller\Component;
-use Cake\Mailer\Email;
+use Cake\Mailer\Mailer;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
 use Cake\Core\Configure;
@@ -11,7 +11,7 @@ class MailerComponent extends Component
 {    
  
     public function mail($name,$template, $subject, $to, $data, $cc = null,$bcc = null, $attachments = null) {
-        $Email = new Email();
+        $Email = new Mailer();
         
         $Email->addHeaders(['Content-Type: text/html; charset=UTF-8']);
         $Email->viewBuilder()->setTemplate($template);
@@ -41,21 +41,21 @@ class MailerComponent extends Component
 
 
         try {
-          $Email->send();
+          $Email->deliver();
         } catch (\Cake\Network\Exception\SocketException $e) {
           $Email->setTransport('default');
           $Email->setSubject('[TDP Email Error] '.$Email->getSubject());
           if (Configure::read('Default.admin_email')) {
             $Email->setTo(Configure::read('Default.admin_email'));
           }
-          $Email->send();
+          $Email->deliver();
         } catch (Exception $e) {
           $Email->setTransport('default');
           $Email->setSubject('[TDP Email Error] '.$Email->getSubject());
           if (Configure::read('Default.admin_email')) {
             $Email->setTo(Configure::read('Default.admin_email'));
           }
-          $Email->send();
+          $Email->deliver();
         }
         
     }

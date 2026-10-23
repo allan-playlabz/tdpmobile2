@@ -12,9 +12,9 @@ use App\Lib\Translator;
 use App\Util\CatMailer;
 use Cake\Core\Configure;
 use Cake\Routing\Router;
-use Cake\Filesystem\File;
+use App\Filesystem\File;
 use Cake\I18n\FrozenTime;
-use Cake\Filesystem\Folder;
+use App\Filesystem\Folder;
 use Cake\Utility\Inflector;
 use App\Form\QuestionGroupForm;
 use App\Controller\AppController;
@@ -2132,7 +2132,7 @@ class OrdersController extends AppController
 
     private function _pdfMerge($files, $ref_id) {
         /*ghostsript*/
-        $folder = new \Cake\Filesystem\Folder(WWW_ROOT. 'files/pdf',true,0775);
+        $folder = new \App\Filesystem\Folder(WWW_ROOT. 'files/pdf',true,0775);
         $output_file = $ref_id.'.pdf';
 
         if (Configure::read('ENVI') == 'DEV') {
