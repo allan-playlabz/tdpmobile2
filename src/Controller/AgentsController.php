@@ -6,7 +6,7 @@ use App\Filesystem\Folder;
 use App\Filesystem\File;
 use Cake\Core\Configure;
 use Cake\Utility\Text;
-use Cake\I18n\Time;
+use Cake\I18n\DateTime;
 /**
  * Agents Controller
  *
@@ -141,7 +141,7 @@ class AgentsController extends AppController
 
     public function notActive($id = null,$days = 15)
     {
-        $agents = $this->Agents->find()->where(['OR'=>['last_activity IS NULL','last_activity <'=>\Cake\I18n\Time::now()->subDays(\Cake\Core\Configure::read('Default.inactive_days'))]])->toArray();
+        $agents = $this->Agents->find()->where(['OR'=>['last_activity IS NULL','last_activity <'=>\Cake\I18n\DateTime::now()->subDays(\Cake\Core\Configure::read('Default.inactive_days'))]])->toArray();
 
         $this->set('agents', $agents);
     }
@@ -209,7 +209,7 @@ class AgentsController extends AppController
           $attractions = $this->paginate($attraction_query->distinct('Attractions.id'))->toArray();
         }
         
-        $now = Time::now();
+        $now = DateTime::now();
         foreach ($attractions as $key => $attraction) {
           $attraction->ticket = null;
           if ($attraction->pricing_type == 'settlement') {
@@ -233,7 +233,7 @@ class AgentsController extends AppController
             })->order(['sequence'=>'asc'])->toArray();
             if (!empty($tickets)) {
               $attraction->tickets = $tickets;
-              $now = Time::now();
+              $now = DateTime::now();
               $ticket_ids = [];
               foreach ($tickets as $key => $ticket) {
                 if ($ticket->publish_start_date <= $now) {

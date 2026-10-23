@@ -2,7 +2,7 @@
 namespace App\Controller;
 
 use Cake\I18n\I18n;
-use Cake\I18n\Time;
+use Cake\I18n\DateTime;
 use App\Lib\ApiCaller;
 use App\Lib\Translator;
 use Cake\Core\Configure;
@@ -39,7 +39,7 @@ class AttractionsController extends AppController
     public function index()
     {
         $this->paginate = ['limit'=>20];
-        $now = Time::now();
+        $now = DateTime::now();
         $conditions = [];
         $search = null;
         $attractions = null;
@@ -165,7 +165,7 @@ class AttractionsController extends AppController
           $attractions = $attraction_query->distinct('Attractions.id')->toArray();
         }
         
-        $now = Time::now();
+        $now = DateTime::now();
         $viewable_attraction_ids = [];
         foreach ($attractions as $akey => $attraction) {
           if ($this->_attachTicketInfo($attraction)) {
@@ -253,7 +253,7 @@ class AttractionsController extends AppController
     private function _attachTicketInfo($attraction): bool
     {
         $agent = $this->Auth->user();
-        $now = Time::now();
+        $now = DateTime::now();
         $attraction->ticket = null;
         if ($attraction->pricing_type == 'settlement') {
             $attraction->ticket = $this->Attractions->Tickets->find()
@@ -275,7 +275,7 @@ class AttractionsController extends AppController
               $attraction->first_open_date = $attraction->ticket->publish_start_date->addSeconds($attraction->ticket->cutoff_seconds)->diffInDays($now);
             }
             else {
-              $ticket_release = Time::now()->addSeconds($attraction->ticket->cutoff_seconds);
+              $ticket_release = DateTime::now()->addSeconds($attraction->ticket->cutoff_seconds);
               $attraction->first_open_date = $ticket_release->diffInDays($now);
             }
             if ($attraction->first_open_date == 0) {
@@ -309,7 +309,7 @@ class AttractionsController extends AppController
             if (!empty($ticket_ids)) {
               $first_fixeddate = $this->Attractions->Tickets->Fixeddates->find()->where(['ticket_id IN'=>$ticket_ids,'date >= (CURDATE() + INTERVAL ABS(Tickets.cutoff_seconds) second)'])->contain('Tickets')->first();
               if ($first_fixeddate) {
-                $attraction->first_open_date = $first_fixeddate->date->diffInDays($now);
+                $attraction->first_open_date = (new DateTime($first_fixeddate->date->format('Y-m-d')))->diffInDays($now);
                 if ($attraction->ticket) {
                   $attraction->ticket->fixeddates = [$first_fixeddate];
                 }
@@ -342,7 +342,7 @@ class AttractionsController extends AppController
      */
     public function view($id = null)
     {
-        $now = Time::now();
+        $now = DateTime::now();
         $attraction = $this->Attractions->get($id,
         contain: ['Merchants', 'Categories', 'AttractionMedias'],
         conditions: ['Attractions.status'=>'published']);
@@ -522,7 +522,7 @@ class AttractionsController extends AppController
             }
           }
         }
-        $date = Time::now();
+        $date = DateTime::now();
         $tickets = [];
 
         $tickets = $this->_getSettlementAttractionTickets($attraction);
@@ -593,7 +593,7 @@ class AttractionsController extends AppController
      */
     public function viewTwoWay($id = null)
     {
-        $now = Time::now();
+        $now = DateTime::now();
         $attraction = $this->Attractions->get($id, contain: ['Merchants', 'Categories', 'AttractionMedias']);
         $attraction->is_favorite = $this->Attractions->FavoriteAttractions->exists(['attraction_id'=>$id,'agent_user_id'=>$this->Auth->user('id')]);
         if ($this->request->getSession()->check('language')) {
@@ -698,7 +698,7 @@ class AttractionsController extends AppController
             }
           }
         }
-        $date = Time::now();
+        $date = DateTime::now();
        
         if ($attraction->pricing_type != 'settlement') {
           $available_dates = $this->_getAvailableDates($attraction);
@@ -712,7 +712,7 @@ class AttractionsController extends AppController
     }
 
     private function _isVoucherEnough($attraction,$ticket_id,$qty,$data = null) {
-      $now = Time::now();
+      $now = DateTime::now();
       $is_voucher_enough = true;
       $total_qty = $qty;
       $cart_tickets = $this->ShoppingCart->getAll();
@@ -772,12 +772,12 @@ class AttractionsController extends AppController
         if ($smallest_cutoff_seconds == $max_cutoff_seconds) {
           $smallest_cutoff_seconds = 0;
         }
-        $first_release_date = Time::now();
+        $first_release_date = DateTime::now();
         if ($smallest_cutoff_seconds > 0) {
           if ($attraction->pricing_type == 'fdate') {
-            $first_release_date = Time::now()->addDay(1)->hour(0)->minute(0)->second(0);
+            $first_release_date = DateTime::now()->addDays(1)->hour(0)->minute(0)->second(0);
           }
-          $first_release_date->addSeconds($smallest_cutoff_seconds);
+          $first_release_date = $first_release_date->addSeconds($smallest_cutoff_seconds);
         }
         $ticket_ids = array_map(function($ticket) {
           return $ticket->id;
@@ -801,7 +801,7 @@ class AttractionsController extends AppController
 
     private function _getSettlementAttractionTickets($attraction, $date = null, $time = null) {
       if (!$date) {
-        $date = Time::now();
+        $date = DateTime::now();
       }
       $agent = $this->Auth->user();
       if ($attraction->product_type == 'simple') {
@@ -840,7 +840,7 @@ class AttractionsController extends AppController
         $date = null;
         if ($this->request->getQuery('date')) {
           try {
-            $date = Time::createFromFormat('d M Y',$this->request->getQuery('date'));
+            $date = DateTime::createFromFormat('d M Y',$this->request->getQuery('date'));
           } catch (Exception $e) {
           }
           if ($date === null) {
@@ -850,7 +850,7 @@ class AttractionsController extends AppController
         $time = null;
         if ($this->request->getQuery('time')) {
           try {
-            $time = Time::createFromFormat('H:i',$this->request->getQuery('time'));
+            $time = DateTime::createFromFormat('H:i',$this->request->getQuery('time'));
           } catch (Exception $e) {
           }
           if ($time === null) {
@@ -873,7 +873,7 @@ class AttractionsController extends AppController
       $departure_date = null;
       if ($this->request->getQuery('departure_date')) {
         try {
-          $departure_date = Time::createFromFormat('d M Y', $this->request->getQuery('departure_date'));
+          $departure_date = DateTime::createFromFormat('d M Y', $this->request->getQuery('departure_date'));
         } catch (Exception $e) {
         }
         if ($departure_date === null) {
@@ -883,7 +883,7 @@ class AttractionsController extends AppController
       $return_date = null;
       if ($this->request->getQuery('return_date')) {
         try {
-          $return_date = Time::createFromFormat('d M Y', $this->request->getQuery('return_date'));
+          $return_date = DateTime::createFromFormat('d M Y', $this->request->getQuery('return_date'));
         } catch (Exception $e) {
         }
         if ($return_date === null) {
@@ -893,7 +893,7 @@ class AttractionsController extends AppController
       $departure_time = null;
       if ($this->request->getQuery('departure_time')) {
         try {
-          $departure_time = Time::createFromFormat('H:i', $this->request->getQuery('departure_time'));
+          $departure_time = DateTime::createFromFormat('H:i', $this->request->getQuery('departure_time'));
         } catch (Exception $e) {
         }
         if ($departure_time === null) {
@@ -903,7 +903,7 @@ class AttractionsController extends AppController
       $return_time = null;
       if ($this->request->getQuery('departure_time')) {
         try {
-          $return_time = Time::createFromFormat('H:i', $this->request->getQuery('return_time'));
+          $return_time = DateTime::createFromFormat('H:i', $this->request->getQuery('return_time'));
         } catch (Exception $e) {
         }
         if ($return_time === null) {
@@ -978,10 +978,10 @@ class AttractionsController extends AppController
         $date = null;
         $tickets = [];
         $times = [];
-        $now = Time::now();
+        $now = DateTime::now();
         if ($this->request->getQuery('date')) {
           try {
-            $date = Time::createFromFormat('d M Y',$this->request->getQuery('date'));
+            $date = DateTime::createFromFormat('d M Y',$this->request->getQuery('date'));
           } catch (Exception $e) {
           }
           if ($date === null) {
@@ -1014,7 +1014,7 @@ class AttractionsController extends AppController
               }
               if (!empty($ticket->fixeddates)) {
                 foreach ($ticket->fixeddates as $key => $fixeddate) {
-                  if ($now->addSeconds($ticket->cutoff_seconds) <= new Time($fixeddate->date->format('Y-m-d'). ' ' . $fixeddate->time->format('H:i:s'))) {
+                  if (($now = $now->addSeconds($ticket->cutoff_seconds)) <= new DateTime($fixeddate->date->format('Y-m-d'). ' ' . $fixeddate->time->format('H:i:s'))) {
                     $times[$fixeddate->time->format('H:i')] = ['time_value'=>$fixeddate->time->format('H:i'),'time_display'=>$fixeddate->time->format('h:ia')];
                   }
                 }
@@ -1037,7 +1037,7 @@ class AttractionsController extends AppController
         $tickets = [];
         $date = null;
         if ($this->request->getQuery('date')) {
-          $date = Time::createFromFormat('d M Y',$this->request->getQuery('date'));
+          $date = DateTime::createFromFormat('d M Y',$this->request->getQuery('date'));
           $agent = $this->Auth->user();
           $tickets_query = $this->Attractions->Tickets->find()->where(['Tickets.attraction_id'=>$attraction->id,'api_purchase'=>true]);
           $tickets_query->contain(['Attractions','Connections','Fixeddates'=>function ($q) use ($date) {
@@ -1070,7 +1070,7 @@ class AttractionsController extends AppController
       $tickets_max_quantity = [];
       $tickets_slots = [];
       $agent = $this->Auth->user();
-      $now = Time::now();
+      $now = DateTime::now();
       if ($attraction) {
         if ($attraction->pricing_type == 'settlement') {
           $tickets_query = $this->Attractions->Tickets->find()->where(['Tickets.attraction_id'=>$attraction->id,'type !='=>'ctc','OR'=>[['publish_start_date <='=>$now,'publish_end_date >='=>$now],'redemption_type'=>'duration']]);
@@ -1141,10 +1141,10 @@ class AttractionsController extends AppController
           }
           $datetime = null;
           if ($time) {
-            $datetime = Time::createFromFormat('Y-m-d H:i:s',$date->format('Y-m-d'). ' '.$time->format('H:i:s'));
+            $datetime = DateTime::createFromFormat('Y-m-d H:i:s',$date->format('Y-m-d'). ' '.$time->format('H:i:s'));
           }
           else {
-            $datetime = Time::createFromFormat('Y-m-d H:i:s',$date->format('Y-m-d 00:00:00'));
+            $datetime = DateTime::createFromFormat('Y-m-d H:i:s',$date->format('Y-m-d 00:00:00'));
           }
 
           $tickets_query
@@ -1158,8 +1158,8 @@ class AttractionsController extends AppController
           foreach ($tickets_array as $key => $ticket) {
             if (!empty($ticket->fixeddates)) {
               if (
-                ($attraction->pricing_type == 'fdate' && ($ticket->fixeddates[0]->date->addSeconds($ticket->cutoff_seconds)->isToday() || $ticket->fixeddates[0]->date->addSeconds($ticket->cutoff_seconds)->isFuture())) || 
-                ($attraction->pricing_type == 'fdatetime' && (new Time($ticket->fixeddates[0]->date->format('Y-m-d') .' ' .(!empty($ticket->fixeddates[0]->time) ? $ticket->fixeddates[0]->time->format('H:i:s') : '00:00:00')))->addSeconds($ticket->cutoff_seconds)->isFuture())
+                ($attraction->pricing_type == 'fdate' && ((new DateTime($ticket->fixeddates[0]->date->format('Y-m-d')))->addSeconds($ticket->cutoff_seconds)->isToday() || (new DateTime($ticket->fixeddates[0]->date->format('Y-m-d')))->addSeconds($ticket->cutoff_seconds)->isFuture())) || 
+                ($attraction->pricing_type == 'fdatetime' && (new DateTime($ticket->fixeddates[0]->date->format('Y-m-d') .' ' .(!empty($ticket->fixeddates[0]->time) ? $ticket->fixeddates[0]->time->format('H:i:s') : '00:00:00')))->addSeconds($ticket->cutoff_seconds)->isFuture())
                 ) {
                 $ticket->redemption_start_date = $ticket->redemption_start_date->format('Y M d');
                 $ticket->redemption_end_date = $ticket->redemption_end_date->format('Y M d');

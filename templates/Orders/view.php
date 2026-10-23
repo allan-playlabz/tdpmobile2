@@ -1,6 +1,6 @@
 <?php
 
-use Cake\I18n\Time;
+use Cake\I18n\DateTime;
 use Cake\Core\Configure;
 use Cake\I18n\FrozenDate;
 use Cake\I18n\FrozenTime;
@@ -81,7 +81,7 @@ function getBadgeInfo($voucher)
             </tr>
             <tr>
               <td><?= __('Purchase Date') ?></td>
-              <td><?= (new Time($order['created']))->format('d M Y h:i a') ?></td>
+              <td><?= (new DateTime($order['created']))->format('d M Y h:i a') ?></td>
             </tr>
           </table>
         </div>

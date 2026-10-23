@@ -2,7 +2,7 @@
 namespace App\Controller;
 
 use App\Util\Csv;
-use Cake\I18n\Time;
+use Cake\I18n\DateTime;
 use Cake\I18n\Number;
 use Cake\Core\Configure;
 use App\Filesystem\File;
@@ -61,12 +61,12 @@ class ReportsController extends AppController
             $this->Flash->error('You have a report that is processing. Please wait before creating another report.');
             return $this->redirect(['action' => 'index']);
           }
-          $first_date_allowed = (new Time())->subMonths(Configure::read('Default.previous_orders_months_to_view'));
+          $first_date_allowed = (new DateTime())->subMonths(Configure::read('Default.previous_orders_months_to_view'));
           $start_date = $first_date_allowed;
           $start_date = $start_date->hour(0)->minute(0)->second(0);
-          $end_date = Time::now();
+          $end_date = DateTime::now();
           if ($this->request->getData('issue_start_date')) {
-            $start_date = Time::createFromFormat('d M Y',$this->request->getData('issue_start_date'));;
+            $start_date = DateTime::createFromFormat('d M Y',$this->request->getData('issue_start_date'));;
             if ($start_date) {
               $start_date = $start_date->hour(0)->minute(0)->second(0);
             }
@@ -76,7 +76,7 @@ class ReportsController extends AppController
             $start_date = $first_date_allowed->hour(0)->minute(0)->second(0);
           }
           if ($this->request->getData('issue_end_date')) {
-            $end_date = Time::createFromFormat('d M Y',$this->request->getData('issue_end_date'));;
+            $end_date = DateTime::createFromFormat('d M Y',$this->request->getData('issue_end_date'));;
             if ($end_date) {
               $end_date = $end_date->hour(23)->minute(59)->second(59);
             }

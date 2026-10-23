@@ -2,7 +2,7 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
-use Cake\I18n\Time;
+use Cake\I18n\DateTime;
 /**
  * Categories Controller
  *
@@ -71,7 +71,7 @@ class CategoriesController extends AppController
       )->toArray();
       
       
-      $now = Time::now();
+      $now = DateTime::now();
       foreach ($attractions as $key => $attraction) {
         $attraction->ticket = null;
         if ($attraction->pricing_type == 'settlement') {
@@ -87,7 +87,7 @@ class CategoriesController extends AppController
                 $attraction->first_open_date = $attraction->ticket->publish_start_date->addSeconds($attraction->ticket->cutoff_seconds)->diffInDays($now);
               }
               else {
-                $ticket_release = Time::now()->addSeconds($attraction->ticket->cutoff_seconds);
+                $ticket_release = DateTime::now()->addSeconds($attraction->ticket->cutoff_seconds);
                 $attraction->first_open_date = $ticket_release->diffInDays($now);
               }
               if ($attraction->first_open_date == 0) {
@@ -105,7 +105,7 @@ class CategoriesController extends AppController
           $tickets = $this->Attractions->Tickets->find()
           // ->select(['Tickets.id'])
           // ->contain(['Fixeddates'=>function ($q) {
-          //   return $q->where(['date >='=>Time::now()])->limit(1)->order(['date'=>'ASC']);
+          //   return $q->where(['date >='=>DateTime::now()])->limit(1)->order(['date'=>'ASC']);
           // }])
           ->where(['Tickets.attraction_id'=>$attraction->id])
           ->matching('FixeddatesAgents',function($q) use ($agent){
@@ -113,7 +113,7 @@ class CategoriesController extends AppController
           })->order(['sequence'=>'asc'])->toArray();
           if (!empty($tickets)) {
             $attraction->ticket = $tickets[0];
-            $now = Time::now();
+            $now = DateTime::now();
             $ticket_ids = [];
             foreach ($tickets as $key => $ticket) {
               if ($ticket->publish_start_date <= $now) {
@@ -124,7 +124,7 @@ class CategoriesController extends AppController
             if (!empty($ticket_ids)) {
               $first_fixeddate = $this->Attractions->Tickets->Fixeddates->find()->where(['ticket_id IN'=>$ticket_ids,'date >= (CURDATE() + INTERVAL Tickets.cutoff_seconds second)'])->contain('Tickets')->first();
               if ($first_fixeddate) {
-                $attraction->first_open_date = $first_fixeddate->date->diffInDays($now);
+                $attraction->first_open_date = (new DateTime($first_fixeddate->date->format('Y-m-d')))->diffInDays($now);
                 if ($attraction->ticket) {
                   $attraction->ticket->fixeddates = [$first_fixeddate];
                 }

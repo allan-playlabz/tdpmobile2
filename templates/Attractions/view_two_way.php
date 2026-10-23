@@ -5,7 +5,7 @@
  */
 use Cake\Core\Configure;
 $base = \Cake\Core\Configure::read('AWSPublic.public_host');
-$now = Cake\I18n\Time::now();
+$now = Cake\I18n\DateTime::now();
 ?>
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">

@@ -15,7 +15,7 @@
 namespace App\Controller;
 
 use Cake\I18n\I18n;
-use Cake\I18n\Time;
+use Cake\I18n\DateTime;
 use App\View\AjaxView;
 use Cake\Event\EventInterface;
 use Cake\I18n\Number;
@@ -128,7 +128,7 @@ class AppController extends Controller
         //get agentuser to check the announcements_read
         $current_agentuser = $this->Agents->AgentUsers->find()->where(['id'=>$this->Auth->user('id')])->first();
         $this->loadModel('Announcements');
-        $now = Time::now();
+        $now = DateTime::now();
         $announcements = $this->Announcements->find()
                                             ->where(['publish_start_date <='=>$now])
                                             ->andWhere(['publish_end_date >='=>$now])

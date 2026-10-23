@@ -1,7 +1,7 @@
 <?php
 namespace App\Controller;
 
-use Cake\I18n\Time;
+use Cake\I18n\DateTime;
 use Cake\Utility\Text;
 use App\Lib\Translator;
 use Cake\Core\Configure;
@@ -323,7 +323,7 @@ class AgentUsersController extends AppController
       $this->loadModel('PasswordResets');
       $agent = null;
       $password_reset = $this->PasswordResets->find()->where(['email'=>$email,'reset_code'=>$reset_code])->first();
-      if (!$password_reset || $password_reset->created < Time::now()->subHours(24)) {
+      if (!$password_reset || $password_reset->created < DateTime::now()->subHours(24)) {
         $this->Flash->error(__('Password reset link not found or expired.'));
         return $this->redirect(['controller'=>'AgentUsers','action'=>'login']);
       }
@@ -479,7 +479,7 @@ class AgentUsersController extends AppController
         $agent_user = $this->AgentUsers->find()->where(['id'=>$agent_user_id])->first();
         if($agent_user->agent_id==$this->Auth->user('agent_id')) {
           if ($this->request->is(['patch', 'post', 'put'])) {
-            $agent_user->last_read_time = Time::now();
+            $agent_user->last_read_time = DateTime::now();
             if ($this->AgentUsers->save($agent_user)) {
               return $this->response->withStatus(200)->withStringBody(json_encode(['status'=>200,'data'=>[]]));
             }

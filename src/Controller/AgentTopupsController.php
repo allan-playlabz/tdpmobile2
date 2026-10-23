@@ -3,7 +3,7 @@ namespace App\Controller;
 
 use Exception;
 use App\Util\Csv;
-use Cake\I18n\Time;
+use Cake\I18n\DateTime;
 use Cake\I18n\Number;
 use Cake\Core\Configure;
 use App\Filesystem\File;
@@ -48,7 +48,7 @@ class AgentTopupsController extends AppController
       if ($this->request->getQuery('from')) {
         
         try {
-          $start_date = Time::createFromFormat('d M Y',$this->request->getQuery('from'));
+          $start_date = DateTime::createFromFormat('d M Y',$this->request->getQuery('from'));
         } catch (Exception $e) {
           // just ignore the exception for now
         }
@@ -65,7 +65,7 @@ class AgentTopupsController extends AppController
       if ($this->request->getQuery('to')) {
         
         try {
-          $end_date = Time::createFromFormat('d M Y',$this->request->getQuery('to'));
+          $end_date = DateTime::createFromFormat('d M Y',$this->request->getQuery('to'));
         } catch (Exception $e) {
           // just ignore the exception for now
         }

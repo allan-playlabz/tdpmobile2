@@ -1,6 +1,6 @@
 <?php 
 use Cake\Utility\Inflector;
-use Cake\I18n\Time;
+use Cake\I18n\DateTime;
 $order->checkout_info = is_array($order->checkout_info) ? $order->checkout_info : json_decode($order->checkout_info,true);
  ?>
 <style type="text/css">
@@ -119,10 +119,10 @@ $order->checkout_info = is_array($order->checkout_info) ? $order->checkout_info 
 						<?php 
 						$datetime = '';
 						if (!empty($transfer_details->pickup_date) && !empty($transfer_details->pickup_time)) {
-						 	$datetime = Time::createFromFormat('d M Y H:i',$transfer_details->pickup_date. ' ' . $transfer_details->pickup_time);
+						 	$datetime = DateTime::createFromFormat('d M Y H:i',$transfer_details->pickup_date. ' ' . $transfer_details->pickup_time);
 						}
 						elseif (!empty($transfer_details->pickup_date)) {
-							$datetime = Time::createFromFormat('d M Y',$transfer_details->pickup_date);
+							$datetime = DateTime::createFromFormat('d M Y',$transfer_details->pickup_date);
 						}
 						if (is_object($datetime)) {
 							echo $datetime->format('F d, Y h:i A');
@@ -155,10 +155,10 @@ $order->checkout_info = is_array($order->checkout_info) ? $order->checkout_info 
 						<?php 
 						$datetime = '';
 						if (!empty($return_transfer_details->pickup_date) && !empty($return_transfer_details->pickup_time)) {
-						 	$datetime = Time::createFromFormat('d M Y H:i',$return_transfer_details->pickup_date. ' ' . $return_transfer_details->pickup_time);
+						 	$datetime = DateTime::createFromFormat('d M Y H:i',$return_transfer_details->pickup_date. ' ' . $return_transfer_details->pickup_time);
 						}
 						elseif (!empty($return_transfer_details->pickup_date)) {
-							$datetime = Time::createFromFormat('d M Y',$return_transfer_details->pickup_date);
+							$datetime = DateTime::createFromFormat('d M Y',$return_transfer_details->pickup_date);
 						}
 						if (is_object($datetime)) {
 							echo $datetime->format('F d, Y h:i A');

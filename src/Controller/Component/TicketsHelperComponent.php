@@ -7,7 +7,7 @@ use Cake\Core\Configure;
 use Cake\I18n\FrozenTime;
 use Cake\I18n\Number;
 use Cake\ORM\TableRegistry;
-use Cake\I18n\Time;
+use Cake\I18n\DateTime;
 
 class TicketsHelperComponent extends Component
 {
@@ -23,14 +23,14 @@ class TicketsHelperComponent extends Component
   public function getTicketAvailableQty($ticket, $date = null) {
     $max_quantity = Configure::read('Default.max_order_quantity'); //unlimited
     if ($ticket->type == 'complex') {
-      $now = Time::now();
+      $now = DateTime::now();
       $this->Tickets->loadInto($ticket,['ChildTickets'=>['Attractions']]);
       if ($ticket->stock !== null) {
         $max_quantity = $ticket->stock > $max_quantity ? $max_quantity : $ticket->stock;
       }
       if (Configure::read('Features.allotment')) {
         if ($ticket->pricing_type == 'fdatetime') {
-          $datetime_obj = Time::createFromFormat('d M Y H:i',$date);
+          $datetime_obj = DateTime::createFromFormat('d M Y H:i',$date);
           $allotment = $this->getTicketAllotment($ticket,$datetime_obj->format('Y-m-d'),$datetime_obj->format('H:i:00'));
         } else {
           $datetime_obj = new \Cake\I18n\DateTime($date);
@@ -41,7 +41,7 @@ class TicketsHelperComponent extends Component
         foreach ($ticket->child_tickets as $key => $child_ticket) {
           if ($child_ticket->attraction && $child_ticket->attraction->pricing_type != 'settlement' && $date != null) {
             if ($child_ticket->attraction->pricing_type == 'fdatetime') {
-              $datetime_obj = Time::createFromFormat('d M Y H:i',$date);
+              $datetime_obj = DateTime::createFromFormat('d M Y H:i',$date);
               $fixeddate = $this->Tickets->Fixeddates->find()->where(['ticket_id'=>$child_ticket->id,'date'=>$datetime_obj->format('Y-m-d'),'time'=>$datetime_obj->format('H:i:00')])->first();
               if (!empty($fixeddate)) {
                 if ($fixeddate->stock !== null) {
@@ -57,7 +57,7 @@ class TicketsHelperComponent extends Component
             else {
               $date_parts = explode(' ', trim($date));
               $date_only = $date_parts[0] . ' ' . $date_parts[1] . ' ' . $date_parts[2];
-              $datetime_obj = Time::createFromFormat('d M Y', $date_only);
+              $datetime_obj = DateTime::createFromFormat('d M Y', $date_only);
               $fixeddate = $this->Tickets->Fixeddates->find()->where(['ticket_id'=>$child_ticket->id,'date'=>$datetime_obj->format('Y-m-d')])->first();
               if (!empty($fixeddate)) {
                 if ($fixeddate->stock !== null) {
@@ -121,11 +121,11 @@ class TicketsHelperComponent extends Component
       if ($ticket->attraction && $ticket->attraction->pricing_type != 'settlement' && $date != null) {
         $fixeddate = null;
         if (in_array($ticket->attraction->pricing_type, [PricingType::FDATETIME, PricingType::TWO_WAY_FDATETIME])) {
-          $datetime_obj = Time::createFromFormat('d M Y H:i',$date);
+          $datetime_obj = DateTime::createFromFormat('d M Y H:i',$date);
           $fixeddate = $this->Tickets->Fixeddates->find()->where(['ticket_id'=>$ticket->id,'date'=>$datetime_obj->format('Y-m-d'),'time'=>$datetime_obj->format('H:i:00')])->first();
         }
         else {
-          $datetime_obj = Time::createFromFormat('d M Y',$date);
+          $datetime_obj = DateTime::createFromFormat('d M Y',$date);
           $fixeddate = $this->Tickets->Fixeddates->find()->where(['ticket_id'=>$ticket->id,'date'=>$datetime_obj->format('Y-m-d')])->first();
         }
         if (!empty($fixeddate)) {
@@ -210,7 +210,7 @@ class TicketsHelperComponent extends Component
   public function getTicketAllotment($ticket,$date,$time = null) {
     $max_quantity = Configure::read('Default.max_order_quantity'); //unlimited
     if ($ticket->allotment_id) {
-      $start_time = new Time($date.' '.$time);
+      $start_time = new DateTime($date.' '.$time);
       if ($ticket->pricing_type == 'fdate') {
         $allotment = $this->Allotments->find()->where(['id'=>$ticket->allotment_id])->contain(['Slots'=>function($q) use($date) {
           return $q->where(['date'=>$date]);
@@ -225,7 +225,7 @@ class TicketsHelperComponent extends Component
           }
         }
       } else {
-        $endtime = (new Time($start_time))->addMinutes($ticket->activity_duration);
+        $endtime = (new DateTime($start_time))->addMinutes($ticket->activity_duration);
         $allotment = $this->Allotments->find()->where(['id'=>$ticket->allotment_id])->contain(['Slots'=>function($q) use($date,$time,$endtime) {
           return $q->where(['date'=>$date,'time >='=>$time,'time <'=>$endtime]);
         }])->first();
@@ -289,10 +289,10 @@ class TicketsHelperComponent extends Component
         $fixeddate = $ticket->fixeddates[0];
       } elseif ($datetime != null) {
         if (in_array($attraction->pricing_type, [PricingType::FDATETIME, PricingType::TWO_WAY_FDATETIME])) {
-          $datetime_obj = Time::createFromFormat('d M Y H:i', $datetime);
+          $datetime_obj = DateTime::createFromFormat('d M Y H:i', $datetime);
           $fixeddate = $this->Tickets->Fixeddates->find()->where(['ticket_id' => $ticket->id, 'date' => $datetime_obj->format('Y-m-d'), 'time' => $datetime_obj->format('H:i:00')])->first();
         } else {
-          $datetime_obj = Time::createFromFormat('d M Y', $datetime);
+          $datetime_obj = DateTime::createFromFormat('d M Y', $datetime);
           $fixeddate = $this->Tickets->Fixeddates->find()->where(['ticket_id' => $ticket->id, 'date' => $datetime_obj->format('Y-m-d')])->first();
         }
       }
@@ -317,14 +317,14 @@ class TicketsHelperComponent extends Component
     
     if ($datetime != null) {
       if (in_array($ticket->attraction->pricing_type, [PricingType::FDATETIME, PricingType::TWO_WAY_FDATETIME])) {
-        $datetime_obj = Time::createFromFormat('d M Y H:i',$datetime);
+        $datetime_obj = DateTime::createFromFormat('d M Y H:i',$datetime);
         $fixeddate = $this->Tickets->Fixeddates->find()->where(['ticket_id'=>$ticket->id,'date'=>$datetime_obj->format('Y-m-d'),'time'=>$datetime_obj->format('H:i:00')])->first();
         if (!empty($fixeddate)) {
           return $fixeddate;
         }
       }
       else {
-        $datetime_obj = Time::createFromFormat('d M Y',$datetime);
+        $datetime_obj = DateTime::createFromFormat('d M Y',$datetime);
         $fixeddate = $this->Tickets->Fixeddates->find()->where(['ticket_id'=>$ticket->id,'date'=>$datetime_obj->format('Y-m-d')])->first();
         if (!empty($fixeddate)) {
           return $fixeddate;

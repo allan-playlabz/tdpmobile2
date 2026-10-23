@@ -1,7 +1,7 @@
 <?php
 namespace App\View\Cell;
 
-use Cake\I18n\Time;
+use Cake\I18n\DateTime;
 use Cake\View\Cell;
 
 class CreditsCell extends Cell
@@ -16,7 +16,7 @@ class CreditsCell extends Cell
             //get agentuser to check the announcements_read
             $current_agentuser = $this->Agents->AgentUsers->find()->where(['id'=>$_SESSION['Auth']['User']['id']])->first();
             $this->loadModel('Announcements');
-            $now = Time::now();
+            $now = DateTime::now();
             $announcements = $this->Announcements->find()
                                                 ->where(['publish_start_date <='=>$now])
                                                 ->andWhere(['publish_end_date >='=>$now])

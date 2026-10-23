@@ -3,7 +3,7 @@ namespace App\Controller;
 
 use Exception;
 use Cake\Log\Log;
-use Cake\I18n\Time;
+use Cake\I18n\DateTime;
 use App\Lib\Payments;
 use Cake\Event\Event;
 use Cake\Http\Client;
@@ -1010,7 +1010,7 @@ class OrdersController extends AppController
 
     private function _checkAvailableVouchers($order = null, $ticket_list = null) {
       $is_voucher_enough = true;
-      $now = Time::now();
+      $now = DateTime::now();
       $total_pdf_needed = [];
       $total_barcode_needed = [];
       $total_gc_needed = [];
@@ -1120,7 +1120,7 @@ class OrdersController extends AppController
     }
 
     private function _createVouchers($order) {
-      $now = Time::now();
+      $now = DateTime::now();
       if ($order && $order->order_items) {
         $ticket_vouchers = [];
         $non_instant_vouchers = [];
@@ -1169,7 +1169,7 @@ class OrdersController extends AppController
                 $package_voucher->code_id = $code;
                 $package_code = $code;
                 $ticket_overwrites_total = 0;
-                $package_voucher->created = Time::now();
+                $package_voucher->created = DateTime::now();
                 if (!$this->GeneratedCodes->save($pk_generated_code)) {
                   return "Error saving generated code";
                 }
@@ -1180,7 +1180,7 @@ class OrdersController extends AppController
                     continue;
                   }
                   $voucher = $this->Vouchers->newEmptyEntity();
-                  $voucher->created = Time::now();
+                  $voucher->created = DateTime::now();
                   $voucher->ticket_name = $ticket->name;
                   $voucher->order_item_id = $order_item->id;
                   // $child_ticket->quantity_sold += 1;
@@ -1425,7 +1425,7 @@ class OrdersController extends AppController
               /* BEGIN ATTRACTION TICKETS */
               else {
                 $voucher = $this->Vouchers->newEmptyEntity();
-                $voucher->created = Time::now();
+                $voucher->created = DateTime::now();
                 $voucher->ticket_name = $ticket->name;
                 $voucher->order_item_id = $order_item->id;
                 if ($ticket->voucher_type == 'generated' || $ticket->voucher_type == null) {
@@ -1740,14 +1740,14 @@ class OrdersController extends AppController
                 }
                 else {
                   if (strpos($datetime, ':') !== false) {
-                    $dt = Time::createFromFormat('d M Y H:i',$datetime);
+                    $dt = DateTime::createFromFormat('d M Y H:i',$datetime);
                     $order_item = $this->Orders->OrderItems->find()->where(['ticket_id'=>$ticket->id,'order_id'=>$order->id,'qty'=>$qty,'date_of_visit'=>$dt->format('Y-m-d'),'time_of_visit'=>$dt->format('H:i:s')])->first();
                     if (!$order_item) {
                       return false;
                     }
                   }
                   else {
-                    $dt = Time::createFromFormat('d M Y',$datetime);
+                    $dt = DateTime::createFromFormat('d M Y',$datetime);
                     $order_item = $this->Orders->OrderItems->find()->where(['ticket_id'=>$ticket->id,'order_id'=>$order->id,'qty'=>$qty,'date_of_visit'=>$dt->format('Y-m-d')])->first();
                     if (!$order_item) {
                       return false;
@@ -1845,7 +1845,7 @@ class OrdersController extends AppController
         } elseif ($this->request->getQuery('status') && $this->request->getQuery('status') == 'waiting') {
           $conditions['Orders.status IN'] = ['in_progress','waiting'];
         }
-        $first_date_allowed = (new Time())->subMonths(Configure::read('Default.previous_orders_months_to_view'));
+        $first_date_allowed = (new DateTime())->subMonths(Configure::read('Default.previous_orders_months_to_view'));
         $from = $first_date_allowed;
         $this->paginate = [
           'conditions' => $conditions,
@@ -1857,7 +1857,7 @@ class OrdersController extends AppController
           if ($this->request->getQuery('from')) {
             $start_date = null;
             try {
-              $start_date = Time::createFromFormat('d M Y',$this->request->getQuery('from'));
+              $start_date = DateTime::createFromFormat('d M Y',$this->request->getQuery('from'));
             } catch (Exception $e) {
               // just ignore the exception for now
             }
@@ -1878,7 +1878,7 @@ class OrdersController extends AppController
           if ($this->request->getQuery('to')) {
             $end_date = null;
             try {
-              $end_date = Time::createFromFormat('d M Y',$this->request->getQuery('to'));
+              $end_date = DateTime::createFromFormat('d M Y',$this->request->getQuery('to'));
             } catch (Exception $e) {
               // just ignore the exception for now
             }
@@ -1893,7 +1893,7 @@ class OrdersController extends AppController
           if ($this->request->getQuery('from')) {
             $start_date = null;
             try {
-              $start_date = Time::createFromFormat('d M Y',$this->request->getQuery('from'));
+              $start_date = DateTime::createFromFormat('d M Y',$this->request->getQuery('from'));
             } catch (Exception $e) {
               // just ignore the exception for now
             }
@@ -1910,7 +1910,7 @@ class OrdersController extends AppController
           if ($this->request->getQuery('to')) {
             $end_date = null;
             try {
-              $end_date = Time::createFromFormat('d M Y',$this->request->getQuery('to'));
+              $end_date = DateTime::createFromFormat('d M Y',$this->request->getQuery('to'));
             } catch (Exception $e) {
               // just ignore the exception for now
             }
@@ -1956,17 +1956,17 @@ class OrdersController extends AppController
             $conditions['code_id like'] = $this->request->getQuery('code').'%';
         }
 
-        $first_date_allowed = (new Time())->subMonths(Configure::read('Default.previous_orders_months_to_view'));
+        $first_date_allowed = (new DateTime())->subMonths(Configure::read('Default.previous_orders_months_to_view'));
         $from = $first_date_allowed;        
         if ($this->request->getQuery('from')) {
-          $from = Time::createFromFormat('d M Y', $this->request->getQuery('from'));
+          $from = DateTime::createFromFormat('d M Y', $this->request->getQuery('from'));
           $from = $from->hour(0)->minute(0)->second(0);
           if ($from < $first_date_allowed) {
             $from = $first_date_allowed;
           }
-          $to = Time::now();
+          $to = DateTime::now();
           if ($this->request->getQuery('to')) {
-            $to = Time::createFromFormat('d M Y', $this->request->getQuery('to'));
+            $to = DateTime::createFromFormat('d M Y', $this->request->getQuery('to'));
           }
           $to = $to->hour(23)->minute(59)->second(59);
           $conditions['Vouchers.created <='] = $to;
@@ -2251,11 +2251,11 @@ class OrdersController extends AppController
               // $order_data['order_data'][$idx]['date_of_visit'] = $date;
 
               if (in_array($ticket->attraction->pricing_type, [PricingType::FDATETIME, PricingType::TWO_WAY_FDATETIME])) {
-                $datetime = Time::createFromFormat('d M Y H:i',$date);
+                $datetime = DateTime::createFromFormat('d M Y H:i',$date);
                 $data['item_booking_date_'.$no] = $datetime->format('Y-m-d H:i:s');
               }
               else {
-                $datetime = Time::createFromFormat('d M Y',$date);
+                $datetime = DateTime::createFromFormat('d M Y',$date);
                 $data['item_booking_date_'.$no] = $datetime->format('Y-m-d');
               }
             }
@@ -2448,7 +2448,7 @@ class OrdersController extends AppController
       $date = $ticket_info['datetime'];
       $data['item_sku_id_'.$no] = $ticket_info['ticket']->sku_id;
       $data['item_quantity_'.$no] = $ticket_info['qty'];
-      $datetime = Time::createFromFormat('d M Y H:i',$ticket_info['datetime']);
+      $datetime = DateTime::createFromFormat('d M Y H:i',$ticket_info['datetime']);
       $data['item_booking_date_'.$no] = $datetime->format('Y-m-d H:i:s');
       $order_data = [];
       if ($this->request->getData('passport_number.'.$ticket_info['ticket']->id.'.'.$date)) {
