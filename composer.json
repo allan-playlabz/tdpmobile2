@@ -5,28 +5,28 @@
     "type": "project",
     "license": "MIT",
     "require": {
-        "php": ">=5.6",
+        "php": ">=8.3",
         "aws/aws-sdk-php": "^3.133",
-        "cakephp/cakephp": "3.10.*",
-        "cakephp/migrations": "^2.0.0",
-        "cakephp/plugin-installer": "^1.0",
+        "cakephp/authentication": "^3.3",
+        "cakephp/cakephp": "5.4.*",
+        "cakephp/migrations": "^5.0",
+        "cakephp/plugin-installer": "^2.0",
         "cunheise/phpqrcode": "^1.0",
-        "dereuromark/cakephp-databaselog": "~2.7",
-        "dompdf/dompdf": "^0.8.3",
+        "dereuromark/cakephp-databaselog": "^4.0",
+        "dompdf/dompdf": "^3.0",
         "firebase/php-jwt": "^6.3",
-        "friendsofcake/cakepdf": "^3.5",
-        "mobiledetect/mobiledetectlib": "2.*",
+        "friendsofcake/cakepdf": "^5.0",
+        "mobiledetect/mobiledetectlib": "^4.8.03",
         "mustache/mustache": "^2.14",
         "picqer/php-barcode-generator": "^0.3.0",
         "stripe/stripe-php": "^7.25"
     },
     "require-dev": {
-        "cakephp/bake": "^1.9.0",
-        "cakephp/cakephp-codesniffer": "^3.0",
-        "cakephp/debug_kit": "^3.17.0",
-        "josegonzalez/dotenv": "3.*",
-        "phpunit/phpunit": "^5|^6",
-        "psy/psysh": "@stable"
+        "cakephp/bake": "^3.6",
+        "cakephp/cakephp-codesniffer": "^5.3",
+        "cakephp/debug_kit": "^5.2",
+        "josegonzalez/dotenv": "^4.0",
+        "phpunit/phpunit": "^11.5.3"
     },
     "suggest": {
         "markstory/asset_compress": "An asset compression plugin which provides file concatenation and a flexible filter system for preprocessing and minification.",
@@ -50,15 +50,17 @@
             "@test",
             "@cs-check"
         ],
-        "cs-check": "phpcs --colors -p --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/ tests/",
-        "cs-fix": "phpcbf --colors --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/ tests/",
+        "cs-check": "phpcs --colors -p",
+        "cs-fix": "phpcbf --colors -p",
         "test": "phpunit --colors=always"
     },
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            "cakephp/plugin-installer": true
-        }
+            "cakephp/plugin-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        },
+        "platform-check": true
     }
 }

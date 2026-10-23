@@ -44,15 +44,27 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 - CSRF is scoped route middleware with `whitelistCallback` (→ `skipCheckCallback`); webhook routes are in their own scopes (keep them outside CSRF).
 - `tests/Fixture/`: 45 fixtures using `$fields`.
 - **Tests do not run before the upgrade**: PHPUnit 6.5 fatals under PHP 8.5. Test DB is `test_myapp` on localhost (placeholder credentials).
-- `config/app.php` is tracked in git and contains credentials.
+- `config/app.php` is tracked in git; real credentials live in gitignored `config/app_config.php` / `config/.env`, but `app.php` has a hardcoded `Security.salt` fallback.
 
 ## Phases
-- [ ] cake5-deps
+- [x] cake5-deps (2026-10-23) — CakePHP 5.4.3 installed
 - [ ] cake5-structure
 - [ ] cake5-code-apis
 - [ ] cake5-auth
 - [ ] cake5-tests
 - [ ] final scan = 0 blockers, smoke test done
+
+## Phase 1 — dependencies (2026-10-23)
+- Start: cakephp/cakephp 3.10.5, PHPUnit 6.5.14; 3.x lock backed up outside the repo (composer.lock is gitignored).
+- Resolved: cakephp 5.4.3, authentication 3.3.7, migrations 5.2.6, cakepdf 5.3.0, databaselog 4.7.0, dompdf 3.1.6, mobiledetect 4.11.0, bake 3.8.1, debug_kit 5.2.4, codesniffer 5.3.2, phpunit 11.5.57, dotenv 4.0.0. Unchanged: aws-sdk, php-jwt 6.4, stripe 7.128, mustache 2.14, picqer 0.3, phpqrcode 1.0.2.
+- Dropped `psy/psysh` (only used by skeleton `ConsoleShell`).
+- No composer patches: DatabaseLog's unqualified `env()` resolves to the global helper once bootstrap requires `CAKE . 'functions.php'` (phase 2).
+- `config/app.php` rebuilt from the 5.4 skeleton with project values (DbLog engines, CustomSession DB sessions, `log_ds`/`log_ds_ro`, `DatabaseLog.datasource`, Asia/Singapore tz, salt fallback, skipLog list). `app_config.php` stays the override (loaded by bootstrap).
+  - Datasources deliberately have **no `timezone`** key (3.x had none; the skeleton's `UTC` would change MySQL session time).
+- `config/paths.php` from skeleton (`RESOURCES`); `src/Locale` → `resources/locales`.
+- `config/plugins.php` added: DebugKit (onlyDebug), Bake (onlyCli, optional), Migrations (onlyCli), Authentication, CakePdf, DatabaseLog (routes off). `addPlugin()` calls in `Application.php` to be removed in phase 2.
+- `phpcs.xml` from skeleton; `cs-check`/`cs-fix` scripts use it.
+- Follow-up: `composer audit` reports CVE-2025-45769 (low) in firebase/php-jwt < 7 (pre-existing; used by Payment2C2P).
 
 ## Found while upgrading
 
