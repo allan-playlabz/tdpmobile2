@@ -4,7 +4,6 @@ namespace App\Controller\Component;
 use App\Lib\PricingType;
 use Cake\Controller\Component;
 use Cake\Core\Configure;
-use Cake\I18n\FrozenTime;
 use Cake\I18n\Number;
 use Cake\ORM\TableRegistry;
 use Cake\I18n\DateTime;

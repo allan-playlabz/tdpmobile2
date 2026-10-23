@@ -6,7 +6,6 @@ use Cake\Event\EventManager;
 use Cake\Form\Form;
 use Cake\Form\Schema;
 use Cake\Http\Client;
-use Cake\I18n\FrozenDate;
 use Cake\Log\Log;
 use Cake\Utility\Text;
 use Cake\Validation\Validator;

@@ -4,7 +4,6 @@ namespace App\Model\Table;
 
 use Exception;
 use Cake\Log\Log;
-use Cake\ORM\Query;
 use Cake\ORM\Table;
 use Cake\ORM\RulesChecker;
 use Cake\Utility\Inflector;

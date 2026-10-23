@@ -7,7 +7,6 @@ use Cake\I18n\DateTime;
 use Cake\I18n\Number;
 use Cake\Core\Configure;
 use App\Filesystem\File;
-use Cake\I18n\FrozenTime;
 use App\Filesystem\Folder;
 use App\Controller\AppController;
 
@@ -165,13 +164,13 @@ class AgentTopupsController extends AppController
           $agentTopup->image = '';
           $agentTopup->status = 'pending';
           if ($this->request->getData('image')) {
-            if ($this->request->getData('image.error') == 0) {
-              if (getimagesize($this->request->getData('image.tmp_name'))) {
+            if ($this->request->getData('image')->getError() == 0) {
+              if (getimagesize($this->request->getData('image')->getStream()->getMetadata('uri'))) {
                 if ($this->AgentTopups->save($agentTopup)) {
                     $this->Flash->success(__('The agent top up has been saved.'));
-                        $filename = $this->Auth->user('agent_id').'/'.$this->request->getData('image.name');
+                        $filename = $this->Auth->user('agent_id').'/'.$this->request->getData('image')->getClientFilename();
                         $image_filename = 'agenttopups/'.$filename;
-                        $this->S3->putObject($image_filename,$this->request->getData('image.tmp_name'));
+                        $this->S3->putObject($image_filename,$this->request->getData('image')->getStream()->getMetadata('uri'));
                         $agentTopup->image = 'agent-topups/topup-images/'. $image_filename;
                         $agentTopup->setDirty('image',true);
                         if (!$this->AgentTopups->save($agentTopup)) {

@@ -1,10 +1,8 @@
 <?php
 namespace App\Model\Table;
 
-use Cake\ORM\Query;
 use Cake\ORM\Table;
 use Cake\Core\Configure;
-use Cake\I18n\FrozenTime;
 use Cake\ORM\RulesChecker;
 use Cake\Validation\Validator;
 

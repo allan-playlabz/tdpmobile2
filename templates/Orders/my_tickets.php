@@ -5,7 +5,6 @@
  * @var \App\Model\Entity\Voucher[]|\Cake\Collection\CollectionInterface $vouchers
  */
 
-use Cake\I18n\FrozenTime;
 use Cake\Utility\Text;
 $from = $this->request->getQuery('from') ?: '';
 $to = $this->request->getQuery('to') ?: '';

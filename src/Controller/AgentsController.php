@@ -272,14 +272,14 @@ class AgentsController extends AppController
           $agent->verification_code = Text::uuid();
           if ($this->Agents->save($agent)) {
               if ($this->request->getData('image')) {
-                if ($this->request->getData('image.error') == 0 && !empty(getimagesize($this->request->getData('image.tmp_name')))) {
+                if ($this->request->getData('image')->getError() == 0 && !empty(getimagesize($this->request->getData('image')->getStream()->getMetadata('uri')))) {
                   // $dir = new Folder(WWW_ROOT.'img'.DS.'agents'.DS.$agent->id,true,0775);
                   // $filename = $agent->id.DS.$this->request->getData('image.name');
                   // move_uploaded_file($this->request->getData('image.tmp_name'), WWW_ROOT.'img'.DS.'agents'.DS.$filename);
                   // $agent->image = '/img/agents/'.str_replace(DS, '/', $filename);
-                    $filename = $agent->id.'/'.$this->request->getData('image.name');
+                    $filename = $agent->id.'/'.$this->request->getData('image')->getClientFilename();
                     $image_filename = 'agents/'.$filename;
-                    $result = $this->S3Public->putObject($image_filename,$this->request->getData('image.tmp_name'));
+                    $result = $this->S3Public->putObject($image_filename,$this->request->getData('image')->getStream()->getMetadata('uri'));
                     if ($result) {
                       $agent->image = $result;
                       $agent->setDirty('image',true);
@@ -365,15 +365,15 @@ class AgentsController extends AppController
 
             $agent = $this->Agents->patchEntity($agent, $data);
             if ($this->request->getData('image')) {
-              if ($this->request->getData('image.error') == 0 && !empty(getimagesize($this->request->getData('image.tmp_name')))) {
+              if ($this->request->getData('image')->getError() == 0 && !empty(getimagesize($this->request->getData('image')->getStream()->getMetadata('uri')))) {
                 // $dir = new Folder(WWW_ROOT.'img'.DS.'agents'.DS.$agent->id,true,0775);
                 // $filename = $agent->id.DS.$this->request->getData('image.name');
                 // move_uploaded_file($this->request->getData('image.tmp_name'), WWW_ROOT.'img'.DS.'agents'.DS.$filename);
                 // $agent->image = '/img/agents/'.str_replace(DS, '/', $filename);
                 $this->S3Public->deleteObject($agent->image);
-                $filename = $agent->id.'/'.$this->request->getData('image.name');
+                $filename = $agent->id.'/'.$this->request->getData('image')->getClientFilename();
                 $image_filename = 'agents/'.$filename;
-                $result = $this->S3Public->putObject($image_filename,$this->request->getData('image.tmp_name'));
+                $result = $this->S3Public->putObject($image_filename,$this->request->getData('image')->getStream()->getMetadata('uri'));
                 $agent->image = $result;
                 $agent->setDirty('image',true);
               }
