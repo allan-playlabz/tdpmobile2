@@ -1,0 +1,1435 @@
+# LANGUAGE translation of CakePHP Application
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2023-04-13 12:37+0800\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: Controller/AgentTopupsController.php:87
+msgid "The agent topup has been saved."
+msgstr "代理充值成功"
+
+#: Controller/AgentTopupsController.php:107
+msgid "Invalid image."
+msgstr "图片无效"
+
+#: Controller/AgentTopupsController.php:111
+msgid "Invalid file. Please, try again."
+msgstr "无效的文件，请重试"
+
+#: Controller/AgentTopupsController.php:115
+msgid "Please provide an image and try again."
+msgstr "请重新上传图片后再尝试"
+
+#: Controller/AgentTopupsController.php:117
+msgid "The agent topup could not be saved. Please, try again."
+msgstr "代理充值未成功，请重试"
+
+#: Controller/AgentUsersController.php:69
+#: Controller/AgentUsersController.php:142
+msgid "Wrong login information."
+msgstr "登陆信息错误"
+
+#: Controller/AgentUsersController.php:130
+msgid "We don't recognize the IP address ({0}) you are using. Please check your email for your One Time Password (OTP)."
+msgstr "我们无法识别您正在使用的IP地址({0})。一次性密码已发送到您的Email，请查收（OTP）"
+
+#: Controller/AgentUsersController.php:157
+msgid "You have successfully changed your password."
+msgstr "更改密码成功"
+
+#: Controller/AgentUsersController.php:161
+msgid "Password change failed. Please, try again."
+msgstr "密码更改失败，请重试"
+
+#: Controller/AgentUsersController.php:164
+msgid "Please enter your old password correctly."
+msgstr "旧密码不正确"
+
+#: Controller/AgentUsersController.php:177
+#: Controller/AgentUsersController.php:186
+#: Controller/AgentUsersController.php:195
+#: Controller/AgentUsersController.php:204
+msgid "Session has expired. Please log in again."
+msgstr "会话已过期，请重新登陆"
+
+#: Controller/AgentUsersController.php:225
+msgid "Incorrect OTP. Please try again."
+msgstr "一次性密码不正确，请重试"
+
+#: Controller/AgentUsersController.php:238
+msgid "Password reset link not found or expired."
+msgstr "密码重置链接已过期"
+
+#: Controller/AgentUsersController.php:252
+msgid "You have successfully set your new password"
+msgstr "您已成功设置新密码"
+
+#: Controller/AgentUsersController.php:271
+msgid "Your password has been successfully set."
+msgstr "密码设置成功"
+
+#: Controller/AgentUsersController.php:276
+msgid "There is an error setting your password."
+msgstr "设置密码时出错"
+
+#: Controller/AgentUsersController.php:280
+msgid "Password and confirm password did not match. Please check and try again."
+msgstr "确认密码不匹配，请检查并重试"
+
+#: Controller/AgentUsersController.php:307
+msgid "You should receive an email to reset your password. Please check your email and click the link provided within 24 hours."
+msgstr "重置密码链接已发送至电子邮件。请检查您的电子邮件并在24小时内点击提供的链接重置"
+
+#: Controller/AgentUsersController.php:325
+msgid "Message successfully sent."
+msgstr "消息发送成功"
+
+#: Controller/AgentUsersController.php:342
+#: Controller/AgentUsersController.php:404
+#: Controller/AgentUsersController.php:410
+msgid "You are not authorized to access that location."
+msgstr "您无权访问该位置"
+
+#: Controller/AgentUsersController.php:373
+#: Controller/AgentUsersController.php:432
+msgid "The agent user has been saved."
+msgstr "代理用户已被保存"
+
+#: Controller/AgentUsersController.php:378
+msgid "The agent user could not be saved. Please, try again."
+msgstr "无法保存代理用户。请重试"
+
+#: Controller/AgentUsersController.php:436
+#: Controller/AgentsController.php:321
+#: Controller/AgentsController.php:403
+msgid "The agent could not be saved. Please, try again."
+msgstr "无法保存代理。请重试"
+
+#: Controller/AgentUsersController.php:451
+msgid "The password of this user has been reset."
+msgstr "此用户的密码已重置"
+
+#: Controller/AgentUsersController.php:454
+#: Controller/AgentUsersController.php:469
+msgid "The agent user password could not be reset. Please, try again or contact administrator."
+msgstr "无法重置代理用户密码。请重试或与管理员联系"
+
+#: Controller/AgentUsersController.php:466
+msgid "The agent user has been successfully suspended."
+msgstr "代理用户已成功挂起"
+
+#: Controller/AgentsController.php:309
+#: Controller/AgentsController.php:400
+msgid "The agent has been saved."
+msgstr "代理已保存"
+
+#: Controller/AgentsController.php:311
+msgid "New agent user created."
+msgstr "创建了新的代理用户"
+
+#: Controller/AgentsController.php:342
+msgid "The sub agent has been saved."
+msgstr "子代理已保存"
+
+#: Controller/AgentsController.php:346
+msgid "The sub agent could not be saved. Please, try again."
+msgstr "无法保存子代理。请重试"
+
+#: Controller/AgentsController.php:434
+msgid "API Key and Secret Key are generated."
+msgstr "生成API密钥和密钥"
+
+#: Controller/AgentsController.php:436
+msgid "API Key and Secret Key could not be generated. Please, try again."
+msgstr "无法生成API密钥和密钥。请重试"
+
+#: Controller/AgentsController.php:457
+msgid "The agent has been suspended."
+msgstr "代理已被暂停"
+
+#: Controller/AgentsController.php:459
+msgid "The agent could not be suspended. Please, try again."
+msgstr "无法暂停代理。请重试"
+
+#: Controller/AgentsSignupsController.php:54
+msgid "The information could not be saved. Please, try again."
+msgstr "无法保存信息。请重试"
+
+#: Controller/AttractionsController.php:216
+#: Controller/OrdersController.php:199
+msgid "Cannot exceed max allowed quantity ({0})"
+msgstr "不能超过允许的最大数量（｛0｝）"
+
+#: Controller/AttractionsController.php:237
+#: Controller/AttractionsController.php:240
+msgid " cannot be purchased together with the tickets in your cart."
+msgstr "不能与购物车中的门票一起购买"
+
+#: Controller/AttractionsController.php:254
+#: Controller/OrdersController.php:189
+msgid "Sorry, you have exceeded max quantity {0} of "
+msgstr "对不起，超出最大购买数量｛0｝"
+
+#: Controller/AttractionsController.php:300
+msgid "Successfully added {0} to cart. Go to <a href=\"{1}\">cart</a> now."
+msgstr "已成功将｛0｝添加到购物车。正在跳转到<a href=\“｛1｝\>购物车</a>"
+
+#: Controller/AttractionsController.php:324
+#: Controller/AttractionsController.php:328
+msgid "This merchant's tickets cannot be bought with other merchants"
+msgstr "此门票不能与其他门票一起购买"
+
+#: Controller/AttractionsController.php:331
+msgid "Only tickets from the same merchant as those in your cart can be added to cart"
+msgstr "只有来自与您购物车中相同景点门票才能添加到购物车中"
+
+#: Controller/AttractionsController.php:407
+#: Controller/AttractionsController.php:413
+#: Controller/AttractionsController.php:420
+msgid "Not enough vouchers. Only {0} left."
+msgstr "代金券不足。剩下｛0｝张"
+
+#: Controller/OrdersController.php:168
+#: Controller/OrdersController.php:174
+#: Controller/OrdersController.php:1881
+#: Controller/OrdersController.php:1891
+msgid "Sorry you have exceeded available {0} tickets."
+msgstr "很抱歉，超过可用的｛0｝张门票"
+
+#: Controller/OrdersController.php:179
+msgid "Minimum quantity for {0} should be {1}."
+msgstr "｛0｝的最小数量应为｛1｝"
+
+#: Controller/OrdersController.php:279
+msgid "Order Tracking Number already exists. Tracking Number should be unique or empty."
+msgstr "订单编号重复，编号应唯一或为空"
+
+#: Controller/OrdersController.php:286
+msgid " Unable to create order."
+msgstr "无法创建订单"
+
+#: Controller/OrdersController.php:291
+msgid "Unexpected error occured. Please contact admin."
+msgstr "发生意外错误。请与管理员联系"
+
+#: Controller/OrdersController.php:388
+#: Controller/OrdersController.php:401
+msgid "Your shopping cart has change! Please re-enter the information needed."
+msgstr "您的购物车已更改！请重新输入所需信息"
+
+#: Controller/OrdersController.php:405
+msgid "No vouchers available this time. Please contact admin."
+msgstr "此订单没有可用的代金券。请联系管理员"
+
+#: Controller/OrdersController.php:437
+msgid "Order not found. Please contact admin."
+msgstr "未找到订单。请与管理员联系"
+
+#: Controller/OrdersController.php:487
+msgid "Selected payment method cannot be processed"
+msgstr "无法处理选定的付款方式"
+
+#: Controller/OrdersController.php:642
+#: Controller/OrdersController.php:1698
+#: Controller/OrdersController.php:1701
+#: Controller/OrdersController.php:1704
+#: Controller/OrdersController.php:1706
+msgid "Order not found."
+msgstr "未找到订单"
+
+#: Controller/OrdersController.php:651
+msgid "Invalid payment."
+msgstr "无效付款"
+
+#: Controller/OrdersController.php:829
+#: Controller/OrdersController.php:840
+#: Controller/OrdersController.php:851
+msgid "Not enough stock for {0} - {1} Only {2} left. Please call administrator. "
+msgstr "库存不足，无法容纳｛0｝-｛1｝，只剩下｛2｝。请联系管理员"
+
+#: Controller/OrdersController.php:1756
+msgid "Successfully cancelled voucher {0}"
+msgstr "已成功取消代金券｛0｝"
+
+#: Controller/OrdersController.php:1765
+msgid "There was an error cancelling voucher {0}."
+msgstr "取消代金券｛0｝时出错。"
+
+#: Controller/OrdersController.php:1768
+#: Controller/OrdersController.php:1770
+msgid "There was an error cancelling voucher {0}. {1}"
+msgstr "取消代金券｛0｝时出错。｛1｝"
+
+#: Template/AgentTopups/add.ctp:11
+msgid "New Topup"
+msgstr "新充值"
+
+#: Template/AgentTopups/add.ctp:20
+#: Template/Agents/add.ctp:62
+#: Template/Agents/edit.ctp:21
+#: Template/AgentsSignups/add.ctp:94
+#: Template/Orders/add.ctp:31
+msgid "Submit"
+msgstr "提交"
+
+#: Template/AgentTopups/index.ctp:10
+msgid "Agent Topups"
+msgstr "代理充值"
+
+#: Template/AgentTopups/index.ctp:22
+#: Template/Agents/add.ctp:9
+#: Template/Agents/index.ctp:9
+#: Template/Agents/index.ctp:59
+#: Template/Orders/add.ctp:9
+msgid "Actions"
+msgstr "操作"
+
+#: Template/AgentTopups/index.ctp:32
+#: Template/Agents/index.ctp:97
+msgid "View"
+msgstr "查看"
+
+#: Template/AgentTopups/index.ctp:41
+#: Template/Agents/index.ctp:107
+#: Template/Attractions/index.ctp:125
+#: Template/CreditLogs/index.ctp:29
+#: Template/Orders/index.ctp:86
+#: Template/Orders/my_tickets.ctp:94
+#: Template/Reports/transactions.ctp:54
+msgid "first"
+msgstr "首页"
+
+#: Template/AgentTopups/index.ctp:42
+#: Template/Agents/index.ctp:108
+#: Template/Attractions/index.ctp:126
+#: Template/CreditLogs/index.ctp:30
+#: Template/Orders/index.ctp:87
+#: Template/Orders/my_tickets.ctp:95
+#: Template/Reports/transactions.ctp:55
+msgid "previous"
+msgstr "上一页"
+
+#: Template/AgentTopups/index.ctp:44
+#: Template/Agents/index.ctp:110
+#: Template/Attractions/index.ctp:128
+#: Template/CreditLogs/index.ctp:32
+#: Template/Orders/index.ctp:89
+#: Template/Orders/my_tickets.ctp:97
+#: Template/Reports/transactions.ctp:57
+msgid "next"
+msgstr "下一页"
+
+#: Template/AgentTopups/index.ctp:45
+#: Template/Agents/index.ctp:111
+#: Template/Attractions/index.ctp:129
+#: Template/CreditLogs/index.ctp:33
+#: Template/Orders/index.ctp:90
+#: Template/Orders/my_tickets.ctp:98
+#: Template/Reports/transactions.ctp:58
+msgid "last"
+msgstr "尾页"
+
+#: Template/AgentTopups/index.ctp:47
+#: Template/Agents/index.ctp:113
+#: Template/Attractions/index.ctp:131
+#: Template/CreditLogs/index.ctp:35
+#: Template/Orders/index.ctp:92
+#: Template/Orders/my_tickets.ctp:100
+#: Template/Reports/transactions.ctp:60
+msgid "Page {{page}} of {{pages}}, showing {{current}} record(s) out of {{count}} total"
+msgstr "第{{page}}页，共{{current}}页"
+
+#: Template/AgentTopups/view.ctp:12
+#: Template/AgentTopups/view.ctp:30
+msgid "Approved By"
+msgstr "批准人"
+
+#: Template/AgentTopups/view.ctp:17
+#: Template/Reports/credits.ctp:27
+#: Template/Reports/topups.ctp:30
+#: Template/Reports/usage.ctp:28
+msgid "Amount"
+msgstr "金额"
+
+#: Template/AgentTopups/view.ctp:21
+msgid "Topup Date"
+msgstr "充值日期"
+
+#: Template/AgentTopups/view.ctp:25
+msgid "Image"
+msgstr "图片"
+
+#: Template/AgentTopups/view.ctp:35
+#: Template/Orders/checkout.ctp:112
+#: Template/Reports/credits.ctp:30
+#: Template/Reports/topups.ctp:33
+#: Template/Reports/usage.ctp:31
+msgid "Remarks"
+msgstr "备注"
+
+#: Template/AgentTopups/view.ctp:40
+msgid "Id"
+msgstr "消息Id"
+
+#: Template/AgentTopups/view.ctp:44
+msgid "Created"
+msgstr "已创建"
+
+#: Template/AgentTopups/view.ctp:48
+msgid "Modified"
+msgstr "已修改"
+
+#: Template/AgentUsers/add.ctp:14
+#: Template/AgentUsers/change_password.ctp:23
+msgid "Save"
+msgstr "保存"
+
+#: Template/AgentUsers/change_password.ctp:3
+msgid "Change Password"
+msgstr "更改密码"
+
+#: Template/AgentUsers/contact.ctp:5
+#: Template/Layout/default.ctp:88
+msgid "Contact Us"
+msgstr "联系我们"
+
+#: Template/AgentUsers/contact.ctp:11
+msgid "Send"
+msgstr "发送"
+
+#: Template/AgentUsers/edit.ctp:11
+msgid "Edit Account Details"
+msgstr "编辑帐户详细信息"
+
+#: Template/AgentUsers/edit.ctp:16
+msgid "Update"
+msgstr "更新"
+
+#: Template/AgentUsers/otp.ctp:12
+msgid "LOG IN"
+msgstr "登录"
+
+#: Template/AgentUsers/view.ctp:36
+#: Template/Agents/view.ctp:22
+msgid "My Purchases"
+msgstr "我的购买"
+
+#: Template/Agents/add.ctp:10
+#: Template/Orders/add.ctp:11
+msgid "List Agents"
+msgstr "导出代理"
+
+#: Template/Agents/add.ctp:11
+msgid "List Master Agents"
+msgstr "导出主代理"
+
+#: Template/Agents/add.ctp:12
+msgid "New Master Agent"
+msgstr "新主代理"
+
+#: Template/Agents/add.ctp:13
+#: Template/Agents/index.ctp:11
+msgid "List Agent Topups"
+msgstr "导出代理充值"
+
+#: Template/Agents/add.ctp:14
+#: Template/Agents/index.ctp:12
+msgid "New Agent Topup"
+msgstr "新代理充值"
+
+#: Template/Agents/add.ctp:15
+#: Template/Agents/index.ctp:13
+msgid "List Credit Logs"
+msgstr "导出信用日志"
+
+#: Template/Agents/add.ctp:16
+#: Template/Agents/index.ctp:14
+msgid "New Credit Log"
+msgstr "新建信用日志"
+
+#: Template/Agents/add.ctp:17
+#: Template/Agents/index.ctp:15
+msgid "List Settlement Agents"
+msgstr "导出结算代理"
+
+#: Template/Agents/add.ctp:18
+#: Template/Agents/index.ctp:16
+msgid "New Settlement Agent"
+msgstr "新结算代理"
+
+#: Template/Agents/add.ctp:19
+#: Template/Agents/index.ctp:17
+#: Template/Orders/add.ctp:10
+msgid "List Orders"
+msgstr "导出订单"
+
+#: Template/Agents/add.ctp:20
+#: Template/Agents/index.ctp:18
+msgid "New Order"
+msgstr "新订单"
+
+#: Template/Agents/add.ctp:21
+#: Template/Agents/index.ctp:19
+msgid "List Tickets"
+msgstr "导出订单"
+
+#: Template/Agents/add.ctp:22
+#: Template/Agents/index.ctp:20
+msgid "New Ticket"
+msgstr "新门票"
+
+#: Template/Agents/add.ctp:28
+msgid "Add Agent"
+msgstr "添加代理"
+
+#: Template/Agents/edit.ctp:10
+msgid "Edit Agent"
+msgstr "编辑代理"
+
+#: Template/Agents/index.ctp:10
+#: Template/Orders/add.ctp:12
+msgid "New Agent"
+msgstr "新代理"
+
+#: Template/Agents/index.ctp:24
+msgid "Agents"
+msgstr "代理"
+
+#: Template/Agents/index.ctp:98
+msgid "Edit"
+msgstr "编辑"
+
+#: Template/Agents/index.ctp:99
+msgid "Delete"
+msgstr "删除"
+
+#: Template/Agents/index.ctp:99
+msgid "Are you sure you want to delete # {0}?"
+msgstr "您确定要删除#{0}吗？"
+
+#: Template/AgentsSignups/add.ctp:73
+msgid "Sign up"
+msgstr "注册"
+
+#: Template/Attractions/index.ctp:15
+msgid "Name of Attractions"
+msgstr "景点名称"
+
+#: Template/Attractions/index.ctp:16
+msgid "Search"
+msgstr "搜索"
+
+#: Template/Attractions/index.ctp:17
+msgid "Show All"
+msgstr "显示全部"
+
+#: Template/Attractions/index.ctp:79
+msgid "Please select date"
+msgstr "请选择日期"
+
+#: Template/Attractions/index.ctp:89
+msgid "Open Date"
+msgstr "开放日期"
+
+#: Template/Attractions/index.ctp:91
+msgid "Fixed Date"
+msgstr "固定日期"
+
+#: Template/Attractions/index.ctp:94
+msgid "Fixed Date/Time"
+msgstr "固定日期/时间"
+
+#: Template/Attractions/index.ctp:106
+msgid "Instant"
+msgstr "即时"
+
+#: Template/Attractions/index.ctp:108
+msgid "Request"
+msgstr "请求"
+
+#: Template/Attractions/index.ctp:113
+msgid "Require info"
+msgstr "需要信息"
+
+#: Template/Attractions/index.ctp:136
+msgid "No attractions found."
+msgstr "未找到景点"
+
+#: Template/Attractions/view.ctp:12
+msgid "Home"
+msgstr "主页"
+
+#: Template/Attractions/view.ctp:30
+msgid "Terms And Conditions"
+msgstr "条款和条件"
+
+#: Template/Attractions/view.ctp:46
+msgid "Options"
+msgstr "选项"
+
+#: Template/Attractions/view.ctp:50
+msgid "Select Date"
+msgstr "选择日期"
+
+#: Template/Attractions/view.ctp:56
+msgid "Please select time"
+msgstr "请选择时间"
+
+#: Template/Attractions/view.ctp:56
+msgid "Select Time"
+msgstr "选择时间"
+
+#: Template/Attractions/view.ctp:62
+msgid "Select ticket(s)"
+msgstr "选择门票"
+
+#: Template/Attractions/view.ctp:84
+#: Template/Attractions/view.ctp:146
+msgid "Any Time"
+msgstr "任何时间"
+
+#: Template/Attractions/view.ctp:107
+#: Template/Attractions/view.ctp:178
+msgid "Sold out"
+msgstr "已售罄"
+
+#: Template/Attractions/view.ctp:161
+msgid "Valid From"
+msgstr "有效起始日期"
+
+#: Template/Attractions/view.ctp:163
+msgid "Valid for"
+msgstr "有效期"
+
+#: Template/Attractions/view.ctp:206
+msgid "Add to Cart"
+msgstr "添加到购物车"
+
+#: Template/Attractions/view.ctp:207
+msgid "Buy Now"
+msgstr "立即购买"
+
+#: Template/Attractions/view.ctp:209
+msgid "View Cart"
+msgstr "查看购物车"
+
+#: Template/Attractions/view.ctp:233
+#: Template/Orders/cart.ctp:68
+#: Template/Orders/cart.ctp:102
+msgid "Total"
+msgstr "总计"
+
+#: Template/Attractions/view.ctp:234
+msgid "No tickets found!"
+msgstr "未找到门票！"
+
+#: Template/Attractions/view.ctp:235
+msgid "Select time"
+msgstr "选择时间"
+
+#: Template/CreditLogs/index.ctp:3
+msgid "Credit Logs"
+msgstr "信用日志"
+
+#: Template/Element/selected_tickets.ctp:33
+msgid "Subtotal"
+msgstr "小计"
+
+#: Template/Element/selected_tickets.ctp:36
+#: Template/Orders/confirmation.ctp:199
+msgid "Grand Total"
+msgstr "总计"
+
+#: Template/Layout/default.ctp:63
+msgid "Credits"
+msgstr "余额"
+
+#: Template/Layout/default.ctp:66
+msgid "Announcement"
+msgstr "公告"
+
+#: Template/Layout/default.ctp:79
+msgid "My Account"
+msgstr "我的帐户"
+
+#: Template/Layout/default.ctp:80
+#: Template/Orders/index.ctp:50
+msgid "My Orders"
+msgstr "我的订单"
+
+#: Template/Layout/default.ctp:81
+#: Template/Orders/my_tickets.ctp:49
+msgid "My Tickets"
+msgstr "我的门票"
+
+#: Template/Layout/default.ctp:82
+#: Template/Reports/topups.ctp:12
+msgid "Topup History"
+msgstr "充值历史记录"
+
+#: Template/Layout/default.ctp:83
+msgid "Sales Report"
+msgstr "销售报告"
+
+#: Template/Layout/default.ctp:86
+msgid "Agent Users"
+msgstr "代理用户"
+
+#: Template/Layout/default.ctp:89
+msgid "Logout"
+msgstr "注销"
+
+#: Template/Layout/error.ctp:35
+#: Template/Orders/confirmation.ctp:340
+#: Template/Error/error400.ctp:36
+#: Template/Error/error500.ctp:41
+msgid "Error"
+msgstr "错误"
+
+#: Template/Layout/error.ctp:43
+#: Template/Orders/checkout.ctp:17
+#: Template/Orders/confirmation.ctp:11
+msgid "Back"
+msgstr "返回"
+
+#: Template/Orders/add.ctp:13
+msgid "List Order Items"
+msgstr "列出订单项目"
+
+#: Template/Orders/add.ctp:14
+msgid "New Order Item"
+msgstr "新订单项目"
+
+#: Template/Orders/add.ctp:20
+msgid "Add Order"
+msgstr "添加订单"
+
+#: Template/Orders/cart.ctp:14
+msgid "Your Cart"
+msgstr "您的购物车"
+
+#: Template/Orders/cart.ctp:57
+msgid "Remove {0} from cart?"
+msgstr "从购物车中删除｛0｝？"
+
+#: Template/Orders/cart.ctp:73
+msgid "Checkout"
+msgstr "结算"
+
+#: Template/Orders/checkout.ctp:35
+msgid "1. Customer Details"
+msgstr "1.客户详细信息"
+
+#: Template/Orders/checkout.ctp:40
+#: Template/Orders/confirmation.ctp:30
+msgid "Order Tracking Number"
+msgstr "订单跟踪号码"
+
+#: Template/Orders/checkout.ctp:43
+#: Template/Orders/confirmation.ctp:33
+msgid "First Name (English only)*"
+msgstr "名字（英文或拼音）*"
+
+#: Template/Orders/checkout.ctp:46
+#: Template/Orders/confirmation.ctp:36
+msgid "Last Name (English only)*"
+msgstr "姓氏（英文或拼音）*"
+
+#: Template/Orders/checkout.ctp:51
+#: Template/Orders/confirmation.ctp:41
+msgid "Email*"
+msgstr "电子邮件*"
+
+#: Template/Orders/checkout.ctp:54
+#: Template/Orders/confirmation.ctp:44
+msgid "Mobile*"
+msgstr "手机号码*"
+
+#: Template/Orders/checkout.ctp:62
+msgid "2. Order Information"
+msgstr "2。订单信息"
+
+#: Template/Orders/checkout.ctp:80
+msgid "Redeem as single code"
+msgstr "兑换为单一代码"
+
+#: Template/Orders/checkout.ctp:88
+msgid "Passport Number *"
+msgstr "护照号码*"
+
+#: Template/Orders/checkout.ctp:91
+msgid "Passport Expiry *"
+msgstr "护照有效期*"
+
+#: Template/Orders/checkout.ctp:96
+msgid "Passport First Name *"
+msgstr "护照名字（英文或拼音）*"
+
+#: Template/Orders/checkout.ctp:99
+msgid "Passport Last Name *"
+msgstr "护照姓氏（英文或拼音）*"
+
+#: Template/Orders/checkout.ctp:104
+msgid "Date of Birth *"
+msgstr "出生日期*"
+
+#: Template/Orders/checkout.ctp:107
+msgid "Nationality *"
+msgstr "国籍*"
+
+#: Template/Orders/checkout.ctp:220
+msgid "Continue"
+msgstr "继续"
+
+#: Template/Orders/confirmation.ctp:86
+msgid "Passport Number"
+msgstr "护照号码"
+
+#: Template/Orders/confirmation.ctp:87
+msgid "Passport Expiry"
+msgstr "护照有效期"
+
+#: Template/Orders/confirmation.ctp:88
+msgid "First Name"
+msgstr "名字（拼音）"
+
+#: Template/Orders/confirmation.ctp:89
+msgid "Last Name"
+msgstr "姓氏（拼音）"
+
+#: Template/Orders/confirmation.ctp:90
+msgid "Date of Birth"
+msgstr "出生日期"
+
+#: Template/Orders/confirmation.ctp:91
+msgid "Nationality"
+msgstr "国籍"
+
+#: Template/Orders/confirmation.ctp:109
+msgid "Transfer Details"
+msgstr "转账详细信息"
+
+#: Template/Orders/confirmation.ctp:120
+msgid "Return Transfer Details"
+msgstr "返回转账详细信息"
+
+#: Template/Orders/confirmation.ctp:137
+msgid "Payment Information"
+msgstr "付款信息"
+
+#: Template/Orders/confirmation.ctp:148
+msgid "Pay By *"
+msgstr "付款方式*"
+
+#: Template/Orders/confirmation.ctp:159
+msgid "Pay Now"
+msgstr "立即付款"
+
+#: Template/Orders/confirmation.ctp:229
+msgid "Processing"
+msgstr "正在处理"
+
+#: Template/Orders/confirmation.ctp:340
+msgid "There is an error proccessing this order. Please try again or contact admin."
+msgstr "处理此订单时出错。请重试或与管理员联系"
+
+#: Template/Orders/confirmation.ctp:342
+msgid "There is an error proccessing this order. Please try again or contact admin"
+msgstr "处理此订单时出错。请重试或与管理员联系"
+
+#: Template/Orders/confirmation.ctp:349
+msgid "We are processing your order. Please do not navigate away from this page</div>"
+msgstr "我们正在处理您的订单。请不要离开此页面</div>"
+
+#: Template/Orders/confirmation.ctp:358
+msgid "Please choose a payment method!"
+msgstr "请选择付款方式！"
+
+#: Template/Reports/credits.ctp:8
+#: Template/Reports/credits.ctp:19
+msgid "Credits History"
+msgstr "积分历史记录"
+
+#: Template/Reports/credits.ctp:11
+#: Template/Reports/topups.ctp:15
+#: Template/Reports/transactions.ctp:12
+#: Template/Reports/transactions.ctp:22
+#: Template/Reports/usage.ctp:11
+msgid "Transaction History"
+msgstr "交易历史记录"
+
+#: Template/Reports/credits.ctp:12
+#: Template/Reports/transactions.ctp:15
+#: Template/Reports/usage.ctp:12
+msgid "Top-up History"
+msgstr "充值历史记录"
+
+#: Template/Reports/credits.ctp:28
+#: Template/Reports/topups.ctp:31
+#: Template/Reports/usage.ctp:29
+msgid "Updated Date"
+msgstr "更新日期"
+
+#: Template/Reports/credits.ctp:29
+#: Template/Reports/usage.ctp:30
+msgid "Ref ID"
+msgstr "编号ID"
+
+#: Template/Reports/index.ctp:12
+msgid "Generate Report"
+msgstr "生成报告"
+
+#: Template/Reports/topups.ctp:22
+msgid "Topup Histoy"
+msgstr "充值历史记录"
+
+#: Template/Reports/topups.ctp:22
+msgid "Export to CSV"
+msgstr "导出到CSV"
+
+#: Template/Reports/topups.ctp:32
+msgid "Top-up By"
+msgstr "充值人"
+
+#: Template/Reports/transactions.ctp:26
+msgid "Search Order Reference/Tracking No."
+msgstr "搜索订单参考/跟踪编号"
+
+#: Template/Reports/usage.ctp:8
+#: Template/Reports/usage.ctp:20
+msgid "Usage History"
+msgstr "使用历史记录"
+
+#: Template/Error/error400.ctp:37
+msgid "The requested address {0} was not found on this server."
+msgstr "在此服务器上找不到请求的地址｛0｝"
+
+#: Template/Error/error500.ctp:39
+msgid "An Internal Error Has Occurred"
+msgstr "发生内部错误"
+
+msgid "Today"
+msgstr "今天"
+
+msgid "Tomorrow"
+msgstr "明天"
+
+msgid "English"
+msgstr "英文"
+
+msgid "Chinese"
+msgstr "中文"
+
+msgid "Categories"
+msgstr "类别"
+
+#: Template/Orders/extract/thank_you.ctp:3
+msgid "Thank you for your purchase!"
+msgstr "感谢您的购买！"
+
+#: Template/Orders/extract/thank_you.ctp:6
+msgid "Details"
+msgstr "详细信息"
+
+#: Template/Orders/extract/thank_you.ctp:9
+msgid "Transaction ID"
+msgstr "交易ID"
+
+#: Template/Orders/extract/thank_you.ctp:10
+msgid "Order Reference No."
+msgstr "订单参考号"
+
+#: Template/Orders/extract/thank_you.ctp:11
+msgid "Created"
+msgstr "已创建"
+
+#: Template/Orders/extract/thank_you.ctp:12
+msgid "Modified"
+msgstr "已修改"
+
+#: Template/Orders/extract/thank_you.ctp:14
+msgid "Reseller"
+msgstr "分销商"
+
+#: Template/Orders/extract/thank_you.ctp:15
+msgid "Reseller Reference No."
+msgstr "分销商参考号"
+
+#: Template/Orders/extract/thank_you.ctp:16
+#: Template/Orders/extract/thank_you.ctp:71
+msgid "Status"
+msgstr "状态"
+
+#: Template/Orders/extract/thank_you.ctp:25
+msgid "Customer Information"
+msgstr "客户信息"
+
+#: Template/Orders/extract/thank_you.ctp:41
+msgid "Payment Information"
+msgstr "付款信息"
+
+#: Template/Orders/extract/thank_you.ctp:45
+msgid "Subtotal"
+msgstr "小计"
+
+#: Template/Orders/extract/thank_you.ctp:49
+msgid "Convenience Fee"
+msgstr "服务费"
+
+#: Template/Orders/extract/thank_you.ctp:53
+#: Template/Orders/extract/thank_you.ctp:70
+msgid "Total"
+msgstr "总计"
+
+#: Template/Orders/extract/thank_you.ctp:58
+msgid "Ticket Info"
+msgstr "票务信息"
+
+#: Template/Orders/extract/thank_you.ctp:58
+msgid "Download All"
+msgstr "全部下载"
+
+#: Template/Orders/extract/thank_you.ctp:64
+msgid "Ticket ID"
+msgstr "票证ID"
+
+#: Template/Orders/extract/thank_you.ctp:65
+msgid "Confirmation Code"
+msgstr "确认码"
+
+#: Template/Orders/extract/thank_you.ctp:66
+msgid "Purchased Item"
+msgstr "已购买物品"
+
+#: Template/Orders/extract/thank_you.ctp:67
+msgid "Ticket Name & Type"
+msgstr "门票名称和类型"
+
+#: Template/Orders/extract/thank_you.ctp:68
+msgid "Qty"
+msgstr "数量"
+
+#: Template/Orders/extract/thank_you.ctp:69
+msgid "Price"
+msgstr "价格"
+
+#: Template/Orders/extract/thank_you.ctp:124
+msgid "There is an error processing this order. Please try again or contact admin."
+msgstr "处理此订单时出错。请重试或与管理员联系"
+
+#: Template/Orders/extract/thank_you.ctp:126
+msgid "We are processing your order. Please do not navigate away from this page. We will show you the details here once done."
+msgstr "我们正在处理您的订单。请不要离开此页面。完成后，我们将在此处向您显示详细信息"
+
+#: Template/Orders/extract/thank_you.ctp:130
+msgid "<p>We are completing your order now.</p>\n\t\t<p>This may take typically 5-15 minutes. During peak period, it may take up to 30 minutes for the attraction to return with a confirmation.</p>\n\t\t<p>You will receive an email with the tickets once completed.</p>\n\t\t<p>For assistance on your ticket or if you do not receive the final ticket after 30 minutes, please get in touch with our Customer Service Agent with the following Order Reference: <?= $order->order_ref_id ?>.</p>"
+msgstr "<p>我们现在正在完成您的订单，</p>\n\t\t\t<p>这通常需要5-15分钟。高峰期可能需要30分钟才能返回并确认。</p>\n\t<p>一旦完成，您将收到一封包含门票的电子邮件。</p>\n\t<p>如需任何帮助，或超时未收到确 认邮件，请与客服联系且提供以下订单参考号： <?= $order->order_ref_id ?>.</p>"
+
+#: Template/Orders/extract/thank_you.ctp:135
+msgid "We are processing your order. Please do not navigate away from this page</div>"
+msgstr "我们正在处理您的订单。请不要离开此页面</div>"
+
+msgid "Confirmation"
+msgstr "确认"
+
+msgid "Credits (Balance: S{0})"
+msgstr "积分（余额：S{0}）"
+
+msgid "Topup"
+msgstr "充值"
+
+msgid "Credit Card"
+msgstr "信用卡"
+
+msgid "Alipay"
+msgstr "支付宝"
+
+msgid "Wechat Pay"
+msgstr "微信支付"
+
+msgid "{0} days"
+msgstr "{0} 天"
+
+#: Template/AgentUsers/add.ctp:10
+msgid "Active"
+msgstr "活动"
+
+#: Template/AgentUsers/add.ctp:10
+msgid "Inactive"
+msgstr "未激活"
+
+#: Template/AgentUsers/add.ctp:13
+msgid "Note: Account temporary password will be sent to users email."
+msgstr "注意：临时密码将通过电子邮件发送"
+
+#: Template/AgentUsers/edit.ctp:11
+msgid "Edit Account Details"
+msgstr "编辑帐户详细信息"
+
+#: Template/AgentUsers/edit.ctp:21
+msgid "Suspend"
+msgstr "暂停使用"
+
+#: Template/AgentUsers/edit.ctp:21
+msgid "Are you sure you want to suspend this user?"
+msgstr "您确定要暂停此用户吗？"
+
+#: Template/AgentUsers/forgot_password.ctp:4
+msgid "Forgot Password"
+msgstr "忘记密码"
+
+#: Template/AgentUsers/forgot_password.ctp:8
+msgid "Please enter your email to send the reset link."
+msgstr "请输入您的电子邮件以发送重置链接"
+
+#: Template/AgentUsers/forgot_password.ctp:11
+msgid "Send me the link"
+msgstr "确认发送"
+
+#: Template/AgentUsers/index.ctp:1
+msgid "Add User"
+msgstr "添加用户"
+
+#: Template/AgentUsers/index.ctp:8
+#: Template/AgentUsers/index.ctp:9
+#: Template/AgentUsers/index.ctp:10
+msgid "Name"
+msgstr "姓名（英文或拼音）"
+
+#: Template/AgentUsers/index.ctp:22
+#: Template/AgentUsers/reset_password.ctp:5
+msgid "Reset Password"
+msgstr "重置密码"
+
+#: Template/AgentUsers/index.ctp:22
+msgid "Are you sure you want to reset password of {0}"
+msgstr "您确定要重置 {0}的密码吗？"
+
+#: Template/AgentUsers/login.ctp:4
+msgid "Agent Login"
+msgstr "代理登录"
+
+#: Template/AgentUsers/login.ctp:6
+#: Template/AgentUsers/set_password.ctp:5
+msgid "Password"
+msgstr "密码"
+
+#: Template/AgentUsers/login.ctp:7
+msgid "Sign in"
+msgstr "登录"
+
+#: Template/AgentUsers/login.ctp:9
+msgid "Forgot password"
+msgstr "忘记密码"
+
+#: Template/AgentUsers/login.ctp:9
+msgid "Click"
+msgstr "点击"
+
+#: Template/AgentUsers/login.ctp:9
+msgid "here"
+msgstr "此处"
+
+#: Template/AgentUsers/login.ctp:9
+msgid "to reset"
+msgstr "重置密码"
+
+#: Template/AgentUsers/login.ctp:11
+msgid "No account yet"
+msgstr "还没有帐户"
+
+#: Template/AgentUsers/login.ctp:11
+msgid "Signup"
+msgstr "注册"
+
+#: Template/AgentUsers/login.ctp:11
+msgid "for free"
+msgstr "免费"
+
+#: Template/AgentUsers/otp.ctp:7
+msgid "OTP"
+msgstr "临时密码"
+
+#: Template/AgentUsers/otp.ctp:8
+msgid "Please enter your One Time Password (OTP) sent to your email."
+msgstr "请输入发送到您的电子邮件中的临时密码(OTP)"
+
+#: Template/AgentUsers/otp.ctp:10
+msgid "One Time Password"
+msgstr "一次性密码"
+
+#: Template/AgentUsers/otp.ctp:12
+msgid "LOG IN"
+msgstr "登录"
+
+#: Template/AgentUsers/otp.ctp:15
+msgid "Resend OTP"
+msgstr "重新发送临时密码"
+
+#: Template/AgentUsers/reset_password.ctp:6
+msgid "Hi {0}, please set a new password for your account."
+msgstr "您好{0}，请为您的帐户设置新密码。"
+
+#: Template/AgentUsers/reset_password.ctp:13
+#: Template/AgentUsers/set_password.ctp:3
+msgid "Set Password"
+msgstr "设置密码"
+
+#: Template/AgentUsers/set_password.ctp:4
+msgid "Please set your password to complete setting up your account"
+msgstr "请设置密码以完成帐户设置"
+
+#: Template/AgentUsers/set_password.ctp:6
+msgid "Confirm Password"
+msgstr "确认密码"
+
+#: Template/AgentUsers/view.ctp:21
+msgid "Current Credit"
+msgstr "当前信用"
+
+#: Template/AgentUsers/view.ctp:22
+msgid "Current Rebate"
+msgstr "当前折扣"
+
+#: Template/AgentUsers/view.ctp:24
+msgid "Edit"
+msgstr "编辑"
+
+#: Template/AgentUsers/view.ctp:28
+msgid "Top Up"
+msgstr "充值"
+
+#: Template/AgentUsers/view.ctp:36
+msgid "My Purchases"
+msgstr "我的购买"
+
+#: Template/AgentUsers/view.ctp:41
+msgid "Ref ID"
+msgstr "订单编号ID"
+
+#: Template/AgentUsers/view.ctp:42
+msgid "Tracking No"
+msgstr "订单追踪码号"
+
+#: Template/AgentUsers/view.ctp:43
+msgid "Items"
+msgstr "项目"
+
+#: Template/AgentUsers/view.ctp:44
+msgid "Status"
+msgstr "状态"
+
+#: Template/AgentUsers/view.ctp:45
+msgid "Amount"
+msgstr "金额"
+
+#: Template/AgentUsers/view.ctp:46
+msgid "Created"
+msgstr "已创建"
+
+#: Template/AgentUsers/view.ctp:70
+msgid "first"
+msgstr "第一页"
+
+#: Template/AgentUsers/view.ctp:71
+msgid "previous"
+msgstr "上一页"
+
+#: Template/AgentUsers/view.ctp:73
+msgid "next"
+msgstr "下一页"
+
+#: Template/AgentUsers/view.ctp:74
+msgid "last"
+msgstr "尾页"
+
+#: Template/AgentUsers/view.ctp:76
+msgid "Page {{page}} of {{pages}}, showing {{current}} record(s) out of {{count}} total"
+msgstr "第{{page}}页，共{{pages}}页"
+
+msgid "Sales Reports"
+msgstr "销售报告"
+
+msgid "No"
+msgstr "否"
+
+msgid "Date Issued"
+msgstr "发布日期"
+
+msgid "Time Issued"
+msgstr "发布时间"
+
+msgid "Rdemption Start Date"
+msgstr "请求开始日期"
+
+msgid "Rdemption End Date"
+msgstr "请求结束日期"
+
+msgid "Reseller Name"
+msgstr "分销商名称"
+
+msgid "Reseller Email"
+msgstr "分销商电子邮件"
+
+msgid "Order Tracking Number"
+msgstr "订单跟踪号码"
+
+msgid "Order Reference"
+msgstr "订单参考"
+
+msgid "Platform"
+msgstr "平台"
+
+msgid "Confirmation No."
+msgstr "确认号码"
+
+msgid "Merchant"
+msgstr "商家"
+
+msgid "Attraction Name"
+msgstr "景点名称"
+
+msgid "Product Type"
+msgstr "产品类型"
+
+msgid "Package Name"
+msgstr "包裹名称"
+
+msgid "Ticket Type"
+msgstr "票证类型"
+
+msgid "Customer Name"
+msgstr "客户名称"
+
+msgid "Payment Method"
+msgstr "付款方式"
+
+msgid "Sales Price"
+msgstr "销售价格"
+
+msgid "Quantity Issued"
+msgstr "发行量"
+
+msgid "Total Sales Price"
+msgstr "总售价"
+
+msgid"Name"
+msgstr "姓名"
+
+msgid"Email"
+msgstr "电子邮件"
+
+msgid"Mobile"
+msgstr "手机号"
+
+msgid"Product(s)"
+msgstr "产品"
+
+msgid"Payment Status"
+msgstr "付款状态"
+
+msgid"Purchase Date"
+msgstr "购买日期"
+
+msgid "Order Ref"
+msgstr "订单参考"
+
+msgid"Credits"
+msgstr "积分"
+
+msgid"Paid"
+msgstr "已付款"
+
+msgid"Cancel"
+msgstr "取消"
+
+msgid "Issue Start Date"
+msgstr "发布开始日期"
+
+msgid "Issue End Date"
+msgstr "发布结束日期"
+
+msgid "Code"
+msgstr "代码"
+
+msgid "Ticket"
+msgstr "门票"
+
+msgid "Date"
+msgstr "日期"
+
+msgid "Filter"
+msgstr "筛选"
+
+msgid "Cancelled"
+msgstr "已取消"
+
+msgid "Waiting"
+msgstr "等待"
+
+msgid "Completed"
+msgstr "已完成"
+
+msgid "Refunded"
+msgstr "退款"
+
+msgid "Failed"
+msgstr "失败"
+
+msgid "From"
+msgstr "发件人"
+
+msgid "To"
+msgstr "收件人"
+
+msgid "Valid"
+msgstr "有效"
+
+msgid "No transactions found."
+msgstr "未找到交易"
+
+msgid "Subject"
+msgstr ""
+
+msgid "Message"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Old Password"
+msgstr ""
+
+msgid "Approved"
+msgstr ""
+
+msgid "Scanned/Photo as proof of payment (allowed types jpg|png|gif|webp)"
+msgstr ""
+
+msgid "All fields are required"
+msgstr ""
+
+msgid "New"
+msgstr ""
+
+msgid "Download as Single PDF (New Request)"
+msgstr "请求合并PDF下载"
+
+msgid "Your request has been queued. Please wait for merge to complete."
+msgstr "你的申请正在处理中，请稍后……"
+
+msgid "Download as Single PDF (Ready)"
+msgstr "下载合并的PDF"
+
+msgid "Download as Single PDF (Processing)"
+msgstr "你的申请正在处理中，请稍后……"

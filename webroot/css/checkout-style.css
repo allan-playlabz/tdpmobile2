@@ -1,0 +1,69 @@
+/* GRAND TOTAL */
+.radio label {
+  display: block
+}
+.grandtotal-row {
+  font-size: 18px;
+}
+.footer-total {
+  background-color: #eee;
+}
+
+/* STEPS */
+.steps-progress {
+      counter-reset: step;
+  }
+  .steps-progress li {
+      list-style-type: none;
+      width: 33%;
+      float: left;
+      font-size: 12px;
+      position: relative;
+      text-align: center;
+      text-transform: uppercase;
+      color: #7d7d7d;
+  }
+  .steps-progress li:before {
+      width: 30px;
+      height: 30px;
+      content: counter(step);
+      counter-increment: step;
+      line-height: 30px;
+      border: 2px solid #7d7d7d;
+      display: block;
+      text-align: center;
+      margin: 0 auto 10px auto;
+      border-radius: 50%;
+      background-color: white;
+  }
+  .steps-progress li:after {
+      width: 100%;
+      height: 2px;
+      content: '';
+      position: absolute;
+      background-color: #7d7d7d;
+      top: 15px;
+      left: -50%;
+      z-index: -1;
+  }
+  .steps-progress li:first-child:after {
+      content: none;
+  }
+  .steps-progress li.active {
+      color: #0f83ff;
+  }
+  .steps-progress li.active:before {
+      border-color: #0f83ff;
+  }
+  .steps-progress li.active + li:after {
+      background-color: #0f83ff;
+  }
+
+.ticket-details-container .hr-50 {
+    width: 50%;
+    margin: 10px auto;
+    border-top: 1px solid #ddd;
+}
+.ticket-details-container .table th, .ticket-details-container .table td{
+    border: 0 none transparent;
+}
