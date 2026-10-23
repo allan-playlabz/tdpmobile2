@@ -91,7 +91,7 @@ class GenerateReportCommand extends Command
 
         $orders_query = $this->Orders->find()->where($conditions)
             ->contain(['AgentUsers' => ['Agents'], 'OrderItems' => ['Tickets' => ['Attractions'], 'Vouchers']])
-            ->order(['Orders.created' => 'ASC']);
+            ->orderBy(['Orders.created' => 'ASC']);
 
         $array_records = [];
         $array_records[] = ['Report Date', date('Y-m-d H:i:s')];

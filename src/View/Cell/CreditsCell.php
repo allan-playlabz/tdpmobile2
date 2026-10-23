@@ -21,7 +21,7 @@ class CreditsCell extends Cell
             $announcements = $this->Announcements->find()
                                                 ->where(['publish_start_date <='=>$now])
                                                 ->andWhere(['publish_end_date >='=>$now])
-                                                ->order(['publish_start_date'=>'desc']);
+                                                ->orderBy(['publish_start_date'=>'desc']);
             $current_agentuser->announcements_read = 1;
             foreach ($announcements as $key => $value) {
               if($value->publish_start_date>$current_agentuser->last_read_time) {

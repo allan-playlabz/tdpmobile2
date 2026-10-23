@@ -116,7 +116,7 @@ class AgentUsersController extends AppController
             }
 
             $agent_ipaddress = $this->UsersIpaddress->find('all',['valueField'=>'ip_address'])
-              ->where(['ip_address'=>$clientIp,'user_id'=>$auth_agent['id'],'type'=>'agent'])->limit(3)->order(['modified'=>'desc'])->first();
+              ->where(['ip_address'=>$clientIp,'user_id'=>$auth_agent['id'],'type'=>'agent'])->limit(3)->orderBy(['modified'=>'desc'])->first();
             if (empty($agent_ipaddress)) {
               $agent_ipaddress = $this->UsersIpaddress->addOrUpdate(['user_id'=>$auth_agent['id'],'ip_address'=>$clientIp,'type'=>'agent']);
             }

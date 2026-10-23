@@ -44,7 +44,7 @@ class CategoriesController extends AppController
       ->select(['Attractions.status','Attractions.id','Attractions.title','Attractions.pricing_type','Attractions.featured_image','settlement_agents.id','fixeddates_agents.id','settlement_agents.settlement_id'])
       ->where(['Attractions.status'=>'published'])
       ->where($conditions)
-      ->order(['display_position'=>'ASC','title'=>'ASC'])
+      ->orderBy(['display_position'=>'ASC','title'=>'ASC'])
       ->join(
         [[
           'table' => 'settlement_agents',
@@ -80,7 +80,7 @@ class CategoriesController extends AppController
           ->where(['SettlementAgents.attraction_id'=>$attraction->id])
           ->matching('SettlementAgents',function($q) use ($agent){
               return $q->where(['SettlementAgents.agent_id'=>$agent['agent_id']]);
-          })->order(['sequence'=>'asc'])->first();
+          })->orderBy(['sequence'=>'asc'])->first();
           if (!empty($attraction->ticket)) {
               
               if ($attraction->ticket->publish_start_date->addSeconds($attraction->ticket->cutoff_seconds)->isFuture()) {
@@ -105,12 +105,12 @@ class CategoriesController extends AppController
           $tickets = $this->Attractions->Tickets->find()
           // ->select(['Tickets.id'])
           // ->contain(['Fixeddates'=>function ($q) {
-          //   return $q->where(['date >='=>DateTime::now()])->limit(1)->order(['date'=>'ASC']);
+          //   return $q->where(['date >='=>DateTime::now()])->limit(1)->orderBy(['date'=>'ASC']);
           // }])
           ->where(['Tickets.attraction_id'=>$attraction->id])
           ->matching('FixeddatesAgents',function($q) use ($agent){
               return $q->where(['FixeddatesAgents.agent_id'=>$agent['agent_id']]);
-          })->order(['sequence'=>'asc'])->toArray();
+          })->orderBy(['sequence'=>'asc'])->toArray();
           if (!empty($tickets)) {
             $attraction->ticket = $tickets[0];
             $now = DateTime::now();
@@ -154,7 +154,7 @@ class CategoriesController extends AppController
                   ->contain(['ChildCategories' => [
                       'sort' => ['name' => 'asc']
                     ]])
-                  ->order(['Categories.name'=>'asc'])->toList();
+                  ->orderBy(['Categories.name'=>'asc'])->toList();
 
       $this->set(compact('attractions','categories','search','selected_categories'));
     }

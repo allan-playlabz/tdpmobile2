@@ -196,7 +196,7 @@ class AttractionsController extends AppController
                     ->contain(['ChildCategories' => [
                         'sort' => ['name' => 'asc']
                       ]])
-                    ->order(['Categories.name'=>'asc'])->toList();
+                    ->orderBy(['Categories.name'=>'asc'])->toList();
         if ($this->request->getSession()->check('language')) {
           foreach ($categories as $category) {
             Translator::translateCategory($this->request, $category);
@@ -206,7 +206,7 @@ class AttractionsController extends AppController
         $this->Cities = $this->fetchTable('Cities');
         $cities = $this->Cities->find()
           ->select(['id', 'country', 'name'])
-          ->order(['country' => 'ASC', 'name' => 'ASC'])
+          ->orderBy(['country' => 'ASC', 'name' => 'ASC'])
           ->all();
         $citiesByCountry = [];
         foreach ($cities as $city) {
@@ -264,7 +264,7 @@ class AttractionsController extends AppController
             ->where(['publish_start_date <='=>$now,'publish_end_date >='=>$now])
             ->matching('SettlementAgents',function($q) use ($agent){
                 return $q->where(['SettlementAgents.agent_id'=>$agent['agent_id']]);
-            })->order(['sequence'=>'asc'])
+            })->orderBy(['sequence'=>'asc'])
             ->distinct('SettlementAgents.id')
             ->first();
 
@@ -295,7 +295,7 @@ class AttractionsController extends AppController
             ->where(['publish_start_date <='=>$now,'publish_end_date >='=>$now])
             ->matching('FdatesettlementsAgents',function($q) use ($agent){
                 return $q->where(['FdatesettlementsAgents.agent_id'=>$agent['agent_id']]);
-            })->order(['sequence'=>'asc'])->toArray();
+            })->orderBy(['sequence'=>'asc'])->toArray();
             if (empty($tickets)) {
               return false;
             }
@@ -364,7 +364,7 @@ class AttractionsController extends AppController
           if ($this->request->getData('quantity')) {
             $date = $now;
             $this->Attractions->loadInto($attraction,['Tickets'=>function($q) use($date) {
-            return $q->where(['type !='=>'ctc','publish_start_date <='=>$date,'publish_end_date >='=>$date])->order(['sequence'=>'ASC']);
+            return $q->where(['type !='=>'ctc','publish_start_date <='=>$date,'publish_end_date >='=>$date])->orderBy(['sequence'=>'ASC']);
             }]);
             if (is_array($this->request->getData('quantity'))) {
               $total_qty = 0;
@@ -616,7 +616,7 @@ class AttractionsController extends AppController
           if ($this->request->getData('quantity')) {
             $date = $now;
             $this->Attractions->loadInto($attraction,['Tickets'=>function($q) use($date) {
-            return $q->where(['type !='=>'ctc','publish_start_date <='=>$date,'publish_end_date >='=>$date])->order(['sequence'=>'ASC']);
+            return $q->where(['type !='=>'ctc','publish_start_date <='=>$date,'publish_end_date >='=>$date])->orderBy(['sequence'=>'ASC']);
             }]);
             if (is_array($this->request->getData('quantity'))) {
               $total_qty = 0;
@@ -813,7 +813,7 @@ class AttractionsController extends AppController
               'publish_end_date >='=>$date->format('Y-m-d H:i:s')])
             ->matching('SettlementAgents',function($q) use ($agent){
                 return $q->where(['SettlementAgents.agent_id'=>$agent['agent_id']])->limit(1);
-            })->order(['sequence'=>'asc'])->toArray();
+            })->orderBy(['sequence'=>'asc'])->toArray();
           $tickets_max_quantity = [];
 
           foreach ($tickets as $key => $ticket) {
@@ -1148,7 +1148,7 @@ class AttractionsController extends AppController
           }
 
           $tickets_query
-          ->order(['sequence'=>'ASC'])
+          ->orderBy(['sequence'=>'ASC'])
           ->matching('FdatesettlementsAgents',function($q) use ($agent){
                 return $q->where(['FdatesettlementsAgents.agent_id'=>$agent['agent_id']]);
             });

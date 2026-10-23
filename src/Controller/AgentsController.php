@@ -55,7 +55,7 @@ class AgentsController extends AppController
           'first_name' => 'asc'
         ],
         'contain'=>['MasterAccount'=>['UsersIpaddress'=>function($uiq) {
-              return $uiq->order(['UsersIpaddress.modified'=>'desc'])->limit(1);
+              return $uiq->orderBy(['UsersIpaddress.modified'=>'desc'])->limit(1);
             }]]
       ];
       $agents = $this->paginate($this->Agents);
@@ -73,7 +73,7 @@ class AgentsController extends AppController
     public function view($id = null)
     {
         $agent = $this->Agents->get($id, contain: ['AgentTopups'=>function($q) {
-            return $q->order(['AgentTopups.created'=>'DESC'])->contain(['Admins']);
+            return $q->orderBy(['AgentTopups.created'=>'DESC'])->contain(['Admins']);
         }, 'AgentUsers','MasterAgents']);
         if ($agent) {
           $topup_query = $this->Agents->CreditLogs->find()->where(['agent_id'=>$agent->id,'debit_credit'=>'debit']);
@@ -91,7 +91,7 @@ class AgentsController extends AppController
     {
         $agent = $this->Agents->get($id, contain: ['MasterAgents']);
         if ($agent) {
-          $agent->credit_logs = $this->paginate($this->Agents->CreditLogs->find()->where(['agent_id'=>$agent->id])->contain(['Orders'])->order(['CreditLogs.created'=>'DESC']));
+          $agent->credit_logs = $this->paginate($this->Agents->CreditLogs->find()->where(['agent_id'=>$agent->id])->contain(['Orders'])->orderBy(['CreditLogs.created'=>'DESC']));
           $topup_query = $this->Agents->CreditLogs->find()->where(['agent_id'=>$agent->id,'debit_credit'=>'debit']);
           $total_topup = $topup_query->select(['total_topup'=>$topup_query->func()->sum('amount')])->first();
           $total_topup = $total_topup->total_topup;
@@ -106,7 +106,7 @@ class AgentsController extends AppController
     public function SubAgents($id = null)
     {
         $agent = $this->Agents->get($id, contain: ['SubAgents'=>function($q) {
-            return $q->order(['created'=>'DESC']);
+            return $q->orderBy(['created'=>'DESC']);
         }, 'MasterAgents']);
         if ($agent) {
           $topup_query = $this->Agents->CreditLogs->find()->where(['agent_id'=>$agent->id,'debit_credit'=>'debit']);
@@ -123,8 +123,8 @@ class AgentsController extends AppController
     public function agentUsers($id = null)
     {
         $agent = $this->Agents->get($id, contain: ['AgentUsers'=>function($q) {
-            return $q->where(['role'=>'normal'])->order(['created'=>'DESC'])->contain(['UsersIpaddress'=>function($uiq) {
-          return $uiq->order(['UsersIpaddress.modified'=>'desc'])->limit(1);
+            return $q->where(['role'=>'normal'])->orderBy(['created'=>'DESC'])->contain(['UsersIpaddress'=>function($uiq) {
+          return $uiq->orderBy(['UsersIpaddress.modified'=>'desc'])->limit(1);
         }]);
         }, 'MasterAgents']);
         if ($agent) {
@@ -163,7 +163,7 @@ class AgentsController extends AppController
             $selected_categories = $this->request->getData('categories');
         }
         $agent = $this->Agents->get($id, contain: ['CreditLogs'=>function($q) {
-            return $q->order(['created'=>'DESC']);
+            return $q->orderBy(['created'=>'DESC']);
         }, 'MasterAgents']);
         if ($agent) {
           $topup_query = $this->Agents->CreditLogs->find()->where(['agent_id'=>$agent->id,'debit_credit'=>'debit']);
@@ -178,7 +178,7 @@ class AgentsController extends AppController
         ->select(['Attractions.status','Attractions.id','Attractions.title','Attractions.title_chinese','Attractions.pricing_type','Attractions.featured_image','settlement_agents.id','fixeddates_agents.id','settlement_agents.settlement_id'])
         ->where(['Attractions.status'=>'published'])
         ->where($conditions)
-        ->order(['display_position'=>'ASC','title'=>'ASC'])
+        ->orderBy(['display_position'=>'ASC','title'=>'ASC'])
         ->join(
           [[
             'table' => 'settlement_agents',
@@ -220,7 +220,7 @@ class AgentsController extends AppController
             ->where(['SettlementAgents.attraction_id'=>$attraction->id])
             ->matching('SettlementAgents',function($q) use ($agent){
                 return $q->where(['SettlementAgents.agent_id'=>$agent->id]);
-            })->order(['sequence'=>'asc'])
+            })->orderBy(['sequence'=>'asc'])
             ->distinct('SettlementAgents.id')
             ->toArray();
             
@@ -230,7 +230,7 @@ class AgentsController extends AppController
             ->where(['Tickets.attraction_id'=>$attraction->id])
             ->matching('FixeddatesAgents',function($q) use ($agent){
                 return $q->where(['FixeddatesAgents.agent_id'=>$agent->id]);
-            })->order(['sequence'=>'asc'])->toArray();
+            })->orderBy(['sequence'=>'asc'])->toArray();
             if (!empty($tickets)) {
               $attraction->tickets = $tickets;
               $now = DateTime::now();
@@ -248,7 +248,7 @@ class AgentsController extends AppController
                     ->contain(['ChildCategories' => [
                         'sort' => ['name' => 'asc']
                       ]])
-                    ->order(['Categories.name'=>'asc'])->toList();
+                    ->orderBy(['Categories.name'=>'asc'])->toList();
 
         $this->set(compact('attractions','categories','search','selected_categories','agent'));
     }

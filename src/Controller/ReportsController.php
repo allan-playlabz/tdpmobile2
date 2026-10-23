@@ -89,7 +89,7 @@ class ReportsController extends AppController
             ->contain(['AgentUsers'=>['Agents'],'OrderItems'=>['Tickets'=>['Attractions'=>function($aq) {
               return $aq->select(['Attractions.title','Attractions.type','Merchants.name'])->contain(['Merchants']);
             }],'Vouchers']])
-            ->order(['Orders.created'=>'ASC']);
+            ->orderBy(['Orders.created'=>'ASC']);
         
           $orders_count = $orders_query->count();
           if (!empty($orders_count > 0)) {

@@ -504,7 +504,7 @@ class OrdersController extends AppController
         return $this->redirect(['controller'=>'Attractions','action'=>'index']);
       }
       $order = $this->Orders->find()->contain(['OrderItems'=>function($q) {
-        return $q->contain(['Vouchers','Tickets'=>['Attractions']])->order(['OrderItems.id'=>'ASC']);
+        return $q->contain(['Vouchers','Tickets'=>['Attractions']])->orderBy(['OrderItems.id'=>'ASC']);
       }])->where(['id'=>$this->request->getSession()->read('order_id')])->first();
       if (!$order) {
         return $this->redirect(['controller'=>'Attractions','action'=>'index']);
@@ -1276,7 +1276,7 @@ class OrdersController extends AppController
                   // $vouchers[] = $voucher;
                   }
                   elseif ($child_ticket->voucher_type =='pdf') {
-                    $pdf = $this->Tickets->Pdfs->find()->where(['ticket_sku_id'=>$child_ticket->sku_id,'status'=>'new','validity_end_date >='=>$now])->order(['Pdfs.created'=>'asc','Pdfs.id'=>'asc'])->epilog('FOR UPDATE')->first();
+                    $pdf = $this->Tickets->Pdfs->find()->where(['ticket_sku_id'=>$child_ticket->sku_id,'status'=>'new','validity_end_date >='=>$now])->orderBy(['Pdfs.created'=>'asc','Pdfs.id'=>'asc'])->epilog('FOR UPDATE')->first();
                     if ($pdf) {
                       $voucher->voucher_type = "pdf";
                       $voucher->code_id = $pdf->id;
@@ -1334,7 +1334,7 @@ class OrdersController extends AppController
                     }
                   }
                   else {
-                    $barcode = $this->Tickets->Barcodes->find()->where(['ticket_sku_id'=>$child_ticket->sku_id,'status'=>'new','validity_end_date >='=>$now ])->order(['Barcodes.created'=>'asc','Barcodes.id'=>'asc'])->epilog('FOR UPDATE')->first();
+                    $barcode = $this->Tickets->Barcodes->find()->where(['ticket_sku_id'=>$child_ticket->sku_id,'status'=>'new','validity_end_date >='=>$now ])->orderBy(['Barcodes.created'=>'asc','Barcodes.id'=>'asc'])->epilog('FOR UPDATE')->first();
                     if ($barcode) {
                       $voucher->voucher_type = "barcode";
                       $voucher->code_id = $barcode->code;
@@ -1488,7 +1488,7 @@ class OrdersController extends AppController
 
                 }
                 elseif ($ticket->voucher_type =='pdf') {
-                  $pdf = $this->Tickets->Pdfs->find()->where(['ticket_sku_id'=>$ticket->sku_id,'status'=>'new','validity_end_date >='=>$now])->order(['Pdfs.created'=>'asc','Pdfs.id'=>'asc'])->epilog('FOR UPDATE')->first();
+                  $pdf = $this->Tickets->Pdfs->find()->where(['ticket_sku_id'=>$ticket->sku_id,'status'=>'new','validity_end_date >='=>$now])->orderBy(['Pdfs.created'=>'asc','Pdfs.id'=>'asc'])->epilog('FOR UPDATE')->first();
                   if ($pdf) {
                     $voucher->voucher_type = "pdf";
                     $voucher->code_id = $pdf->id;
@@ -1536,7 +1536,7 @@ class OrdersController extends AppController
                   }
                 }
                 else {
-                  $barcode = $this->Tickets->Barcodes->find()->where(['ticket_sku_id'=>$ticket->sku_id,'status'=>'new','validity_end_date >='=>$now ])->order(['Barcodes.created'=>'asc','Barcodes.id'=>'asc'])->epilog('FOR UPDATE')->first();
+                  $barcode = $this->Tickets->Barcodes->find()->where(['ticket_sku_id'=>$ticket->sku_id,'status'=>'new','validity_end_date >='=>$now ])->orderBy(['Barcodes.created'=>'asc','Barcodes.id'=>'asc'])->epilog('FOR UPDATE')->first();
                   if ($barcode) {
                     $voucher->voucher_type = "barcode";
                     $voucher->code_id = $barcode->code;

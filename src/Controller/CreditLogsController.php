@@ -36,7 +36,7 @@ class CreditLogsController extends AppController
       $query = $this->Agents->CreditLogs->find()
       ->contain(['Orders'])
       ->where(['CreditLogs.agent_id'=>$agent_id, 'CreditLogs.created >=' => $first_date_allowed])
-      ->order(['CreditLogs.log_no'=>'desc']);
+      ->orderBy(['CreditLogs.log_no'=>'desc']);
       if ($this->request->getQuery('from')) {
         
         try {

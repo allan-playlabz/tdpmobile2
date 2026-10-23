@@ -81,7 +81,7 @@ class CreditLogsTable extends Table
     }
 
     public function credit($agent_id, $order) {
-        // $last_log = $this->find()->where(['agent_id'=>$agent_id])->order(['created'=>'DESC'])->first();
+        // $last_log = $this->find()->where(['agent_id'=>$agent_id])->orderBy(['created'=>'DESC'])->first();
         // $new_log = $this->newEntity(['agent_id'=>$agent_id,'order_id'=>$order->id,'debit_credit'=>'credit','amount'=>$order->total,'credits'=>$last_log ? $last_log->credits - $order->total : $order->total]);
         // if ($this->save($new_log)) {
         //     return true;
