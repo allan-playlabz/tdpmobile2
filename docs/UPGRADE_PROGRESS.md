@@ -49,7 +49,7 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 ## Phases
 - [x] cake5-deps (2026-10-23) — CakePHP 5.4.3 installed
 - [x] cake5-structure (2026-10-23) — structure scan 0 blockers; `bin/cake --help` lists `delete_temp`, `generate_report`
-- [ ] cake5-code-apis
+- [x] cake5-code-apis (2026-10-23) — code-api scan 0 blockers; lint clean; `generate_report` runs on local DB. Total blockers 956 → 280 (auth 140, tests 140)
 - [ ] cake5-auth
 - [ ] cake5-tests
 - [ ] final scan = 0 blockers, smoke test done
@@ -78,6 +78,25 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 - `Error.exceptionRenderer` left unset so CLI gets the console renderer.
 - `DbLog::log()` signature updated (needed to boot).
 
+## Phase 3 — code APIs (2026-10-23)
+- Rector (cakephp/upgrade 5.x branch, run directly with `disableParallel()` + `--clear-cache` — parallel workers hang on Windows and the cache makes later sets skip files): cakephp40 (76 files), 44, 45, 50 (128 files), 53; 41/42/51/52/chronos3 no changes. **cakephp43 skipped**: broken against current Rector, and its `getTableLocator()->get()` → `fetchTable()` rule is wrong inside Tables.
+- Manual:
+  - `App\Filesystem\File` / `Folder` shims (3.x semantics: `find()`, `->path`, create, `lastChange/delete/name/mime`).
+  - `Email` → `Mailer` (`deliver()`), RequestHandler removed; XHR requests still render with `AjaxView` via `AppController::beforeRender()` (3.x RequestHandler behaviour); body parsing via BodyParserMiddleware.
+  - `Cake\I18n\Time` → `DateTime` (17 files). Mutability audit: `AttractionsController` `$first_release_date->addSeconds()` reassigned (was a silent no-op otherwise); `ReportsController`/`OrdersController` `->hour()->minute()->second()` chains reassigned; `addDay()` → `addDays()`.
+  - `date` columns are now `Cake\I18n\Date` (not DateTimeInterface): `fixeddates.date` arithmetic converted to local-midnight `DateTime` (= 3.x FrozenDate semantics) in Attractions/Categories controllers.
+  - `loadModel()` → `$this->X = $this->fetchTable('X')`, `#[\AllowDynamicProperties]` on AppController (inherited), CreditsCell, GenerateReportCommand.
+  - `->order()` → `->orderBy()`; `find('list', [...])` → named args; `->all()` before `toList()/extract()`; `Table::query()` → `insertQuery()`.
+  - **Paginate `conditions`/`contain` moved onto the query** (5.x silently ignores them — would have listed all agents' orders/vouchers/credit logs).
+  - Uploads are `UploadedFile` objects: `image.error/tmp_name/name` → `getError()/getStream()->getMetadata('uri')/getClientFilename()`.
+  - CSRF token in templates: `getParam('_csrfToken')` → `getAttribute('csrfToken')`.
+  - `Number::defaultCurrency()` → `setDefaultCurrency()`; `DefaultPasswordHasher` → Authentication plugin's.
+  - Log messages must be strings: arrays `json_encode()`d at call sites (same output as 3.x DbLog).
+  - `OrderItemsTable`: duplicate `Vouchers` alias (3.x silently kept the later `hasMany`) — `belongsTo` removed.
+  - Session handler: `SessionHandlerInterface` return types; null-safe `agent_user_id` lookup.
+  - `fputcsv()` explicit escape `'\'` (PHP 8.4 deprecation; output unchanged).
+- PHPStan level 1 on `src/` used as an extra net (remaining findings are pre-existing, listed below).
+- **Phase 4 note:** `CustomDatabaseSession::write()` reads `$_SESSION['Auth']['User']['id']` to enforce one session per agent user → configure the Authentication session key as `Auth.User`.
 ## Follow-ups (not part of the upgrade)
 - Consider `HostHeaderMiddleware` with `APP_FULL_BASE_URL` set per environment (Host header injection protection).
 - firebase/php-jwt < 7 advisory (CVE-2025-45769, low).
@@ -89,3 +108,13 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 - Backup files `src/Controller/OrdersController - Copy.php` and `ignore/` deleted (kept in git history).
 - Phase 5 gate: suite runs to completion; failures triaged and listed, not necessarily all green. HTTP smoke test is the primary check.
 - Auth: like-for-like `cakephp/authentication` (Session + Form on `AgentUsers`, email/password, same login/logout URLs); no authorization plugin.
+- `AttractionsController::getFixeddateTime` (≈ line 1017): `$now->addSeconds($ticket->cutoff_seconds)` inside the loop **accumulated** in 3.x (mutable Time). Kept as-is (`$now = $now->addSeconds(...)`) — probably meant `$now->addSeconds()` per ticket without accumulating. **Decide.**
+- `ReportsController::reports()`: builds `new File($file)` from bare file names, so the "delete reports older than 24h" never deleted anything (3.x and now). Kept.
+- `AgentsController::index()` (`/agents`) loads a `Search` component that doesn't exist — fatal in 3.x too.
+- `OrdersController::addToCart/subtractQuantity/removeFromCart` call `_ajaxResponse()` (not defined) and `$this->Products` — not routed, dead code.
+- `S3PublicComponent` uses `Mimey\MimeTypes`, which isn't installed (also not in the 3.x lock).
+- `VouchersController` ≈ line 177 uses undefined `$id`.
+- `TicketsTable::isValidReturnTicket()`: `find('list', ['type' => 'return'])` — `type` was never applied (probably meant `->where(['type' => 'return'])`). Kept.
+- `AgentTopupsTable` validates `image` with `scalar()`, which rejects an uploaded file (3.x array / 5.x object) — check in smoke test whether top-ups with an image save.
+- `AgentsSignupsTable` `MasterAgents` association has no `className` (targets non-existent `master_agents`); clashes with `AgentsTable`'s `MasterAgents` if both load. Only `index()` (not routed) uses it.
+- Baked associations to non-existent tables in the local DB (`records`, `txns`, `jobs`, `package_tickets`, `fixeddates_agents`).
