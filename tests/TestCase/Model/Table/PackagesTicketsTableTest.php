@@ -22,10 +22,9 @@ class PackagesTicketsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.PackagesTickets',
         'app.Tickets',
-        'app.PackageTickets'
     ];
 
     /**
@@ -33,7 +32,7 @@ class PackagesTicketsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('PackagesTickets') ? [] : ['className' => PackagesTicketsTable::class];
@@ -45,7 +44,7 @@ class PackagesTicketsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->PackagesTickets);
 

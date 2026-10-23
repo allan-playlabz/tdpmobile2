@@ -22,8 +22,8 @@ class PasswordResetsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
-        'app.PasswordResets'
+    protected array $fixtures = [
+        'app.PasswordResets',
     ];
 
     /**
@@ -31,7 +31,7 @@ class PasswordResetsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('PasswordResets') ? [] : ['className' => PasswordResetsTable::class];
@@ -43,7 +43,7 @@ class PasswordResetsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->PasswordResets);
 

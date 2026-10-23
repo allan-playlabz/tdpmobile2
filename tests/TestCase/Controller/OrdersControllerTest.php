@@ -8,7 +8,6 @@ use Cake\TestSuite\TestCase;
 /**
  * App\Controller\OrdersController Test Case
  *
- * @uses \App\Controller\OrdersController
  */
 class OrdersControllerTest extends TestCase
 {
@@ -19,11 +18,10 @@ class OrdersControllerTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.Orders',
-        'app.OrderReves',
         'app.Agents',
-        'app.OrderItems'
+        'app.OrderItems',
     ];
 
     /**

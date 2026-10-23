@@ -22,15 +22,14 @@ class TicketsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.Tickets',
         'app.Attractions',
-        'app.Skus',
         'app.Invcharts',
         'app.GeneratedCodes',
         'app.OrderItems',
         'app.SettlementAgents',
-        'app.Settlements'
+        'app.Settlements',
     ];
 
     /**
@@ -38,7 +37,7 @@ class TicketsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('Tickets') ? [] : ['className' => TicketsTable::class];
@@ -50,7 +49,7 @@ class TicketsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->Tickets);
 

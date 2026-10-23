@@ -22,7 +22,7 @@ class FavoriteAttractionsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.FavoriteAttractions',
         'app.Attractions',
         'app.AgentUsers',
@@ -33,7 +33,7 @@ class FavoriteAttractionsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('FavoriteAttractions') ? [] : ['className' => FavoriteAttractionsTable::class];
@@ -45,7 +45,7 @@ class FavoriteAttractionsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->FavoriteAttractions);
 

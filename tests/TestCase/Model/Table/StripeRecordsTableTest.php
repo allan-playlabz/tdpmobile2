@@ -22,9 +22,8 @@ class StripeRecordsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.StripeRecords',
-        'app.Pis'
     ];
 
     /**
@@ -32,7 +31,7 @@ class StripeRecordsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('StripeRecords') ? [] : ['className' => StripeRecordsTable::class];
@@ -44,7 +43,7 @@ class StripeRecordsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->StripeRecords);
 

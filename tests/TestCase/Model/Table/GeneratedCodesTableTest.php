@@ -22,9 +22,9 @@ class GeneratedCodesTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.GeneratedCodes',
-        'app.Tickets'
+        'app.Tickets',
     ];
 
     /**
@@ -32,7 +32,7 @@ class GeneratedCodesTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('GeneratedCodes') ? [] : ['className' => GeneratedCodesTable::class];
@@ -44,7 +44,7 @@ class GeneratedCodesTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->GeneratedCodes);
 

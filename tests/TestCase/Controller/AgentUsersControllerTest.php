@@ -8,7 +8,6 @@ use Cake\TestSuite\TestCase;
 /**
  * App\Controller\AgentUsersController Test Case
  *
- * @uses \App\Controller\AgentUsersController
  */
 class AgentUsersControllerTest extends TestCase
 {
@@ -19,10 +18,10 @@ class AgentUsersControllerTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.AgentUsers',
         'app.Agents',
-        'app.Orders'
+        'app.Orders',
     ];
 
     /**

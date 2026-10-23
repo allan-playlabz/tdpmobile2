@@ -22,7 +22,7 @@ class PaymentMarkupsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.PaymentMarkups',
         'app.PaymentMethods',
         'app.PaymentGateways',
@@ -33,7 +33,7 @@ class PaymentMarkupsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('PaymentMarkups') ? [] : ['className' => PaymentMarkupsTable::class];
@@ -45,7 +45,7 @@ class PaymentMarkupsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->PaymentMarkups);
 

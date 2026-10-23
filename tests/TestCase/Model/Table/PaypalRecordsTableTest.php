@@ -22,9 +22,9 @@ class PaypalRecordsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.PaypalRecords',
-        'app.Orders'
+        'app.Orders',
     ];
 
     /**
@@ -32,7 +32,7 @@ class PaypalRecordsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('PaypalRecords') ? [] : ['className' => PaypalRecordsTable::class];
@@ -44,7 +44,7 @@ class PaypalRecordsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->PaypalRecords);
 

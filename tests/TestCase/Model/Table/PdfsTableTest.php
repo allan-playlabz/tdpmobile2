@@ -22,10 +22,8 @@ class PdfsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.Pdfs',
-        'app.PurchasedTicketSkus',
-        'app.TicketSkus'
     ];
 
     /**
@@ -33,7 +31,7 @@ class PdfsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('Pdfs') ? [] : ['className' => PdfsTable::class];
@@ -45,7 +43,7 @@ class PdfsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->Pdfs);
 

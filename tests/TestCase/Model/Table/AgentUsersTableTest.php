@@ -22,10 +22,10 @@ class AgentUsersTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.AgentUsers',
         'app.Agents',
-        'app.Orders'
+        'app.Orders',
     ];
 
     /**
@@ -33,7 +33,7 @@ class AgentUsersTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('AgentUsers') ? [] : ['className' => AgentUsersTable::class];
@@ -45,7 +45,7 @@ class AgentUsersTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->AgentUsers);
 

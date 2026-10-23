@@ -22,11 +22,10 @@ class InvchartsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.Invcharts',
-        'app.Skus',
         'app.Merchants',
-        'app.Tickets'
+        'app.Tickets',
     ];
 
     /**
@@ -34,7 +33,7 @@ class InvchartsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('Invcharts') ? [] : ['className' => InvchartsTable::class];
@@ -46,7 +45,7 @@ class InvchartsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->Invcharts);
 

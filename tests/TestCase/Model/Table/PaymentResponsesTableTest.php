@@ -22,9 +22,8 @@ class PaymentResponsesTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.PaymentResponses',
-        'app.OrderReves',
     ];
 
     /**
@@ -32,7 +31,7 @@ class PaymentResponsesTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('PaymentResponses') ? [] : ['className' => PaymentResponsesTable::class];
@@ -44,7 +43,7 @@ class PaymentResponsesTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->PaymentResponses);
 

@@ -22,8 +22,8 @@ class OnefgPerformanceProductsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
-        'app.OnefgPerformanceProducts'
+    protected array $fixtures = [
+        'app.OnefgPerformanceProducts',
     ];
 
     /**
@@ -31,7 +31,7 @@ class OnefgPerformanceProductsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('OnefgPerformanceProducts') ? [] : ['className' => OnefgPerformanceProductsTable::class];
@@ -43,7 +43,7 @@ class OnefgPerformanceProductsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->OnefgPerformanceProducts);
 

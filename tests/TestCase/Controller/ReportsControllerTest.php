@@ -8,7 +8,6 @@ use Cake\TestSuite\TestCase;
 /**
  * App\Controller\ReportsController Test Case
  *
- * @uses \App\Controller\ReportsController
  */
 class ReportsControllerTest extends TestCase
 {
@@ -19,9 +18,7 @@ class ReportsControllerTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
-        'app.Reports'
-    ];
+    protected array $fixtures = [];
 
     /**
      * Test index method

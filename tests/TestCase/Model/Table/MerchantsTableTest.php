@@ -22,12 +22,10 @@ class MerchantsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.Merchants',
         'app.Attractions',
         'app.Invcharts',
-        'app.LandTransfers',
-        'app.MerchantUsers'
     ];
 
     /**
@@ -35,7 +33,7 @@ class MerchantsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('Merchants') ? [] : ['className' => MerchantsTable::class];
@@ -47,7 +45,7 @@ class MerchantsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->Merchants);
 

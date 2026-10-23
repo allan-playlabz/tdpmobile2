@@ -22,12 +22,10 @@ class AllotmentsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.Allotments',
         'app.Merchants',
-        'app.AutoPopulateAllotments',
-        'app.Slots',
-        'app.Tickets'
+        'app.Tickets',
     ];
 
     /**
@@ -35,7 +33,7 @@ class AllotmentsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('Allotments') ? [] : ['className' => AllotmentsTable::class];
@@ -47,7 +45,7 @@ class AllotmentsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->Allotments);
 

@@ -51,7 +51,7 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 - [x] cake5-structure (2026-10-23) — structure scan 0 blockers; `bin/cake --help` lists `delete_temp`, `generate_report`
 - [x] cake5-code-apis (2026-10-23) — code-api scan 0 blockers; lint clean; `generate_report` runs on local DB. Total blockers 956 → 280 (auth 140, tests 140)
 - [x] cake5-auth (2026-10-23) — auth scan 0 blockers; login/logout/public actions/CSRF/single-session verified over HTTP; logged-in page sweep clean
-- [ ] cake5-tests
+- [x] cake5-tests (2026-10-23) — `vendor/bin/phpunit`: OK, 202 tests (8 passing, 194 incomplete baked stubs); tests scan 0 blockers
 - [ ] final scan = 0 blockers, smoke test done
 
 ## Phase 1 — dependencies (2026-10-23)
@@ -114,6 +114,16 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 - Also fixed during the web sweep: `ShoppingCartComponent` used `$controller->request` (protected in 5.x); `paginate()->toArray()` sites keep the paginated result as a view var (`paginateToArray()`) so PaginatorHelper works; `AgentUsers/index` sort headers (not paginated) render the same links via `Html->link`; null-safe `where()` for login email, `AgentUsers::edit` without id, `VoucherMerging::getStatus`.
 - Local test setup: `config/.env` sets `COOKIE_DOMAIN=tpp.localhost` — use `http://tpp.localhost:8765` with `bin/cake server`.
 - Not verified (needs real gateways/API/mail): OTP email flow, checkout + payment, voucher/PDF download, top-up with image. The local API (`tdpapiv2.localhost`) returns non-JSON, so availability/ticket pages log "array offset on null" warnings (environment).
+## Phase 5 — tests (2026-10-23)
+- Before: suite could not run (PHPUnit 6.5 fatals on PHP 8.5).
+- `phpunit.xml.dist` and `tests/bootstrap.php` from the 5.4 skeleton (PHPUnit 11.5, fixture extension). No migrations exist, so the schema is loaded from schema-only dumps `tests/schema/app.sql` (local `test_catdb`) and `tests/schema/log.sql` (local `tdp_log`) with `SchemaLoader`. Regenerate the dumps when the schema changes (`mysqldump --no-data --skip-comments`, strip `AUTO_INCREMENT=` / `DEFINER=`).
+- Test connections: `test` (`DATABASE_TEST_URL`) and `test_log_ds` / `test_log_ds_ro` / `test_database_log` (`DATABASE_TEST_LOG_URL`) — every datasource needs a `test_<name>` for `ConnectionHelper::addTestAliases()`. Locally these point at new DBs `tdpmobile_test` / `tdpmobile_test_log` (URLs in gitignored `config/.env`).
+- Rector `phpunit80` (setUp/tearDown `: void`); fixtures: `$fields` removed, `init(): void`; baked placeholder records (empty binary-UUID ids, "Lorem ipsum") replaced with `[]` — they cannot be inserted into the real schema.
+- `$fixtures` lists: dropped references to fixtures that never existed (`app.Skus`, `app.MasterAgents`, `app.Users`, …) and to tables missing from the schema (`fixeddates_agents`, `ctickets_invcharts`, …).
+- `ApplicationTest` → 5.x skeleton version adapted to this app's plugins/middleware; `PagesControllerTest` removed (no PagesController); `@uses` doc-comment metadata removed (PHPUnit 12 deprecation).
+- New `tests/TestCase/Controller/AuthenticationTest.php`: logged-out redirect with `?redirect=`, public login/signup, 3.x `Auth.User` session layout accepted, wrong password shows the error and doesn't log in.
+- Results: **OK (202 tests: 8 passing, 194 incomplete)**. The incomplete ones are 3.x baked stubs (`markTestIncomplete`) — not written tests.
+- Also fixed: `templates/layout/default.php` used `null` as an array key when no language is selected (PHP 8.5 deprecation).
 ## Follow-ups (not part of the upgrade)
 - Consider `HostHeaderMiddleware` with `APP_FULL_BASE_URL` set per environment (Host header injection protection).
 - firebase/php-jwt < 7 advisory (CVE-2025-45769, low).

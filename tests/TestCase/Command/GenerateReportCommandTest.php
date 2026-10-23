@@ -8,7 +8,6 @@ use Cake\TestSuite\TestCase;
 /**
  * App\Command\GenerateReportCommand Test Case
  *
- * @uses \App\Command\GenerateReportCommand
  */
 class GenerateReportCommandTest extends TestCase
 {
@@ -19,7 +18,7 @@ class GenerateReportCommandTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
     }

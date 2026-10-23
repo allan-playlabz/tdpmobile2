@@ -8,7 +8,6 @@ use Cake\TestSuite\TestCase;
 /**
  * App\Controller\Webhook\OrdersController Test Case
  *
- * @uses \App\Controller\Webhook\OrdersController
  */
 class OrdersControllerTest extends TestCase
 {
@@ -19,11 +18,11 @@ class OrdersControllerTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.Orders',
         'app.Agents',
         'app.AgentUsers',
-        'app.OrderItems'
+        'app.OrderItems',
     ];
 
     /**

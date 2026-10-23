@@ -22,11 +22,11 @@ class OrderItemsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.OrderItems',
         'app.Orders',
         'app.Tickets',
-        'app.Vouchers'
+        'app.Vouchers',
     ];
 
     /**
@@ -34,7 +34,7 @@ class OrderItemsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('OrderItems') ? [] : ['className' => OrderItemsTable::class];
@@ -46,7 +46,7 @@ class OrderItemsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->OrderItems);
 

@@ -22,9 +22,8 @@ class UsersIpaddressTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.UsersIpaddress',
-        'app.Users'
     ];
 
     /**
@@ -32,7 +31,7 @@ class UsersIpaddressTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('UsersIpaddress') ? [] : ['className' => UsersIpaddressTable::class];
@@ -44,7 +43,7 @@ class UsersIpaddressTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->UsersIpaddress);
 

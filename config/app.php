@@ -359,6 +359,46 @@ return [
             //'init' => ['SET GLOBAL innodb_stats_on_metadata = 0'],
             'url' => env('DATABASE_TEST_URL', null),
         ],
+
+        /*
+         * Test aliases for the log connections (ConnectionHelper::addTestAliases()
+         * requires a test_<name> connection for every configured datasource).
+         */
+        'test_log_ds' => [
+            'className' => Connection::class,
+            'driver' => Mysql::class,
+            'persistent' => false,
+            'encoding' => 'utf8mb4',
+            'flags' => [],
+            'cacheMetadata' => true,
+            'quoteIdentifiers' => false,
+            'log' => false,
+            'url' => env('DATABASE_TEST_LOG_URL', null),
+        ],
+
+        'test_log_ds_ro' => [
+            'className' => Connection::class,
+            'driver' => Mysql::class,
+            'persistent' => false,
+            'encoding' => 'utf8mb4',
+            'flags' => [],
+            'cacheMetadata' => true,
+            'quoteIdentifiers' => false,
+            'log' => false,
+            'url' => env('DATABASE_TEST_LOG_URL', null),
+        ],
+
+        'test_database_log' => [
+            'className' => Connection::class,
+            'driver' => Mysql::class,
+            'persistent' => false,
+            'encoding' => 'utf8mb4',
+            'flags' => [],
+            'cacheMetadata' => true,
+            'quoteIdentifiers' => false,
+            'log' => false,
+            'url' => env('DATABASE_TEST_LOG_URL', null),
+        ],
     ],
 
     'DatabaseLog' => [

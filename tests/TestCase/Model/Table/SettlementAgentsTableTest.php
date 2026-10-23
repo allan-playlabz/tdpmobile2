@@ -22,12 +22,12 @@ class SettlementAgentsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.SettlementAgents',
         'app.Attractions',
         'app.Tickets',
         'app.Settlements',
-        'app.Agents'
+        'app.Agents',
     ];
 
     /**
@@ -35,7 +35,7 @@ class SettlementAgentsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('SettlementAgents') ? [] : ['className' => SettlementAgentsTable::class];
@@ -47,7 +47,7 @@ class SettlementAgentsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->SettlementAgents);
 

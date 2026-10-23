@@ -66,7 +66,7 @@ $available_languages = Configure::read('Translation.languages');
         <?php if (Configure::read('Features.translation') && !empty($available_languages)) { ?>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <?= __($available_languages[$this->request->getSession()->read('language')] ?? 'English') ?>
+            <?= __($available_languages[$this->request->getSession()->read('language') ?? ''] ?? 'English') ?>
           </a>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarLanguageDropdown">
             <?php 

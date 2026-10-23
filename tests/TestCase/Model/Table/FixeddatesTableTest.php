@@ -22,9 +22,9 @@ class FixeddatesTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.Fixeddates',
-        'app.Tickets'
+        'app.Tickets',
     ];
 
     /**
@@ -32,7 +32,7 @@ class FixeddatesTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('Fixeddates') ? [] : ['className' => FixeddatesTable::class];
@@ -44,7 +44,7 @@ class FixeddatesTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->Fixeddates);
 

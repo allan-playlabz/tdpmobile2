@@ -22,7 +22,7 @@ class LoginsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.Logins',
     ];
 
@@ -31,7 +31,7 @@ class LoginsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('Logins') ? [] : ['className' => LoginsTable::class];
@@ -43,7 +43,7 @@ class LoginsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->Logins);
 

@@ -22,8 +22,8 @@ class RwsProductsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
-        'app.RwsProducts'
+    protected array $fixtures = [
+        'app.RwsProducts',
     ];
 
     /**
@@ -31,7 +31,7 @@ class RwsProductsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('RwsProducts') ? [] : ['className' => RwsProductsTable::class];
@@ -43,7 +43,7 @@ class RwsProductsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->RwsProducts);
 

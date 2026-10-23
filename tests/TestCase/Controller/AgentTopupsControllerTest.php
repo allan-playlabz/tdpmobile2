@@ -8,7 +8,6 @@ use Cake\TestSuite\TestCase;
 /**
  * App\Controller\AgentTopupsController Test Case
  *
- * @uses \App\Controller\AgentTopupsController
  */
 class AgentTopupsControllerTest extends TestCase
 {
@@ -19,9 +18,9 @@ class AgentTopupsControllerTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.AgentTopups',
-        'app.Agents'
+        'app.Agents',
     ];
 
     /**

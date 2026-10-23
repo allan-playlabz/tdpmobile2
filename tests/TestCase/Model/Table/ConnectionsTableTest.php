@@ -22,10 +22,10 @@ class ConnectionsTableTest extends TestCase
      *
      * @var array
      */
-    public array $fixtures = [
+    protected array $fixtures = [
         'app.Connections',
         'app.Tickets',
-        'app.Attractions'
+        'app.Attractions',
     ];
 
     /**
@@ -33,7 +33,7 @@ class ConnectionsTableTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $config = TableRegistry::getTableLocator()->exists('Connections') ? [] : ['className' => ConnectionsTable::class];
@@ -45,7 +45,7 @@ class ConnectionsTableTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->Connections);
 
