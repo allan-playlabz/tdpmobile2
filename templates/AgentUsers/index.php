@@ -5,10 +5,11 @@
   <table class="table table-bordered table-striped">
       <thead>
         <tr>
-          <th scope="col"><?= $this->Paginator->sort('name', __('Name')) ?></th>
-          <th scope="col"><?= $this->Paginator->sort('email', __('Email')) ?></th>
-          <th scope="col"><?= $this->Paginator->sort('role', __('Role')) ?></th>
-          <th scope="col"><?= $this->Paginator->sort('status', __('Status')) ?></th>
+          <?php // index() is not paginated (PaginatorHelper throws without paging data in 5.x); same links Paginator->sort() rendered in 3.x ?>
+          <th scope="col"><?= $this->Html->link(__('Name'), ['?' => ['sort' => 'name', 'direction' => 'asc']]) ?></th>
+          <th scope="col"><?= $this->Html->link(__('Email'), ['?' => ['sort' => 'email', 'direction' => 'asc']]) ?></th>
+          <th scope="col"><?= $this->Html->link(__('Role'), ['?' => ['sort' => 'role', 'direction' => 'asc']]) ?></th>
+          <th scope="col"><?= $this->Html->link(__('Status'), ['?' => ['sort' => 'status', 'direction' => 'asc']]) ?></th>
           <th scope="col"><?= __('Actions') ?></th>
         </tr>
       </thead>

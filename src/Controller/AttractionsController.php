@@ -28,7 +28,7 @@ class AttractionsController extends AppController
         $this->loadComponent('TicketsHelper');
         $this->SettlementAgents = $this->fetchTable('SettlementAgents');
         $this->Tickets = $this->fetchTable('Tickets');
-        // $this->Auth->allow(['index','view','getTickets']);
+        // $this->Authentication->addUnauthenticatedActions(['index','view','getTickets']);
     } 
 
     /**
@@ -46,7 +46,7 @@ class AttractionsController extends AppController
         $filtered_attractions = [];
         $fdate_attractions = null;
         $selected_categories = [];
-        $user_id = $this->Auth->user('id');
+        $user_id = $this->getAuthUser('id');
         $selected_countries = [];
         $selected_cities = [];
         // Only use GET (query) parameters for search and filters.
@@ -80,7 +80,7 @@ class AttractionsController extends AppController
               $conditions['Attractions.city_id IN'] = $city_ids;
             }
         }
-        $agent = $this->Auth->user();
+        $agent = $this->getAuthUser();
         $this->FdatesettlementsAgents = $this->fetchTable('FdatesettlementsAgents');
         $settlement_attraction_ids = $this->SettlementAgents->find()
           ->select(['attraction_id'])
@@ -149,7 +149,7 @@ class AttractionsController extends AppController
             ], true);
         }
         if ($this->request->getQuery('filter') == 'favorites') {
-          $favorite_attraction_ids = $this->Attractions->FavoriteAttractions->find()->where(['agent_user_id'=>$this->Auth->user('id')])->all()->extract('attraction_id')->toArray();
+          $favorite_attraction_ids = $this->Attractions->FavoriteAttractions->find()->where(['agent_user_id'=>$this->getAuthUser('id')])->all()->extract('attraction_id')->toArray();
           if (is_array($favorite_attraction_ids) && count($favorite_attraction_ids) > 0) {
             $attraction_query = $attraction_query->where(['Attractions.id IN' => $favorite_attraction_ids]);
           }
@@ -181,7 +181,7 @@ class AttractionsController extends AppController
           }
         }
         if (!empty($viewable_attraction_ids)) {
-          $attractions = $this->paginate($attraction_query->where(['Attractions.id IN'=>$viewable_attraction_ids]))->toArray();
+          $attractions = $this->paginateToArray($attraction_query->where(['Attractions.id IN'=>$viewable_attraction_ids]));
         } else {
           $attractions = [];
         }
@@ -252,7 +252,7 @@ class AttractionsController extends AppController
      */
     private function _attachTicketInfo($attraction): bool
     {
-        $agent = $this->Auth->user();
+        $agent = $this->getAuthUser();
         $now = DateTime::now();
         $attraction->ticket = null;
         if ($attraction->pricing_type == 'settlement') {
@@ -346,17 +346,17 @@ class AttractionsController extends AppController
         $attraction = $this->Attractions->get($id,
         contain: ['Merchants', 'Categories', 'AttractionMedias'],
         conditions: ['Attractions.status'=>'published']);
-        $attraction->is_favorite = $this->Attractions->FavoriteAttractions->exists(['attraction_id'=>$id,'agent_user_id'=>$this->Auth->user('id')]);
+        $attraction->is_favorite = $this->Attractions->FavoriteAttractions->exists(['attraction_id'=>$id,'agent_user_id'=>$this->getAuthUser('id')]);
         if ($this->request->getSession()->check('language')) {
           Translator::translateAttraction($this->request, $attraction);
         }
 
-        if ($this->Auth->user('role') == 'viewer') {
+        if ($this->getAuthUser('role') == 'viewer') {
           $this->set('not_allowed_to_add', true);
         }
 
         if ($this->request->is(['post'])) {
-          if ($this->Auth->user('role') == 'viewer') {
+          if ($this->getAuthUser('role') == 'viewer') {
             $this->Flash->error(__('You are not authorized to access that location.'));
             return $this->redirect(['action'=>'view',$id]);
           }
@@ -436,14 +436,14 @@ class AttractionsController extends AppController
                     if (!$has_error) {
                       if ($attraction->pricing_type != 'settlement') {
                         if ($attraction->pricing_type == 'fdate') {
-                          $fixeddate = $this->TicketsHelper->getFixeddate($ticket,$this->Auth->user(),$this->request->getData('date'));
+                          $fixeddate = $this->TicketsHelper->getFixeddate($ticket,$this->getAuthUser(),$this->request->getData('date'));
                           if ($fixeddate && ($fixeddate->stock === null || ($this->request->getSession()->read('ShoppingCart.'.$ticket->id.'.'.$this->request->getData('date')) + $qty <= $fixeddate->stock))) {
                             $this->ShoppingCart->add($ticket_id,$qty,$this->request->getData('date'));
                           } else {
                             $has_error = true;
                           }
                         } else {
-                          $fixeddate = $this->TicketsHelper->getFixeddate($ticket,$this->Auth->user(),$this->request->getData('date') .' '.$this->request->getData('time') );
+                          $fixeddate = $this->TicketsHelper->getFixeddate($ticket,$this->getAuthUser(),$this->request->getData('date') .' '.$this->request->getData('time') );
                           if ($fixeddate && ($fixeddate->stock === null || ($this->request->getSession()->read('ShoppingCart.'.$ticket->id.'.'.$this->request->getData('date') .' '.$this->request->getData('time') ) + $qty <= $fixeddate->stock))) {
                             $this->ShoppingCart->add($ticket_id,$qty,$this->request->getData('date') .' '.$this->request->getData('time') );
                           } else {
@@ -530,7 +530,7 @@ class AttractionsController extends AppController
         $http = new \Cake\Http\Client();
         $api_url = Configure::read('Api.url');
         $data = ['sku_id'=>$attraction->sku_id,'time_from'=>$now->format('Y-m-d'),'time_to'=>$now->format('Y-m-d')];
-        $headers = $this->_buildHeaders($data,$this->Auth->user('email'),$this->Auth->user('id'));
+        $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
         $ticket_ids = [];
         $tickets_max_quantity = [];
         $tickets_slots = [];
@@ -595,7 +595,7 @@ class AttractionsController extends AppController
     {
         $now = DateTime::now();
         $attraction = $this->Attractions->get($id, contain: ['Merchants', 'Categories', 'AttractionMedias']);
-        $attraction->is_favorite = $this->Attractions->FavoriteAttractions->exists(['attraction_id'=>$id,'agent_user_id'=>$this->Auth->user('id')]);
+        $attraction->is_favorite = $this->Attractions->FavoriteAttractions->exists(['attraction_id'=>$id,'agent_user_id'=>$this->getAuthUser('id')]);
         if ($this->request->getSession()->check('language')) {
           Translator::translateAttraction($this->request, $attraction);
         }
@@ -603,12 +603,12 @@ class AttractionsController extends AppController
           return $this->redirect(['action'=>'view', $id]);
         }
 
-        if ($this->Auth->user('role') == 'viewer') {
+        if ($this->getAuthUser('role') == 'viewer') {
           $this->set('not_allowed_to_add', true);
         }
 
         if ($this->request->is(['post'])) {
-          if ($this->Auth->user('role') == 'viewer') {
+          if ($this->getAuthUser('role') == 'viewer') {
             $this->Flash->error(__('You are not authorized to access that location.'));
             return $this->redirect(['action'=>'viewTwoWay',$id]);
           }
@@ -674,7 +674,7 @@ class AttractionsController extends AppController
                         $datetime = $this->request->getData('return_date') . ' ' . $this->request->getData('return_time');
                       }
                     }
-                    $fixeddate = $this->TicketsHelper->getFixeddate($ticket,$this->Auth->user(), $datetime);
+                    $fixeddate = $this->TicketsHelper->getFixeddate($ticket,$this->getAuthUser(), $datetime);
                     if ($fixeddate && ($fixeddate->stock === null || ($this->request->getSession()->read('ShoppingCart.'.$ticket->id.'.'.$datetime) + $qty <= $fixeddate->stock))) {
                       $this->ShoppingCart->add($ticket_id,$qty,$datetime);
                     } else {
@@ -754,7 +754,7 @@ class AttractionsController extends AppController
 
     private function _getAvailableDates($attraction) {
       $available_dates = [];
-      $agent = $this->Auth->user();
+      $agent = $this->getAuthUser();
       $tickets = $this->Attractions->Tickets->find()->where(['Tickets.attraction_id'=>$attraction->id,'publish_start_date <='=>date('Y-m-d H:i:s'), 'publish_end_date >='=>date('Y-m-d H:i:s')])
         ->matching('FdatesettlementsAgents',function($q) use ($agent){
               return $q->where(['FdatesettlementsAgents.agent_id'=>$agent['agent_id']]);
@@ -803,7 +803,7 @@ class AttractionsController extends AppController
       if (!$date) {
         $date = DateTime::now();
       }
-      $agent = $this->Auth->user();
+      $agent = $this->getAuthUser();
       if ($attraction->product_type == 'simple') {
         if ($attraction->pricing_type == 'settlement') {
           $tickets = $this->Attractions->Tickets->find()
@@ -817,7 +817,7 @@ class AttractionsController extends AppController
           $tickets_max_quantity = [];
 
           foreach ($tickets as $key => $ticket) {
-              $ticket = $this->TicketsHelper->getTicketResellerPrice($ticket,$attraction,$this->Auth->user());
+              $ticket = $this->TicketsHelper->getTicketResellerPrice($ticket,$attraction,$this->getAuthUser());
               if ($this->request->getSession()->check('language')) {
                 Translator::translateTicket($this->request, $ticket);
               }
@@ -857,7 +857,7 @@ class AttractionsController extends AppController
             return $this->response->withStatus(400);
           }
         }
-        $agent = $this->Auth->user();
+        $agent = $this->getAuthUser();
         $data = $this->_getAttractionTickets($attraction,$date,$time);
 
         return $this->response->withStatus(200)->withStringBody(json_encode(['status'=>200,'data'=>$data]));
@@ -918,7 +918,7 @@ class AttractionsController extends AppController
       $time_from = $departure_date->format('Y-m-d') . $departure_time->format(' H:i');
       $return_time_from = $return_date->format('Y-m-d') . $return_time->format(' H:i');
       $data = ['sku_id' => $attraction->sku_id, 'depart_datetime' => $time_from, 'return_datetime' => $return_time_from];
-      $headers = $this->_buildHeaders($data, $this->Auth->user('email'), $this->Auth->user('id'));
+      $headers = $this->_buildHeaders($data, $this->getAuthUser('email'), $this->getAuthUser('id'));
       try {
         $response = $http->get($api_url . '/availabilities', $data, ['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false, 'timeout' => Configure::read('Api.timeout')]);
         if ($response->isOk()) {
@@ -987,7 +987,7 @@ class AttractionsController extends AppController
           if ($date === null) {
             return $this->response->withStatus(400);
           }
-          $agent = $this->Auth->user();
+          $agent = $this->getAuthUser();
           $tickets_query = $this->Attractions->Tickets->find()->where(['Tickets.attraction_id'=>$attraction->id])->contain(['TicketTripTypes']);
           $tickets_query->contain(['Fixeddates'=>function ($q) use ($date) {
             return $q->where(['date'=>$date->format('Y-m-d')]);
@@ -1038,7 +1038,7 @@ class AttractionsController extends AppController
         $date = null;
         if ($this->request->getQuery('date')) {
           $date = DateTime::createFromFormat('d M Y',$this->request->getQuery('date'));
-          $agent = $this->Auth->user();
+          $agent = $this->getAuthUser();
           $tickets_query = $this->Attractions->Tickets->find()->where(['Tickets.attraction_id'=>$attraction->id,'api_purchase'=>true]);
           $tickets_query->contain(['Attractions','Connections','Fixeddates'=>function ($q) use ($date) {
             return $q->where(['date'=>$date->format('Y-m-d')]);
@@ -1069,21 +1069,21 @@ class AttractionsController extends AppController
       $tickets = [];
       $tickets_max_quantity = [];
       $tickets_slots = [];
-      $agent = $this->Auth->user();
+      $agent = $this->getAuthUser();
       $now = DateTime::now();
       if ($attraction) {
         if ($attraction->pricing_type == 'settlement') {
           $tickets_query = $this->Attractions->Tickets->find()->where(['Tickets.attraction_id'=>$attraction->id,'type !='=>'ctc','OR'=>[['publish_start_date <='=>$now,'publish_end_date >='=>$now],'redemption_type'=>'duration']]);
           $raw_tickets = $tickets_query->toArray();
           // foreach ($tickets as $key => $ticket) {
-          //     $ticket = $this->TicketsHelper->getTicketResellerPrice($ticket,$attraction,$this->Auth->user());
+          //     $ticket = $this->TicketsHelper->getTicketResellerPrice($ticket,$attraction,$this->getAuthUser());
           //     $stock = $this->TicketsHelper->getOpenDateAvailableQuantity($ticket);
           //     $tickets_max_quantity[$ticket->id] = $stock;
           // }
           $http = new \Cake\Http\Client();
           $api_url = Configure::read('Api.url');
           $data = ['sku_id'=>$attraction->sku_id,'time_from'=>$date,'time_to'=>$date];
-          $headers = $this->_buildHeaders($data,$this->Auth->user('email'),$this->Auth->user('id'));
+          $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
           $availabilities = [];
           $ticket_ids = [];
           foreach ($raw_tickets as $key => $ticket) {
@@ -1163,7 +1163,7 @@ class AttractionsController extends AppController
                 ) {
                 $ticket->redemption_start_date = $ticket->redemption_start_date->format('Y M d');
                 $ticket->redemption_end_date = $ticket->redemption_end_date->format('Y M d');
-                $tickets[$ticket->sku_id] = $this->TicketsHelper->getFixeddateResellerPrice($ticket,$attraction,$this->Auth->user(),$datetime);
+                $tickets[$ticket->sku_id] = $this->TicketsHelper->getFixeddateResellerPrice($ticket,$attraction,$this->getAuthUser(),$datetime);
               }
             }
             if ($this->request->getSession()->check('language')) {
@@ -1173,7 +1173,7 @@ class AttractionsController extends AppController
           $http = new \Cake\Http\Client();
           $api_url = Configure::read('Api.url');
           $data = ['sku_id'=>$attraction->sku_id,'time_from'=>$datetime->format('Y-m-d'),'time_to'=>$datetime->format('Y-m-d')];
-          $headers = $this->_buildHeaders($data,$this->Auth->user('email'),$this->Auth->user('id'));
+          $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
           $ticket_ids = [];
           
           foreach ($tickets_array as $key => $ticket) {
@@ -1297,7 +1297,7 @@ class AttractionsController extends AppController
         if (!$attraction) {
             return $this->response->withStatus(400)->withStringBody(json_encode(['error'=>'Attraction not found']));
         }
-        $favorite_attraction = $this->FavoriteAttractions->toggle($attraction_id, $this->Auth->user('id'));
+        $favorite_attraction = $this->FavoriteAttractions->toggle($attraction_id, $this->getAuthUser('id'));
         if ($favorite_attraction) {
           return $this->response->withStatus(200)->withStringBody(json_encode(['data' => $favorite_attraction]));
         }

@@ -14,6 +14,11 @@
  */
 namespace App\Controller;
 
+use ArrayAccess;
+use ArrayObject;
+use Authentication\Identifier\PasswordIdentifier;
+use Cake\Datasource\EntityInterface;
+use Cake\Utility\Hash;
 use Cake\I18n\I18n;
 use Cake\I18n\DateTime;
 use App\View\AjaxView;
@@ -51,31 +56,16 @@ class AppController extends Controller
 
         $this->loadComponent('Flash');
         //$this->loadComponent('Security', ['blackHoleCallback' => 'forceSSL']);
-        $this->loadComponent('Auth', [
-          'authorize'=> 'Controller',//added this line
-          'authenticate' => [
-            'Form' => [
-              'fields' => [
-                'username' => 'email',
-                'password' => 'password'
-              ],
-              'userModel' => 'AgentUsers'
-            ]
-          ],
-          'loginRedirect' => '/dashboard',
-          'loginAction' => [
-            'controller' => 'AgentUsers',
-            'action' => 'login'
-          ],
-          'logoutRedirect' => [
-              'controller' => 'AgentUsers',
-              'action' => 'login'
-          ],
-          'unauthorizedRedirect' => '/agent-users/login'
-        ]);
+        // Replaces AuthComponent. Unauthenticated requests are redirected to
+        // /agent-users/login?redirect=... (see Application::getAuthenticationService()).
+        $this->loadComponent('Authentication.Authentication');
+        // AuthComponent always allowed its loginAction.
+        if ($this->request->getParam('controller') === 'AgentUsers') {
+          $this->Authentication->addUnauthenticatedActions(['login']);
+        }
 
-        if ($this->Auth->user()) {
-          $this->set('auth_user',$this->Auth->user());
+        if ($this->getAuthUser()) {
+          $this->set('auth_user',$this->getAuthUser());
         }
         /*
          * Enable the following component for recommended CakePHP security settings.
@@ -101,6 +91,99 @@ class AppController extends Controller
       return true;
     }
 
+    /**
+     * paginate() returning a plain array, for actions that post-process the rows.
+     *
+     * Also sets the paginated result as a view var so PaginatorHelper finds the
+     * paging info (3.x kept it in the request; an array has none).
+     *
+     * @param mixed $object Table or query to paginate.
+     * @param array $settings Pagination settings.
+     * @return array
+     */
+    protected function paginateToArray(mixed $object = null, array $settings = []): array
+    {
+        $paginated = $this->paginate($object, $settings);
+        $this->set('paginated', $paginated);
+
+        return $paginated->toArray();
+    }
+
+    /**
+     * The logged-in agent user as stored in the session, like 3.x `$this->getAuthUser()`.
+     *
+     * Reads the session (not the request identity) so values written with
+     * setAuthUser() earlier in the same request are seen, as with AuthComponent.
+     *
+     * @param string|null $key Dot path into the user data, e.g. `agent.mobile_otp`.
+     * @return mixed
+     */
+    protected function getAuthUser(?string $key = null): mixed
+    {
+        $user = $this->request->getSession()->read('Auth.User');
+        if (empty($user)) {
+            return null;
+        }
+        if ($user instanceof EntityInterface) {
+            $user = $user->toArray();
+        } elseif ($user instanceof ArrayObject) {
+            $user = $user->getArrayCopy();
+        }
+
+        return $key === null ? $user : Hash::get($user, $key);
+    }
+
+    /**
+     * Logs the user in (or replaces the stored user), like 3.x `$this->setAuthUser()`.
+     *
+     * @param \ArrayAccess|array $user User data.
+     * @return void
+     */
+    protected function setAuthUser(ArrayAccess|array $user): void
+    {
+        $session = $this->request->getSession();
+        $session->renew();
+        $session->write('Auth.User', $user);
+    }
+
+    /**
+     * Checks email/password without logging in, like 3.x `$this->identifyAuthUser()`
+     * with the Form authenticator on AgentUsers (email/password, default hasher).
+     *
+     * @return array|false The user data without the password, or false.
+     */
+    protected function identifyAuthUser(): array|false
+    {
+        $email = $this->request->getData('email');
+        $password = $this->request->getData('password');
+        if (!is_string($email) || $email === '' || !is_string($password) || $password === '') {
+            return false;
+        }
+        $identifier = new PasswordIdentifier([
+            'fields' => ['username' => 'email', 'password' => 'password'],
+            'resolver' => ['className' => 'Authentication.Orm', 'userModel' => 'AgentUsers'],
+        ]);
+        $user = $identifier->identify(['username' => $email, 'password' => $password]);
+        if (!$user instanceof EntityInterface) {
+            return false;
+        }
+        $user->unset('password');
+
+        return $user->toArray();
+    }
+
+    /**
+     * Logs the user out, like 3.x `$this->logoutAuthUser()`.
+     *
+     * @return array The 3.x logoutRedirect.
+     */
+    protected function logoutAuthUser(): array
+    {
+        $this->Authentication->logout();
+
+        return ['controller' => 'AgentUsers', 'action' => 'login'];
+    }
+
     public function beforeFilter(\Cake\Event\EventInterface $event) {
       //$this->Security->requireSecure();
       if ($this->request->getQuery('l')) {
@@ -121,13 +204,13 @@ class AppController extends Controller
         I18n::setLocale($this->request->getSession()->read('language'));
         
       }
-      if ($this->Auth->user('agent_id')) {
+      if ($this->getAuthUser('agent_id')) {
         $this->Agents = $this->fetchTable('Agents');
-        $auth_user = $this->Auth->user();
+        $auth_user = $this->getAuthUser();
         //get agent to get the credit amount
-        $agent = $this->Agents->find()->where(['id'=>$this->Auth->user('agent_id')])->first();
+        $agent = $this->Agents->find()->where(['id'=>$this->getAuthUser('agent_id')])->first();
         //get agentuser to check the announcements_read
-        $current_agentuser = $this->Agents->AgentUsers->find()->where(['id'=>$this->Auth->user('id')])->first();
+        $current_agentuser = $this->Agents->AgentUsers->find()->where(['id'=>$this->getAuthUser('id')])->first();
         $this->Announcements = $this->fetchTable('Announcements');
         $now = DateTime::now();
         $announcements = $this->Announcements->find()

@@ -30,7 +30,7 @@ class OrdersController extends AppController
 {
   public function initialize(): void {
     parent::initialize();
-    $this->Auth->allow(['sps','notificationReceiver','frontendNotificationReceiver']);
+    $this->Authentication->addUnauthenticatedActions(['sps','notificationReceiver','frontendNotificationReceiver']);
     $this->loadComponent('InputCleaner');
     $this->loadComponent('ShoppingCart');
     $this->loadComponent('Mailer');
@@ -52,7 +52,7 @@ class OrdersController extends AppController
   public function beforeFilter(\Cake\Event\EventInterface $event) {
     parent::beforeFilter($event);
     $viewerBlockedActions = ['addToCart', 'subtractQuantity', 'removeFromCart', 'cart', 'checkout', 'removeTicket', 'index', 'myTickets'];
-    if ($this->Auth->user('role') == 'viewer' && in_array($this->request->getParam('action'), $viewerBlockedActions)) {
+    if ($this->getAuthUser('role') == 'viewer' && in_array($this->request->getParam('action'), $viewerBlockedActions)) {
       $this->Flash->error(__('You are not authorized to access that location.'));
       return $this->redirect('/');
     }
@@ -148,7 +148,7 @@ class OrdersController extends AppController
               foreach ($ticket_list[$ticket->id] as $datetime => $qty) {
                 $_ticket_id = $ticket->id;
                 if ($ticket->attraction->pricing_type == 'settlement') {
-                  $ticket = $this->TicketsHelper->getTicketResellerPrice($ticket,$ticket->attraction,$this->Auth->user());
+                  $ticket = $this->TicketsHelper->getTicketResellerPrice($ticket,$ticket->attraction,$this->getAuthUser());
                   if ($ticket) {
                     $default_max_qty =  Configure::read('Default.max_order_quantity');
                     $tickets_max_quantity[$ticket->id] = $ticket->stock && $ticket->stock < $default_max_qty ? $ticket->stock : $default_max_qty;
@@ -161,7 +161,7 @@ class OrdersController extends AppController
                   return $this->redirect(['controller' => 'Attractions', 'action' => 'checkout']);
                 }
                 else {
-                  $ticket = $this->TicketsHelper->getFixeddateResellerPrice($ticket,$ticket->attraction,$this->Auth->user(),$datetime);
+                  $ticket = $this->TicketsHelper->getFixeddateResellerPrice($ticket,$ticket->attraction,$this->getAuthUser(),$datetime);
                   if ($ticket->markup_value && $ticket->markup_value > 0) {
                     $ticket->price = $this->_getTicketApiPrice($ticket, $datetime);
                   }
@@ -271,12 +271,12 @@ class OrdersController extends AppController
             if (isset($ticket_list[$ticket->id]) && is_array($ticket_list[$ticket->id])) {
               foreach ($ticket_list[$ticket->id] as $datetime => $qty) {
                 if ($ticket->attraction->pricing_type == 'settlement') {
-                  $ticket = $this->TicketsHelper->getTicketResellerPrice($ticket,$ticket->attraction,$this->Auth->user(),$datetime);
+                  $ticket = $this->TicketsHelper->getTicketResellerPrice($ticket,$ticket->attraction,$this->getAuthUser(),$datetime);
                 } elseif ($ticket->pricing_type === PricingType::TWO_WAY_FDATETIME) {
                   if ($ticket->ticket_trip_type->type == 'return') {
                     continue;
                   }
-                  $ticket = $this->TicketsHelper->getFixeddateResellerPrice($ticket,$ticket->attraction,$this->Auth->user(),$datetime);
+                  $ticket = $this->TicketsHelper->getFixeddateResellerPrice($ticket,$ticket->attraction,$this->getAuthUser(),$datetime);
                   if (count($tickets) > 1) {
                     $return_ticket = $this->Tickets->getReturnTicket($ticket->id);
                     if (!$return_ticket) {
@@ -288,7 +288,7 @@ class OrdersController extends AppController
                     if ($return_ticket) {
                       $return_datetime = array_keys($ticket_list[$return_ticket->id])[0];
                       $return_ticket = $this->Tickets->loadInto($return_ticket, ['Attractions' => ['Merchants']]);
-                      $return_ticket = $this->TicketsHelper->getFixeddateResellerPrice($return_ticket,$return_ticket->attraction,$this->Auth->user(),$return_datetime);
+                      $return_ticket = $this->TicketsHelper->getFixeddateResellerPrice($return_ticket,$return_ticket->attraction,$this->getAuthUser(),$return_datetime);
                       $two_way_price = $this->_getTicketApiPrice($ticket, $datetime, $return_ticket, $return_datetime);
                     }
                     if (!empty($two_way_price)) {
@@ -313,7 +313,7 @@ class OrdersController extends AppController
                   }
                 }
                 else {
-                  $ticket = $this->TicketsHelper->getFixeddateResellerPrice($ticket,$ticket->attraction,$this->Auth->user(),$datetime);
+                  $ticket = $this->TicketsHelper->getFixeddateResellerPrice($ticket,$ticket->attraction,$this->getAuthUser(),$datetime);
                   if ($ticket->markup_value && $ticket->markup_value > 0) {
                     $ticket->price = $this->_getTicketApiPrice($ticket, $datetime);
                   }
@@ -355,7 +355,7 @@ class OrdersController extends AppController
         if (empty($data)) {
           return $this->redirect(['action'=>'checkout']);
         }
-        $headers = $this->_buildHeaders($data,$this->Auth->user('email'),$this->Auth->user('id'));
+        $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
         $api_url = Configure::read('Api.url');
         $response = $http->post($api_url.'/order/create',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false]);
         $errorMessage = '<h4>' . __('Booking Temporarily Unavailable for this Supplier') . '</h4><br>' .
@@ -421,8 +421,8 @@ class OrdersController extends AppController
 
       }
       // $this->Agents = $this->fetchTable('Agents');
-      // $agent = $this->Agents->find()->where(['id'=>$this->Auth->user('agent_id')])->first();
-      $agent = $this->Auth->user();
+      // $agent = $this->Agents->find()->where(['id'=>$this->getAuthUser('agent_id')])->first();
+      $agent = $this->getAuthUser();
 
       $this->set(compact('order','agent','tickets_with_question_group'));
     }
@@ -443,7 +443,7 @@ class OrdersController extends AppController
         $api_url = Configure::read('Api.url');
         foreach ($attraction_skus as $sku_id) {
             $data = ['sku_id'=>$sku_id,'from_mobile'=> true];
-            $headers = $this->_buildHeaders($data,$this->Auth->user('email'),$this->Auth->user('id'));
+            $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
             try {
                 $response = $http->get($api_url . '/attraction/details', $data, ['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false, 'timeout' => Configure::read('Api.timeout')]);
                 if ($response->isOk()) {
@@ -520,7 +520,7 @@ class OrdersController extends AppController
         if ($this->request->getData('pay_by')) {
 
           // $order = $this->Orders->patchEntity($order,$this->request->getData());
-          $order->agent_user_id = $this->Auth->user('id');
+          $order->agent_user_id = $this->getAuthUser('id');
           if ($this->request->getData('pay_by') == 'credits') {
             $order->convinience_fee = 0;
             $order->total = $order->subtotal;
@@ -537,7 +537,7 @@ class OrdersController extends AppController
             $http = new \Cake\Http\Client();
             $api_url = Configure::read('Api.url');
             $data = ['order_ref_id'=>$order->order_ref_id,'action'=>'pay','from_mobile'=> true];
-            $headers = $this->_buildHeaders($data,$this->Auth->user('email'),$this->Auth->user('id'));
+            $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
             try {
               $response = $http->post($api_url.'/order/update',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
               if ($response->isOk()) {
@@ -697,7 +697,7 @@ class OrdersController extends AppController
         $http = new \Cake\Http\Client();
         $api_url = Configure::read('Api.url');
         $data = ['order_ref_id'=>$order_ref_id,'action'=>'complete'];
-        $headers = $this->_buildHeaders($data,$this->Auth->user('email'),$this->Auth->user('id'));
+        $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
         try {
           $response = $http->post($api_url.'/order/complete',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
           if ($response->isOk()) {
@@ -708,11 +708,11 @@ class OrdersController extends AppController
                 $order_ref_id = $res_data['data']['order_ref_id'];
                 $order = $this->Orders->find()->where(['order_ref_id'=>$order_ref_id])->first();
                 if ($order) {
-                  $agent = $this->Agents->find()->where(['id'=>$this->Auth->user('agent_id')])->first();
+                  $agent = $this->Agents->find()->where(['id'=>$this->getAuthUser('agent_id')])->first();
                   if ($agent) {
-                    $auth_user = $this->Auth->user();
+                    $auth_user = $this->getAuthUser();
                     $auth_user['credits'] = $agent->credits;
-                    $this->Auth->setUser($auth_user);
+                    $this->setAuthUser($auth_user);
                   }
                   $this->request->getSession()->delete('order');
                   $this->ShoppingCart->clear();
@@ -754,7 +754,7 @@ class OrdersController extends AppController
        $http = new \Cake\Http\Client();
        $api_url = Configure::read('Api.url');
        $data = ['order_ref_id'=>$order->order_ref_id];
-       $headers = $this->_buildHeaders($data,$this->Auth->user('email'),$this->Auth->user('id'));
+       $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
       try {
         $response = $http->get($api_url.'/order/status',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
         if ($response->isOk()) {
@@ -917,7 +917,7 @@ class OrdersController extends AppController
         return $this->response->withStatus(404); 
       }
       
-      $pdf = $this->Orders->createInvoice($order_ref_id, $this->Auth->user());
+      $pdf = $this->Orders->createInvoice($order_ref_id, $this->getAuthUser());
       if ($pdf === false) {
         return $this->response->withStatus(404);
       }
@@ -941,7 +941,7 @@ class OrdersController extends AppController
         $ticket_price = [];
         try {
           $data = ['depart_sku_id' => $ticket->sku_id, 'return_sku_id' => $return_ticket->sku_id, 'depart_datetime' => $time_from,'return_datetime' => $time_to, 'is_two_way' => true];
-          $headers = $this->_buildHeaders($data,$this->Auth->user('email'),$this->Auth->user('id'));
+          $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
           $response = $http->get($api_url . '/ticket/availabilities', $data, ['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false, 'timeout' => Configure::read('Api.timeout')]);
           if ($response->isOk()) {
             $res = $response->getJson();
@@ -976,7 +976,7 @@ class OrdersController extends AppController
       } else {
         try {
           $data = ['sku_id' => $ticket->sku_id, 'time_from' => $time_from,'time_to' => $time_from];
-          $headers = $this->_buildHeaders($data,$this->Auth->user('email'),$this->Auth->user('id'));
+          $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
           $response = $http->get($api_url.'/ticket/availabilities',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
           if ($response->isOk()) {
             $res = $response->getJson();
@@ -1821,11 +1821,11 @@ class OrdersController extends AppController
     public function index()
     {
         $this->AgentUsers = $this->fetchTable('AgentUsers');
-        $conditions = ['agent_user_id'=>$this->Auth->user('id')];
-        if ($this->Auth->user('role') == 'master') {
-          $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id'=>$this->Auth->user('agent_id')])->all()->toList();
+        $conditions = ['agent_user_id'=>$this->getAuthUser('id')];
+        if ($this->getAuthUser('role') == 'master') {
+          $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id'=>$this->getAuthUser('agent_id')])->all()->toList();
           if (empty($agent_user_ids)) {
-            $agent_user_ids = [$this->Auth->user('id')];
+            $agent_user_ids = [$this->getAuthUser('id')];
           }
           $conditions = ['agent_user_id IN' => $agent_user_ids];
         }
@@ -1939,12 +1939,12 @@ class OrdersController extends AppController
         $this->AgentUsers = $this->fetchTable('AgentUsers');
         $this->Vouchers = $this->fetchTable('Vouchers');
         $conditions = [];
-        $order_conditions = ['Orders.agent_user_id'=>$this->Auth->user('id')];
+        $order_conditions = ['Orders.agent_user_id'=>$this->getAuthUser('id')];
         $status_allowed = ['purchased','used','partially_redeemed_expired','partially_redeemed_cancelled','cancelled','expired'];
-        if ($this->Auth->user('role') == 'master') {
-          $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id'=>$this->Auth->user('agent_id')])->all()->toList();
+        if ($this->getAuthUser('role') == 'master') {
+          $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id'=>$this->getAuthUser('agent_id')])->all()->toList();
           if (empty($agent_user_ids)) {
-            $agent_user_ids = [$this->Auth->user('id')];
+            $agent_user_ids = [$this->getAuthUser('id')];
           }
           $order_conditions = ['Orders.agent_user_id IN' => $agent_user_ids];
         }
@@ -1978,10 +1978,10 @@ class OrdersController extends AppController
         $query = $this->Vouchers->find()->matching('OrderItems.Orders',function ($q) use ($order_conditions) {
           return $q->where($order_conditions);
         });
-        $vouchers = $this->paginate($query->where($conditions)->contain(['OrderItems'=>['Orders']]))->toArray();
+        $vouchers = $this->paginateToArray($query->where($conditions)->contain(['OrderItems'=>['Orders']]));
         foreach ($vouchers as $key => $voucher) {
           $voucher->code_status = $this->Vouchers->getStatus($voucher->code_id, $voucher->voucher_type);
-          $voucher->is_cancellable = $this->Vouchers->isCancellable($voucher->code_id, $this->Auth->user('agent_id'));
+          $voucher->is_cancellable = $this->Vouchers->isCancellable($voucher->code_id, $this->getAuthUser('agent_id'));
 
           // if ($this->request->getQuery('status') && in_array($this->request->getQuery('status'),$status_allowed)) {
           //   if ($voucher->code_status != $this->request->getQuery('status')) {
@@ -2006,7 +2006,7 @@ class OrdersController extends AppController
       $http = new \Cake\Http\Client();
       $api_url = Configure::read('Api.url');
       $data = ['order_ref_id'=>$id];
-      $headers = $this->_buildHeaders($data,$this->Auth->user('email'),$this->Auth->user('id'));
+      $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
       try {
         $response = $http->get($api_url.'/order/details',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
         if ($response->isOk()) {
@@ -2014,7 +2014,7 @@ class OrdersController extends AppController
           if ($res_data['status'] == '1000') {
             $order = $res_data['data'];
             $this->VoucherMerging = $this->fetchTable('VoucherMerging');
-            $voucher_merging = $this->VoucherMerging->find()->where(['order_ref_id' => $order['order_ref_id'], 'agent_id' => $this->Auth->user('agent_id')])->first();
+            $voucher_merging = $this->VoucherMerging->find()->where(['order_ref_id' => $order['order_ref_id'], 'agent_id' => $this->getAuthUser('agent_id')])->first();
             // $expired_voucher_merging = FrozenTime::now(Configure::read('App.defaultTimezone'))->subMinutes(Configure::read('Voucher.merged_expiration') ?? '60');
             // if ($voucher_merging && $voucher_merging->created < $expired_voucher_merging) {
             //   $voucher_merging = null;
@@ -2046,7 +2046,7 @@ class OrdersController extends AppController
   //     $http = new \Cake\Http\Client();
   //     $api_url = Configure::read('Api.url');
   //     $data = ['order_ref_id'=>$order_ref_id,'action'=>'cancel'];
-  //     $headers = $this->_buildHeaders($data,$this->Auth->user('email'),$this->Auth->user('id'));
+  //     $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
   //    try {
   //      $response = $http->post($api_url.'/order/update',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
   //      if ($response->isOk()) {
@@ -2078,7 +2078,7 @@ class OrdersController extends AppController
       $http = new \Cake\Http\Client();
       $api_url = Configure::read('Api.url');
       $data = ['code'=>$code,'action'=>'cancel'];
-      $headers = $this->_buildHeaders($data,$this->Auth->user('email'),$this->Auth->user('id'));
+      $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
       try {
         $response = $http->post($api_url.'/voucher/cancel',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
         if ($response->isOk()) {
@@ -2210,7 +2210,7 @@ class OrdersController extends AppController
           if ($ticket) {
             $_ticket_id = $ticket->id;
             if ($ticket->attraction->pricing_type == 'settlement') {
-              $ticket = $this->TicketsHelper->getTicketResellerPrice($ticket,$ticket->attraction,$this->Auth->user());
+              $ticket = $this->TicketsHelper->getTicketResellerPrice($ticket,$ticket->attraction,$this->getAuthUser());
               if ($ticket &&  ($qty > ($ticket->stock !== null ? $ticket->stock : Configure::read('Default.max_order_quantity')))) {
                 $this->Flash->error(__('Sorry you have exceeded available {0} tickets.', $ticket->name));
                 return false;
@@ -2220,7 +2220,7 @@ class OrdersController extends AppController
               }
             }
             else {
-              $ticket = $this->TicketsHelper->getFixeddateResellerPrice($ticket,$ticket->attraction,$this->Auth->user(),$date);
+              $ticket = $this->TicketsHelper->getFixeddateResellerPrice($ticket,$ticket->attraction,$this->getAuthUser(),$date);
               if ($ticket->markup_value && $ticket->markup_value > 0) {
                 $ticket->price = $this->_getTicketApiPrice($ticket, $date);
               }

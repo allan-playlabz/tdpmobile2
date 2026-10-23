@@ -27,8 +27,8 @@ class VoucherMergingController extends AppController
     {
         $this->autoRender = false;
         $this->AgentUsers = $this->fetchTable('AgentUsers');
-        $voucher_merging = $this->VoucherMerging->find()->where(['order_ref_id' => $this->request->getQuery('order_ref_id'),
-        'agent_id' => $this->Auth->user('agent_id')])->first();
+        $voucher_merging = $this->VoucherMerging->find()->where(['order_ref_id' => (string)$this->request->getQuery('order_ref_id'),
+        'agent_id' => $this->getAuthUser('agent_id')])->first();
 
         return $this->response->withStatus(200)->withStringBody(json_encode([
             'voucher_merging' => $voucher_merging,

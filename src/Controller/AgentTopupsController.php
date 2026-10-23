@@ -32,7 +32,7 @@ class AgentTopupsController extends AppController
      */
     public function index()
     {
-      if($this->Auth->user('role')!='master') {
+      if($this->getAuthUser('role')!='master') {
         $this->Flash->error('You are not authorized to access that location.');
         return $this->redirect('/');
       }
@@ -42,7 +42,7 @@ class AgentTopupsController extends AppController
       $end_date = \Cake\I18n\DateTime::now(Configure::read('App.defaultTimezone'));;
       $query = $this->AgentTopups->find('all',
       contain: ['Agents'],
-      conditions: ['agent_id'=>$this->Auth->user('agent_id')],
+      conditions: ['agent_id'=>$this->getAuthUser('agent_id')],
       order: ['AgentTopups.created'=>'desc']);
       if ($this->request->getQuery('from')) {
         
@@ -82,7 +82,7 @@ class AgentTopupsController extends AppController
         //   return $this->redirect(['controller' => 'AgentTopups', 'action' => 'index']);
         // }
         $agent = $this->Agents->find()
-          ->where(['id'=>$this->Auth->user('agent_id')])
+          ->where(['id'=>$this->getAuthUser('agent_id')])
           ->first();
         $array_records = [];
         $array_records[] = ['Report Date',date('Y-m-d H:i:s')];
@@ -119,7 +119,7 @@ class AgentTopupsController extends AppController
       $agentTopups = $this->paginate($query);
 
       $agent = $this->Agents->find()
-        ->where(['id' => $this->Auth->user('agent_id')])
+        ->where(['id' => $this->getAuthUser('agent_id')])
         ->first();
       $bank_reference_code = $agent ? $agent->bank_reference_code : null;
 
@@ -135,13 +135,13 @@ class AgentTopupsController extends AppController
      */
     public function view($id = null)
     {
-      if($this->Auth->user('role')!='master') {
+      if($this->getAuthUser('role')!='master') {
         $this->Flash->error('You are not authorized to access that location.');
         return $this->redirect('/');
       }
       $agentTopup = $this->AgentTopups->get($id,
       contain: ['Agents'],
-      conditions: ['agent_id'=>$this->Auth->user('agent_id')]);
+      conditions: ['agent_id'=>$this->getAuthUser('agent_id')]);
       if ($agentTopup && $agentTopup->status == 'approved') {
         $this->AgentTopups->loadInto($agentTopup,['Admins']);
       }
@@ -151,7 +151,7 @@ class AgentTopupsController extends AppController
 
     public function add()
     {
-      if($this->Auth->user('role')!='master') {
+      if($this->getAuthUser('role')!='master') {
         $this->Flash->error('You are not authorized to access that location.');
         return $this->redirect('/');
       }
@@ -159,7 +159,7 @@ class AgentTopupsController extends AppController
       if ($this->request->is('post')) {
           $agentTopup = $this->AgentTopups->patchEntity($agentTopup, $this->request->getData());
           $agentTopup->amount = floatval($agentTopup->amount);
-          $agentTopup->agent_id = $this->Auth->user('agent_id');
+          $agentTopup->agent_id = $this->getAuthUser('agent_id');
           $agentTopup->topup_date = date('Y-m-d'); 
           $agentTopup->image = '';
           $agentTopup->status = 'pending';
@@ -168,7 +168,7 @@ class AgentTopupsController extends AppController
               if (getimagesize($this->request->getData('image')->getStream()->getMetadata('uri'))) {
                 if ($this->AgentTopups->save($agentTopup)) {
                     $this->Flash->success(__('The agent top up has been saved.'));
-                        $filename = $this->Auth->user('agent_id').'/'.$this->request->getData('image')->getClientFilename();
+                        $filename = $this->getAuthUser('agent_id').'/'.$this->request->getData('image')->getClientFilename();
                         $image_filename = 'agenttopups/'.$filename;
                         $this->S3->putObject($image_filename,$this->request->getData('image')->getStream()->getMetadata('uri'));
                         $agentTopup->image = 'agent-topups/topup-images/'. $image_filename;

@@ -21,10 +21,10 @@ class CreditLogsController extends AppController
     {
       // filter by date
       // max 30 days only
-      $agent_id = $this->Auth->user('agent_id');
+      $agent_id = $this->getAuthUser('agent_id');
       $start_date = null;
       $end_date = null;
-      if (!$this->Auth->user('agent.enable_credit_logs_view')) {
+      if (!$this->getAuthUser('agent.enable_credit_logs_view')) {
         return $this->redirect('/');
       }
       $days_to_show = Configure::read('CreditLogs.days_to_show') ?? 100;
@@ -72,7 +72,7 @@ class CreditLogsController extends AppController
           return $this->redirect(['controller' => 'CreditLogs', 'action' => 'index', '?' => $this->request->getQuery()]);
         }
         $agent = $this->Agents->find()
-          ->where(['id'=>$this->Auth->user('agent_id')])
+          ->where(['id'=>$this->getAuthUser('agent_id')])
           ->first();
         $array_records = [];
         $array_records[] = ['Report Date',date('Y-m-d H:i:s')];

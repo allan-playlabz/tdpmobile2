@@ -39,7 +39,7 @@ class CategoriesController extends AppController
       if ($this->request->getData('categories')) {
           $selected_categories = $this->request->getData('categories');
       }
-      $agent = $this->Auth->user();
+      $agent = $this->getAuthUser();
       $attraction_query = $this->Attractions->find()
       ->select(['Attractions.status','Attractions.id','Attractions.title','Attractions.pricing_type','Attractions.featured_image','settlement_agents.id','fixeddates_agents.id','settlement_agents.settlement_id'])
       ->where(['Attractions.status'=>'published'])
@@ -64,11 +64,11 @@ class CategoriesController extends AppController
         'OR'=>[['Attractions.pricing_type'=>'settlement','settlement_agents.id IS NOT NULL'],['Attractions.pricing_type !='=>'settlement','fixeddates_agents.id IS NOT NULL']
         ]
       ]);
-      $attractions = $this->paginate($attraction_query
+      $attractions = $this->paginateToArray($attraction_query
         ->contain(['Categories'])
         ->where(['Attractions.category_id'=>$id])
         ->distinct('Attractions.id')
-      )->toArray();
+      );
       
       
       $now = DateTime::now();

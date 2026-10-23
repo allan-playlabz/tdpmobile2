@@ -32,7 +32,7 @@ class CreditsCell extends Cell
             if ($agent) {
               $auth_user['credits'] = $agent->credits;
               $auth_user['announcements_read'] = $current_agentuser->announcements_read;
-            //   $this->Auth->setUser($auth_user);
+            //   $this->setAuthUser($auth_user);
               $this->set('auth_user',$auth_user);
             }
     

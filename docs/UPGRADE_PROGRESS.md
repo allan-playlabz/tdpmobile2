@@ -50,7 +50,7 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 - [x] cake5-deps (2026-10-23) — CakePHP 5.4.3 installed
 - [x] cake5-structure (2026-10-23) — structure scan 0 blockers; `bin/cake --help` lists `delete_temp`, `generate_report`
 - [x] cake5-code-apis (2026-10-23) — code-api scan 0 blockers; lint clean; `generate_report` runs on local DB. Total blockers 956 → 280 (auth 140, tests 140)
-- [ ] cake5-auth
+- [x] cake5-auth (2026-10-23) — auth scan 0 blockers; login/logout/public actions/CSRF/single-session verified over HTTP; logged-in page sweep clean
 - [ ] cake5-tests
 - [ ] final scan = 0 blockers, smoke test done
 
@@ -97,6 +97,23 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
   - `fputcsv()` explicit escape `'\'` (PHP 8.4 deprecation; output unchanged).
 - PHPStan level 1 on `src/` used as an extra net (remaining findings are pre-existing, listed below).
 - **Phase 4 note:** `CustomDatabaseSession::write()` reads `$_SESSION['Auth']['User']['id']` to enforce one session per agent user → configure the Authentication session key as `Auth.User`.
+## Phase 4 — authentication (2026-10-23)
+### 3.x AuthComponent inventory (acceptance table)
+| Item | 3.x | 5.x | Verified |
+|---|---|---|---|
+| User model / fields | Form on `AgentUsers`, `email`/`password`, default hasher | `AppController::identifyAuthUser()` (Authentication `PasswordIdentifier`, Orm resolver, default hasher); returns array without password like `Auth->identify()` | valid + invalid password |
+| Login flow | `identify()` then OTP/IP checks, then `setUser()` with a modified array | unchanged; `setUser()` → `setAuthUser()` (session renew + write `Auth.User`) | no-OTP login → Attractions |
+| Session layout | `$_SESSION['Auth']['User']` (read directly by CustomDatabaseSession, LoggableBehavior, CreditsCell) | Session authenticator `sessionKey => 'Auth.User'` | single session per user still enforced |
+| `Auth->user('a.b')` | session read, `Hash::get` | `getAuthUser('a.b')` (session read, `Hash::get`) | — |
+| loginAction / unauthenticated | redirect to `/agent-users/login` | `unauthenticatedRedirect` `/agent-users/login?redirect=<url>` | logged-out `/`, `/orders`, `/agent-users/logout` → login |
+| logoutRedirect | `AgentUsers::login` | `logoutAuthUser()` → `Authentication->logout()` + same redirect | logout → protected page redirects |
+| loginRedirect `/dashboard` | only via `redirectUrl()` (result unused) | removed | — |
+| authorize `Controller` / `isAuthorized()` | always `true` | no authorization layer (method kept) | — |
+| Public actions | `allow()` in AgentUsers (otp, resendOtp, forgotPassword, resetPassword + implicit login), AgentsSignups (add, thankyou), Orders (sps, notificationReceiver, frontendNotificationReceiver), Vouchers (download, sdownload) | `addUnauthenticatedActions()` (login added in AppController for AgentUsers) | all reachable logged out; gateway callbacks accept POST without CSRF |
+- Differences: unauthenticated XHR now gets a 302 to login (3.x AuthComponent returned 403).
+- Also fixed during the web sweep: `ShoppingCartComponent` used `$controller->request` (protected in 5.x); `paginate()->toArray()` sites keep the paginated result as a view var (`paginateToArray()`) so PaginatorHelper works; `AgentUsers/index` sort headers (not paginated) render the same links via `Html->link`; null-safe `where()` for login email, `AgentUsers::edit` without id, `VoucherMerging::getStatus`.
+- Local test setup: `config/.env` sets `COOKIE_DOMAIN=tpp.localhost` — use `http://tpp.localhost:8765` with `bin/cake server`.
+- Not verified (needs real gateways/API/mail): OTP email flow, checkout + payment, voucher/PDF download, top-up with image. The local API (`tdpapiv2.localhost`) returns non-JSON, so availability/ticket pages log "array offset on null" warnings (environment).
 ## Follow-ups (not part of the upgrade)
 - Consider `HostHeaderMiddleware` with `APP_FULL_BASE_URL` set per environment (Host header injection protection).
 - firebase/php-jwt < 7 advisory (CVE-2025-45769, low).
@@ -118,3 +135,5 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 - `AgentTopupsTable` validates `image` with `scalar()`, which rejects an uploaded file (3.x array / 5.x object) — check in smoke test whether top-ups with an image save.
 - `AgentsSignupsTable` `MasterAgents` association has no `className` (targets non-existent `master_agents`); clashes with `AgentsTable`'s `MasterAgents` if both load. Only `index()` (not routed) uses it.
 - Baked associations to non-existent tables in the local DB (`records`, `txns`, `jobs`, `package_tickets`, `fixeddates_agents`).
+- `ReportsController` routes `/reports/topups` and `/reports/transactions` have no matching actions (404 Missing Method, also in 3.x).
+- `where(['col' => null])` throws in 5.x (3.x matched nothing). Request-sourced and route-reachable sites are guarded; other call sites with possibly-null values should be watched in logs.

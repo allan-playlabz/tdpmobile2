@@ -18,7 +18,7 @@ class AgentsSignupsController extends AppController
     public function initialize(): void
     {
         parent::initialize();
-        $this->Auth->allow(['add','thankyou']);
+        $this->Authentication->addUnauthenticatedActions(['add','thankyou']);
     }
 
     /**

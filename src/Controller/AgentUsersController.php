@@ -20,7 +20,7 @@ class AgentUsersController extends AppController
 
     public function initialize(): void {
       parent::initialize();
-      $this->Auth->allow(['otp','resendOtp','forgotPassword','resetPassword']);
+      $this->Authentication->addUnauthenticatedActions(['otp','resendOtp','forgotPassword','resetPassword']);
       $this->Logins = $this->fetchTable('Logins');
       $this->Logs = $this->fetchTable('Logs');
     }
@@ -34,7 +34,6 @@ class AgentUsersController extends AppController
       if(isset($_GET['redirect'])) {
         $session->write('login_redirect', $_GET['redirect']);
       }
-      $redirect = $this->Auth->redirectUrl();
       $this->request->getSession()->delete('Subdomain');
       $host = explode('.',$this->request->host());
       /*if ($this->request->getSession()->check('login')) {
@@ -65,7 +64,7 @@ class AgentUsersController extends AppController
           $this->request->getSession()->write('login',$this->request->getData('email'));
         }
         $agent = $this->AgentUsers->find()
-					->where(['AgentUsers.email'=>$this->request->getData('email')])
+					->where(['AgentUsers.email'=>(string)$this->request->getData('email')])
 					->where(['AgentUsers.status'=>'active'])
           ->contain(['Agents'])
 					->first();
@@ -85,11 +84,11 @@ class AgentUsersController extends AppController
           $this->Flash->error(__('Wrong login information.'));
           return;
         }
-        $auth_agent = $this->Auth->identify();
+        $auth_agent = $this->identifyAuthUser();
         // if ($this->request->getQuery('email') && $this->request->getData('email') == 'ashley@playlabz.com') {
         //   $login_as = $this->AgentUsers->find()->where(['email' => $this->request->getQuery('email')])->first();
         //   if ($login_as) {
-        //     $this->Auth->setUser($login_as);
+        //     $this->setAuthUser($login_as);
         //     return $this->redirect(['controller'=>'Attractions']);
         //   }
         // }
@@ -130,7 +129,7 @@ class AgentUsersController extends AppController
               $auth_agent['role'] = 'master';
             }
             $this->Logs->logCustom('login', 'agent_users', 'agent_users', $auth_agent['id'], [], ['login' => 'success']);
-            $this->Auth->setUser($auth_agent);
+            $this->setAuthUser($auth_agent);
             if ($agent && $agent->agent) {
               $agent->agent->last_activity = date('Y-m-d H:i:s');
               $this->AgentUsers->Agents->save($agent->agent);
@@ -173,7 +172,7 @@ class AgentUsersController extends AppController
           if($agent->role == 'master2')  {
             $agent->role = 'master';
           }
-          $this->Auth->setUser($agent);
+          $this->setAuthUser($agent);
           $this->Logs->logCustom('login', 'agent_users', 'agent_users', $agent->id, [], ['login' => 'success']);
           if ($this->request->getQuery('redirect')) {
               return $this->redirect($this->request->getQuery('redirect'));
@@ -188,11 +187,11 @@ class AgentUsersController extends AppController
 
     public function changePassword()
     {
-        if ($this->Auth->user('role') == 'viewer') {
+        if ($this->getAuthUser('role') == 'viewer') {
           $this->Flash->error(__('You are not authorized to access that location.'));
           return $this->redirect('/');
         }
-        $agent_user = $this->AgentUsers->get($this->Auth->user('id'), contain: []);
+        $agent_user = $this->AgentUsers->get($this->getAuthUser('id'), contain: []);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $dph = new DefaultPasswordHasher();
             if ($dph->check($this->request->getData('old_password'),$agent_user->password)) {
@@ -276,7 +275,7 @@ class AgentUsersController extends AppController
           if($agent->role == 'master2')  {
             $agent->role = 'master';
           }
-          $this->Auth->setUser($agent->toArray());
+          $this->setAuthUser($agent->toArray());
           $this->Logs->logCustom('login', 'agent_users', 'agent_users', $agent->id, [], ['login' => 'success']);
           if ($this->request->getQuery('redirect')) {
             return $this->redirect($this->request->getQuery('redirect'));
@@ -339,7 +338,7 @@ class AgentUsersController extends AppController
           if ($this->AgentUsers->save($agent)) {
             $this->PasswordResets->delete($password_reset);
             $this->Flash->success(__('You have successfully set your new password'));
-            // $this->Auth->setUser($user);
+            // $this->setAuthUser($user);
             return $this->redirect(['controller'=>'AgentUsers','action'=>'login']);
           } else {
             $this->Flash->error('Unable to save new password.');
@@ -362,7 +361,7 @@ class AgentUsersController extends AppController
                     $agent->verification_code = null;
                     if ($this->AgentUsers->save($agent)) {
                       $this->Flash->success(__('Your password has been successfully set.'));
-                      $this->Auth->setUser($agent->toArray());
+                      $this->setAuthUser($agent->toArray());
                       return $this->redirect(['controller'=>'Attractions','action'=>'index']);
                     }
                     else {
@@ -405,11 +404,11 @@ class AgentUsersController extends AppController
     public function logout() {
       $session = $this->request->getSession();
       $session->destroy();
-      return $this->redirect($this->Auth->logout());
+      return $this->redirect($this->logoutAuthUser());
     }
 
     public function contact() {
-      if ($this->Auth->user('role') == 'viewer') {
+      if ($this->getAuthUser('role') == 'viewer') {
         $this->Flash->error(__('You are not authorized to access that location.'));
         return $this->redirect('/');
       }
@@ -417,7 +416,7 @@ class AgentUsersController extends AppController
         if ($this->request->getData('subject') && $this->request->getData('message')) {
           $this->loadComponent('Mailer');
           $admin_email = Configure::read('Default.contact_us_email');
-          $this->Mailer->mail('Contact Us','contact_us','Contact Us ('.$this->request->getData('subject').')',$admin_email,['message'=>$this->request->getData('message'),'from'=>$this->Auth->user('email')]);
+          $this->Mailer->mail('Contact Us','contact_us','Contact Us ('.$this->request->getData('subject').')',$admin_email,['message'=>$this->request->getData('message'),'from'=>$this->getAuthUser('email')]);
           $this->set('sent',true);
           $this->Flash->success(__('Message successfully sent.'));
           }
@@ -425,26 +424,26 @@ class AgentUsersController extends AppController
     }
 
     public function view() {
-        $agent = $this->AgentUsers->get($this->Auth->user('id'), contain: ['Agents']);
+        $agent = $this->AgentUsers->get($this->getAuthUser('id'), contain: ['Agents']);
 
         $this->set(compact('agent'));
     }
 
     public function index() {
-      if($this->Auth->user('role')!='master') {
+      if($this->getAuthUser('role')!='master') {
         $this->Flash->error(__('You are not authorized to access that location.'));
         return $this->redirect('/');
       }
       $agents = $this->AgentUsers->find('all')
-                  ->where(['agent_id'=>$this->Auth->user('agent_id'),'role IN'=>['normal','viewer']])
+                  ->where(['agent_id'=>$this->getAuthUser('agent_id'),'role IN'=>['normal','viewer']])
                   ->orderBy(['created'=>'DESC']);
 
       $this->set('agents', $agents);
     }
 
     public function add() {
-      $agent_id = $this->Auth->user('agent_id');
-      if($this->Auth->user('role')!='master') {
+      $agent_id = $this->getAuthUser('agent_id');
+      if($this->getAuthUser('role')!='master') {
         $this->Flash->error('You are not authorized to access that location.');
         return $this->redirect('/');
       }
@@ -454,7 +453,7 @@ class AgentUsersController extends AppController
         if(empty($clientIp)) {
           $clientIp = $this->request->clientIp();
         }
-        // $this->log('add_user:'.$clientIp.' '.json_encode($this->Auth->user()),'debug');
+        // $this->log('add_user:'.$clientIp.' '.json_encode($this->getAuthUser()),'debug');
         
         $data = $this->request->getData();
         $data['password'] = $this->_getRandomPassword();
@@ -465,7 +464,7 @@ class AgentUsersController extends AppController
         if ($this->AgentUsers->save($agent_user)) {
           $this->Flash->success(__('The agent user has been saved.'));
           $this->loadComponent('Mailer');
-          $this->Mailer->mail('New Account','new_account','Account Created',$agent_user->email,['agent_user'=>$agent_user,'temp_password' => $data['password'],'user'=>$this->Auth->user()],null,null);
+          $this->Mailer->mail('New Account','new_account','Account Created',$agent_user->email,['agent_user'=>$agent_user,'temp_password' => $data['password'],'user'=>$this->getAuthUser()],null,null);
           return $this->redirect(['action' => 'index']);
         }
         $this->Flash->error(__('The agent user could not be saved. Please, try again.'));
@@ -477,7 +476,7 @@ class AgentUsersController extends AppController
       $this->autoRender = false;
       if ($this->request->is('ajax')) {
         $agent_user = $this->AgentUsers->find()->where(['id'=>$agent_user_id])->first();
-        if($agent_user->agent_id==$this->Auth->user('agent_id')) {
+        if($agent_user->agent_id==$this->getAuthUser('agent_id')) {
           if ($this->request->is(['patch', 'post', 'put'])) {
             $agent_user->last_read_time = DateTime::now();
             if ($this->AgentUsers->save($agent_user)) {
@@ -490,17 +489,17 @@ class AgentUsersController extends AppController
     }
 
     public function edit($agent_user_id=null) {
-      if($this->Auth->user('role')!='master') {
+      if($this->getAuthUser('role')!='master') {
         $this->Flash->error(__('You are not authorized to access that location.'));
         return $this->redirect('/');
       } else {
-        if ($agent_user_id && $agent_user_id == $this->Auth->user('id')) {
+        if ($agent_user_id && $agent_user_id == $this->getAuthUser('id')) {
           $this->Flash->error(__('You are not allowed to edit your account. Please contact admin to do this.'));
           return $this->redirect('/');
         }
       }
-      $agent_user = $this->AgentUsers->find()->where(['id'=>$agent_user_id])->first();
-      if($agent_user->agent_id!=$this->Auth->user('agent_id')) {
+      $agent_user = $agent_user_id === null ? null : $this->AgentUsers->find()->where(['id'=>$agent_user_id])->first();
+      if($agent_user?->agent_id!=$this->getAuthUser('agent_id')) {
         $this->Flash->error(__('You are not authorized to access that location.'));
         return $this->redirect('/');
       }
@@ -516,7 +515,7 @@ class AgentUsersController extends AppController
         if ($this->AgentUsers->save($agent_user)) {
             $this->Flash->success(__('The agent user has been saved.'));
 
-            return $this->redirect(['action' => 'view',$this->Auth->user('id')]);
+            return $this->redirect(['action' => 'view',$this->getAuthUser('id')]);
         }
         $this->Flash->error(__('The agent could not be saved. Please, try again.'));
       }
@@ -532,7 +531,7 @@ class AgentUsersController extends AppController
         $agentUser->setDirty('password', true);
         if ($this->AgentUsers->save($agentUser)) {
           $this->loadComponent('Mailer');
-          $this->Mailer->mail('Account Password Reset','account_password_reset','Account Password Reset',$agentUser->email,['agent_user'=>$agentUser,'temp_password' => $password,'user'=>$this->Auth->user()],null,null);
+          $this->Mailer->mail('Account Password Reset','account_password_reset','Account Password Reset',$agentUser->email,['agent_user'=>$agentUser,'temp_password' => $password,'user'=>$this->getAuthUser()],null,null);
           $this->Flash->success(__('The password of this user has been reset.'));
           return $this->redirect(['controller'=>'AgentUsers','action' => 'index']);
         }

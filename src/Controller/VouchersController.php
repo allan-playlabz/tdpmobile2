@@ -22,7 +22,7 @@ class VouchersController extends AppController
         $this->loadComponent('S3');
         $this->Orders = $this->fetchTable('Orders');
         $this->VoucherMerging = $this->fetchTable('VoucherMerging');
-        $this->Auth->allow(['download', 'sdownload']);
+        $this->Authentication->addUnauthenticatedActions(['download', 'sdownload']);
     }
 
     public function view($id = null)
@@ -30,9 +30,9 @@ class VouchersController extends AppController
         $this->autoRender = false;
         $this->AgentUsers = $this->fetchTable('AgentUsers');
         $voucher = $this->Vouchers->get($id, contain: ['OrderItems' => ['Orders' => ['AgentUsers']]]);
-        $is_agent_allowed = $voucher->order_item->order->agent_user->id == $this->Auth->user('id');
-        if ($this->Auth->user('role') == 'master') {
-            $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id' => $this->Auth->user('agent_id')])->all()->toList();
+        $is_agent_allowed = $voucher->order_item->order->agent_user->id == $this->getAuthUser('id');
+        if ($this->getAuthUser('role') == 'master') {
+            $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id' => $this->getAuthUser('agent_id')])->all()->toList();
             if (!empty($agent_user_ids)) {
                 $is_agent_allowed = in_array($voucher->order_item->order->agent_user_id, $agent_user_ids);
             }
@@ -58,7 +58,7 @@ class VouchersController extends AppController
             } else {
                 $data = [];
                 $http = new \Cake\Http\Client();
-                $headers = $this->_buildHeaders($data, $this->Auth->user('email'), $this->Auth->user('id'));
+                $headers = $this->_buildHeaders($data, $this->getAuthUser('email'), $this->getAuthUser('id'));
                 $api_url = Configure::read('Api.url');
                 $response = $http->get($api_url . '/voucher/download', ['voucher_id' => $voucher->id], ['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false]);
                 if ($response->isOk()) {
@@ -105,7 +105,7 @@ class VouchersController extends AppController
             return $this->response->withStatus(404);
         }
         $order_item = $this->Vouchers->OrderItems->get($id_parts[0], ['contain' => ['Orders']]);
-        if ($order_item && $order_item->order->agent_user_id == $this->Auth->user('id')) {
+        if ($order_item && $order_item->order->agent_user_id == $this->getAuthUser('id')) {
             $filename = $order_item->id . '_' . $id_parts[1] . '.pdf';
             $file = $this->S3->getObject('vouchers/' . $order_item->created->format('Y/md') . '/' . $filename);
             $response = $this->response;
@@ -140,9 +140,9 @@ class VouchersController extends AppController
         if (!$order_item) {
             return $this->response->withStatus(404);
         }
-        $is_agent_allowed = $order_item->order->agent_user_id == $this->Auth->user('id');
-        if ($this->Auth->user('role') == 'master') {
-            $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id' => $this->Auth->user('agent_id')])->all()->toList();
+        $is_agent_allowed = $order_item->order->agent_user_id == $this->getAuthUser('id');
+        if ($this->getAuthUser('role') == 'master') {
+            $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id' => $this->getAuthUser('agent_id')])->all()->toList();
             if (!empty($agent_user_ids)) {
                 $is_agent_allowed = in_array($order_item->order->agent_user_id, $agent_user_ids);
             }
@@ -204,9 +204,9 @@ class VouchersController extends AppController
             return $this->response->withStatus(404);
         }
 
-        $is_agent_allowed = $order->agent_user_id == $this->Auth->user('id');
-        if ($this->Auth->user('role') == 'master') {
-            $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id' => $this->Auth->user('agent_id')])->all()->toList();
+        $is_agent_allowed = $order->agent_user_id == $this->getAuthUser('id');
+        if ($this->getAuthUser('role') == 'master') {
+            $agent_user_ids = $this->AgentUsers->find('list', valueField: 'id')->where(['agent_id' => $this->getAuthUser('agent_id')])->all()->toList();
             if (!empty($agent_user_ids)) {
                 $is_agent_allowed = in_array($order->agent_user_id, $agent_user_ids);
             }
@@ -214,13 +214,13 @@ class VouchersController extends AppController
         if (!$is_agent_allowed) {
             return $this->response->withStatus(404);
         }
-        $voucher_merging = $this->VoucherMerging->find()->where(['order_ref_id' => $order->order_ref_id, 'agent_id' => $this->Auth->user('agent_id')])->first();
+        $voucher_merging = $this->VoucherMerging->find()->where(['order_ref_id' => $order->order_ref_id, 'agent_id' => $this->getAuthUser('agent_id')])->first();
         if ($voucher_merging) {
             if ($voucher_merging->status == 'done') {
                 $data = [];
                 $http = new \Cake\Http\Client();
-                $auth_user_email = $this->Auth->user('email');
-                $auth_user_id = $this->Auth->user('id');
+                $auth_user_email = $this->getAuthUser('email');
+                $auth_user_id = $this->getAuthUser('id');
                 if (empty($auth_user_email)) {
                     $this->Agents = $this->fetchTable('Agents');
                     $agent = $this->Agents->find()->where(['id' => $order->agent_user->agent_id])->first();
@@ -245,7 +245,7 @@ class VouchersController extends AppController
         } else {
             $merged_pdf = QueueSender::send('/merged-pdf', 'post', [
                 'order_ref_id' => $order->order_ref_id,
-                'agent_id' => $this->Auth->user('agent_id'),
+                'agent_id' => $this->getAuthUser('agent_id'),
                 'type' => 'singlepdf'
             ]);
             if ($merged_pdf !== null) {
@@ -281,8 +281,8 @@ class VouchersController extends AppController
             $response = $this->response;
             $data = [];
             $http = new \Cake\Http\Client();
-            $auth_user_email = $this->Auth->user('email');
-            $auth_user_id = $this->Auth->user('id');
+            $auth_user_email = $this->getAuthUser('email');
+            $auth_user_id = $this->getAuthUser('id');
             if (empty($auth_user_email)) {
                 $this->Agents = $this->fetchTable('Agents');
                 $agent = $this->Agents->find()->where(['id' => $voucher->order_item->order->agent_user->agent_id])->first();

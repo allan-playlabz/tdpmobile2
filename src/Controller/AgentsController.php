@@ -200,13 +200,13 @@ class AgentsController extends AppController
         ]);
         
         if(count($selected_categories)>0) {
-          $attractions = $this->paginate($attraction_query
+          $attractions = $this->paginateToArray($attraction_query
             ->contain(['Categories'])
             ->where(['Attractions.category_id IN'=>$selected_categories])
             ->distinct('Attractions.id')
-          )->toArray();
+          );
         } else {
-          $attractions = $this->paginate($attraction_query->distinct('Attractions.id'))->toArray();
+          $attractions = $this->paginateToArray($attraction_query->distinct('Attractions.id'));
         }
         
         $now = DateTime::now();
@@ -300,7 +300,7 @@ class AgentsController extends AppController
               if($this->Agents->AgentUsers->save($agentUser)){
                 $this->Flash->success(__('New agent user created.'));
                 $this->loadComponent('Mailer');
-                $this->Mailer->mail('New Account','new_agent_account','Account Created',$agentUser->email,['agent_user'=>$agentUser,'temp_password' => $data['password'],'user'=>$this->Auth->user()],null,null);
+                $this->Mailer->mail('New Account','new_agent_account','Account Created',$agentUser->email,['agent_user'=>$agentUser,'temp_password' => $data['password'],'user'=>$this->getAuthUser()],null,null);
               } else {
                 print_r($agentUser->getErrors());
               }

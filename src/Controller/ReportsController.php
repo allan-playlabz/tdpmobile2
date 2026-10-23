@@ -39,19 +39,19 @@ class ReportsController extends AppController
       $this->ApiPdfs = $this->fetchTable('ApiPdfs');
       $this->Agents = $this->fetchTable('Agents');
       $agent = $this->Agents->find()
-            ->where(['id'=>$this->Auth->user('agent_id')])
+            ->where(['id'=>$this->getAuthUser('agent_id')])
             ->first();
       $agent_user_ids = [];
       if (!empty($agent)) {
-        if ($this->Auth->user('role') == 'master') {
-          $agent_user_ids = $this->Agents->AgentUsers->find('list', valueField: 'id')->where(['agent_id'=>$this->Auth->user('agent_id')])->all()->toList();
+        if ($this->getAuthUser('role') == 'master') {
+          $agent_user_ids = $this->Agents->AgentUsers->find('list', valueField: 'id')->where(['agent_id'=>$this->getAuthUser('agent_id')])->all()->toList();
           if (empty($agent_user_ids)) {
-            $agent_user_ids = [$this->Auth->user('id')];
+            $agent_user_ids = [$this->getAuthUser('id')];
           }
           $conditions = ['agent_user_id IN' => $agent_user_ids];
         } else {
-          $agent_user_ids = [$this->Auth->user('id')];
-          $conditions = ['agent_user_id' => $this->Auth->user('id')];
+          $agent_user_ids = [$this->getAuthUser('id')];
+          $conditions = ['agent_user_id' => $this->getAuthUser('id')];
         }
       
         $conditions['Orders.created >='] = date('Y-m-1 00:00:00');
@@ -94,7 +94,7 @@ class ReportsController extends AppController
           $orders_count = $orders_query->count();
           if (!empty($orders_count > 0)) {
             $cmd = 'php '.ROOT.DS.'bin'.DS.'cake.php generate_report';
-            $cmd .= ' --agent_user_id="'. $this->Auth->user('id') . '"';
+            $cmd .= ' --agent_user_id="'. $this->getAuthUser('id') . '"';
             $cmd .= ' --issue_start_date="' . $this->request->getData('issue_start_date') . '"';
             $cmd .= ' --issue_end_date="' . $this->request->getData('issue_end_date') . '"';
             $cmd .= ' --start_date="' . $start_date->format('Y-m-d H:i:s') . '"';
@@ -125,7 +125,7 @@ class ReportsController extends AppController
 
     public function usage() {
       $this->CreditLogs = $this->fetchTable('CreditLogs');
-      $conditions = ['agent_id'=>$this->Auth->user('agent_id'),'debit_credit'=>'credit'];
+      $conditions = ['agent_id'=>$this->getAuthUser('agent_id'),'debit_credit'=>'credit'];
 
       $query = $this->CreditLogs->find()->where($conditions);
       $this->paginate = [
@@ -155,7 +155,7 @@ class ReportsController extends AppController
     }
 
     public function reports() {
-      $folder = new Folder(TMP . 'reports' . DS . $this->Auth->user('id'));
+      $folder = new Folder(TMP . 'reports' . DS . $this->getAuthUser('id'));
       $files = $folder->find('.*\.csv');
      
       $reports = [];
@@ -169,7 +169,7 @@ class ReportsController extends AppController
         } else {
           
           $reports[$created] = [
-            'name' => str_replace($this->Auth->user('id'), '', $report_file->name()),
+            'name' => str_replace($this->getAuthUser('id'), '', $report_file->name()),
             'filename' => $report_file->name(),
             'created' => date('d M Y H:i:s', $created),
           ];
@@ -187,7 +187,7 @@ class ReportsController extends AppController
           $report_file->delete();
         } else {          
           $processing_files[$created] = [
-            'name' => str_replace([$this->Auth->user('id'), '.tmp'], '', $tmp_file),
+            'name' => str_replace([$this->getAuthUser('id'), '.tmp'], '', $tmp_file),
             'filename' => $report_file->name(),
             'created' => date('d M Y H:i:s', $created),
           ];
@@ -198,14 +198,14 @@ class ReportsController extends AppController
 
     public function download($name) {
       // debug(TMP . 'reports' . DS . $name . '.csv');exit;
-      return $this->response->withFile(TMP . 'reports' . DS . $this->Auth->user('id') . DS . $name . '.csv', [
-        'name' => str_replace($this->Auth->user('id'), '', $name).'.csv',
+      return $this->response->withFile(TMP . 'reports' . DS . $this->getAuthUser('id') . DS . $name . '.csv', [
+        'name' => str_replace($this->getAuthUser('id'), '', $name).'.csv',
         'download' => true
       ]);
     }
 
     private function _getUnfinishedReports() {
-      $folder = new Folder(TMP . 'reports' . DS . $this->Auth->user('id'));
+      $folder = new Folder(TMP . 'reports' . DS . $this->getAuthUser('id'));
       $files = $folder->find('.*\.tmp');
       
       return count($files);
