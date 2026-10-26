@@ -542,7 +542,7 @@ class AttractionsController extends AppController
             $response = $http->get($api_url.'/availabilities',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
             if ($response->isOk()) {
               $res = $response->getJson();
-              $availabilities = $res['response']['data'];
+              $availabilities = $res['response']['data'] ?? null;
               if (!empty($res['response']['data'])) {
                 foreach ($res['response']['data'] as $date => $available_tickets) {
                   foreach ($available_tickets as $key => $available_ticket) {
@@ -1098,7 +1098,7 @@ class AttractionsController extends AppController
               $response = $http->get($api_url.'/availabilities',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
               if ($response->isOk()) {
                 $res = $response->getJson();
-                $availabilities = $res['response']['data'];
+                $availabilities = $res['response']['data'] ?? null;
                 if (!empty($res['response']['data'])) {
                   foreach ($res['response']['data'] as $date => $available_tickets) {
                     foreach ($available_tickets as $key => $available_ticket) {
@@ -1185,7 +1185,7 @@ class AttractionsController extends AppController
               $response = $http->get($api_url.'/availabilities',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
               if ($response->isOk()) {
                 $res = $response->getJson();
-                $availabilities = $res['response']['data'];
+                $availabilities = $res['response']['data'] ?? null;
                 if (!empty($res['response']['data'])) {
                   foreach ($res['response']['data'] as $date => $available_tickets) {
                     foreach ($available_tickets as $key => $available_ticket) {
