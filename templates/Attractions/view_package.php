@@ -128,11 +128,11 @@ $now = Cake\I18n\DateTime::now();
                                 <div class="col-lg-4">
                                   <?php if (!isset($not_allowed_to_add)): ?>
                                   <?php 
-                                  if ($ticket->max_quantity && $tickets_max_quantity[$ticket->id] > $ticket->max_quantity) {
+                                  if ($ticket->max_quantity && ($tickets_max_quantity[$ticket->id] ?? null) > $ticket->max_quantity) {
                                     $tickets_max_quantity[$ticket->id] = $ticket->max_quantity;
                                   }
                                   ?>
-                                  <div class="input-group"><div class="input-group-prepend"><button class="btn btn-outline-secondary btn-subtract" type="button"><i class="fa fa-minus"></i></button></div><?= $this->Form->text('quantity.'.$ticket->id,['value'=>0,'class'=>'form-control p-1 text-center','data-price'=>$ticket->price,'min'=>($ticket->min_quantity ? $ticket->min_quantity : '0'),'max'=> $tickets_max_quantity[$ticket->id]]) ?>
+                                  <div class="input-group"><div class="input-group-prepend"><button class="btn btn-outline-secondary btn-subtract" type="button"><i class="fa fa-minus"></i></button></div><?= $this->Form->text('quantity.'.$ticket->id,['value'=>0,'class'=>'form-control p-1 text-center','data-price'=>$ticket->price,'min'=>($ticket->min_quantity ? $ticket->min_quantity : '0'),'max'=> ($tickets_max_quantity[$ticket->id] ?? null)]) ?>
                                   <div class="input-group-append"><button class="btn btn-outline-secondary btn-add" type="button"><i class="fa fa-plus"></i></button></div>
                                   </div>
                                   <?php if (empty($tickets_max_quantity[$ticket->id])) {
@@ -140,7 +140,7 @@ $now = Cake\I18n\DateTime::now();
                                    } ?>
                                   <?php endif ?>
                                   <?php if ($ticket->show_stock): ?>
-                                    <div class="text-center">Remaining: <?= $tickets_max_quantity[$ticket->id] ?></div>
+                                    <div class="text-center">Remaining: <?= ($tickets_max_quantity[$ticket->id] ?? null) ?></div>
                                   <?php endif ?>
                                 </div>
                               </div>

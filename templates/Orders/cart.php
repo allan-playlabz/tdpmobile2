@@ -41,11 +41,11 @@ $base = \Cake\Core\Configure::read('AWSPublic.public_host');
                   <div class="input-group-prepend"><button class="btn btn-outline-secondary btn-sm btn-subtract" type="button"><i class="fa fa-minus"></i></button></div>
                   <?php 
                   if ($ticket->max_quantity && !empty($tickets_max_quantity[$ticket->id])) {
-                    if ($ticket->max_quantity < $tickets_max_quantity[$ticket->id]) {
+                    if ($ticket->max_quantity < ($tickets_max_quantity[$ticket->id] ?? null)) {
                       $tickets_max_quantity[$ticket->id] = $ticket->max_quantity;
                     }
                   } ?>
-                  <?= $this->Form->text('quantity.'.$ticket->id.'.'.$date,['value'=>$qty,'class'=>'form-control p-1 text-center','data-price'=>$ticket->price,'max'=> !empty($tickets_max_quantity[$ticket->id]) ? $tickets_max_quantity[$ticket->id] : '','min'=> $ticket->min_quantity]) ?>
+                  <?= $this->Form->text('quantity.'.$ticket->id.'.'.$date,['value'=>$qty,'class'=>'form-control p-1 text-center','data-price'=>$ticket->price,'max'=> !empty($tickets_max_quantity[$ticket->id]) ? ($tickets_max_quantity[$ticket->id] ?? null) : '','min'=> $ticket->min_quantity]) ?>
 
                   <div class="input-group-append"><button class="btn btn-outline-secondary btn-sm btn-add" type="button"><i class="fa fa-plus"></i></button></div>
                 </div>
