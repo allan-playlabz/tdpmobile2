@@ -61,3 +61,14 @@ ConnectionHelper::addTestAliases();
 // application and log databases (regenerate when the schema changes).
 (new SchemaLoader())->loadSqlFiles(dirname(__DIR__) . "/tests/schema/app.sql", "test");
 (new SchemaLoader())->loadSqlFiles(dirname(__DIR__) . "/tests/schema/log.sql", "test_log_ds");
+
+// LoggableBehavior reads request headers via getallheaders(), which only exists under web SAPIs.
+if (!function_exists('getallheaders')) {
+    function getallheaders(): array
+    {
+        return [];
+    }
+}
+
+// LoggableBehavior falls back to $_SERVER['REMOTE_ADDR'], which CLI runs don't set.
+$_SERVER['REMOTE_ADDR'] ??= '127.0.0.1';
