@@ -2131,40 +2131,6 @@ class OrdersController extends AppController
         fpassthru($temp_memory);
     }
 
-    private function _pdfMerge($files, $ref_id) {
-        /*ghostsript*/
-        $folder = new \App\Filesystem\Folder(WWW_ROOT. 'files/pdf',true,0775);
-        $output_file = $ref_id.'.pdf';
-
-        if (Configure::read('ENVI') == 'DEV') {
-            #$cmd = "/usr/local/bin/gs -q -dNOPAUSE -dBATCH -dAutoRotatePages=1 -sPAPERSIZE=legal -sDEVICE=pdfwrite -sOutputFile=$output_file ";
-            // $cmd = "/usr/local/bin/gs";
-            $cmd = '\"program files"\gs\gs9.52\bin\gswin64';
-            // $cmd = "/program files/gs/gs9.52/bin/gswin64";
-        } else {
-            #$cmd = "gs -dNOPAUSE -dBATCH -dAutoRotatePages=1 -sPAPERSIZE=legal -sDEVICE=pdfwrite -sOutputFile=$output_file ";
-            $cmd = "gs";
-            // $cmd = "/program files/gs/gs9.52/bin/gswin64";
-        }
-        $full_output_file = WWW_ROOT. 'files/pdf/'.$ref_id.'.pdf';
-        $cmd .= " -sDEVICE=pdfwrite -dNOPAUSE -dQUIET -dBATCH -sOutputFile=$full_output_file ";
-        // debug($files);
-        foreach($files as $file) {
-            $cmd .= $file." ";
-        }
-        try {
-            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                $p_string = "start {$cmd}";
-                pclose(popen($p_string, "r"));
-            } else {
-                exec($cmd);
-            }
-        } catch (Exception $exc) {
-            echo 'Error: '.$exc;
-        }
-        return $output_file;
-    }
-
     private function _buildHeaders($data,$email,$user_id) {
       $secret_key = Configure::read('Api.secret');
 

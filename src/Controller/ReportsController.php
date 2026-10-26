@@ -93,13 +93,19 @@ class ReportsController extends AppController
         
           $orders_count = $orders_query->count();
           if (!empty($orders_count > 0)) {
-            $cmd = 'php '.ROOT.DS.'bin'.DS.'cake.php generate_report';
-            $cmd .= ' --agent_user_id="'. $this->getAuthUser('id') . '"';
-            $cmd .= ' --issue_start_date="' . $this->request->getData('issue_start_date') . '"';
-            $cmd .= ' --issue_end_date="' . $this->request->getData('issue_end_date') . '"';
-            $cmd .= ' --start_date="' . $start_date->format('Y-m-d H:i:s') . '"';
-            $cmd .= ' --end_date="' . $end_date->format('Y-m-d H:i:s') . '"';
-            $cmd .= ' --agent_user_ids="' . implode(',', $agent_user_ids) . '"';
+            // Every argument is shell-escaped (request values must never reach the shell raw).
+            $cmd = 'php ' . escapeshellarg(ROOT . DS . 'bin' . DS . 'cake.php') . ' generate_report';
+            $report_options = [
+              'agent_user_id' => (string)$this->getAuthUser('id'),
+              'issue_start_date' => (string)$this->request->getData('issue_start_date'),
+              'issue_end_date' => (string)$this->request->getData('issue_end_date'),
+              'start_date' => $start_date->format('Y-m-d H:i:s'),
+              'end_date' => $end_date->format('Y-m-d H:i:s'),
+              'agent_user_ids' => implode(',', $agent_user_ids),
+            ];
+            foreach ($report_options as $option => $value) {
+              $cmd .= ' --' . $option . '=' . escapeshellarg($value);
+            }
             $cmd .= ' > /dev/null 2>&1 &';
             // debug($cmd);
             try {
