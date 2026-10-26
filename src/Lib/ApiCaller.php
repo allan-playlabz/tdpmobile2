@@ -33,14 +33,18 @@ class ApiCaller
             $response = null;
             // debug($headers);
             if ($type == 'get') {
-                $response = $http->get($api_base_url . $url, $data, ['headers' => $headers,  'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false ]);
+                $response = $http->get($api_base_url . $url, $data, ['headers' => $headers]);
             } elseif ($type == 'post') {
-                $response = $http->post($api_base_url . $url, $data, ['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false ]);
+                $response = $http->post($api_base_url . $url, $data, ['headers' => $headers]);
             }
             $log_data = [
                 'url' => $url,
                 'request' => [
-                    'headers' => $headers,
+                    // Signed auth headers are replayable; never log them in clear.
+                    'headers' => array_merge($headers, array_intersect_key(
+                        array_fill_keys(['Authorization', 'X-CA-UserSecret', 'X-Ca-Nonce'], '[redacted]'),
+                        $headers
+                    )),
                     'data' => $data
                 ],
                 'response' => [

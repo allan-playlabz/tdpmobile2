@@ -108,31 +108,31 @@ class Payment2C2P
         $response_json = $response->getJson();
 
         if (empty($response_json['payload'])) {
-            Log::write('debug', [
+            Log::write('debug', (string)json_encode([
                 'code' => '',
                 'description' => '',
                 'message' => $order_ref_id .' request payment token is invalid.',
                 'data' => $response_json
-            ]);
+            ]));
             return null;
         }
         $decoded_payload = $this->_decodeTokenResponse($response_json);
         if (empty($decoded_payload)) {
-            Log::write('debug', [
+            Log::write('debug', (string)json_encode([
                 'code' => '',
                 'description' => '',
                 'message' => $order_ref_id .' decoded payload is empty.',
                 'data' => $response_json
-            ]);
+            ]));
             return null;
         }
-        if ($decoded_payload['respCode'] !== '0000') {
-            Log::write('debug', [
+        if (($decoded_payload['respCode'] ?? null) !== '0000') {
+            Log::write('debug', (string)json_encode([
                 'code' => $decoded_payload['respCode'],
                 'description' => $decoded_payload['respDesc'],
                 'message' => $order_ref_id .' decoded payload is invalid.',
                 'data' => $decoded_payload
-            ]);
+            ]));
             return null;
         }
         
@@ -148,24 +148,24 @@ class Payment2C2P
      */
     public function isPaymentSuccess($order, $data) {
         if (empty($order)) {
-            Log::write('debug', [
+            Log::write('debug', (string)json_encode([
                 'code' => '',
                 'description' => '',
                 'message' => 'Order not found',
                 'data' => $data
-            ]);
+            ]));
             return false;
         }
         $decoded_payload = base64_decode($data['paymentResponse']);
         $decoded_json = json_decode($decoded_payload, true);
         $order_ref_id = $order->order_ref_id;
         if (empty($decoded_json)) {
-            Log::write('debug', [
+            Log::write('debug', (string)json_encode([
                 'code' => '',
                 'description' => '',
                 'message' => $order_ref_id .' decoded payload is empty.',
                 'data' => $data
-            ]);
+            ]));
             return false;
         }
 
@@ -188,31 +188,31 @@ class Payment2C2P
         $response_json = $response->getJson();
 
         if (empty($response_json['payload'])) {
-            Log::write('debug', [
+            Log::write('debug', (string)json_encode([
                 'code' => '',
                 'description' => '',
                 'message' => $order_ref_id .' request payment inquiry is invalid.',
                 'data' => $response_json
-            ]);
+            ]));
             return false;
         }
         $decoded_payload = $this->_decodeTokenResponse($response_json);
         if (empty($decoded_payload)) {
-            Log::write('debug', [
+            Log::write('debug', (string)json_encode([
                 'code' => '',
                 'description' => '',
                 'message' => $order_ref_id .' decoded payload is empty.',
                 'data' => $response_json
-            ]);
+            ]));
             return false;
         }
-        if ($decoded_payload['respCode'] !== '0000') {
-            Log::write('debug', [
+        if (($decoded_payload['respCode'] ?? null) !== '0000') {
+            Log::write('debug', (string)json_encode([
                 'code' => $decoded_payload['respCode'],
                 'description' => $decoded_payload['respDesc'],
                 'message' => $order_ref_id .' decoded payload is invalid.',
                 'data' => $decoded_payload
-            ]);
+            ]));
             return false;
         }
         
@@ -227,7 +227,7 @@ class Payment2C2P
      */
     public function getOrderRefId($data) {
         $decoded_payload = $this->_decodeTokenResponse($data);
-        if ($decoded_payload['respCode'] === '0000') {
+        if (($decoded_payload['respCode'] ?? null) === '0000') {
             if (!empty($decoded_payload['invoiceNo'])) {
                 return $decoded_payload['invoiceNo'];
             }
@@ -244,7 +244,7 @@ class Payment2C2P
      */
     public function verifyPayment($order, $data) {
         $decoded_payload = $this->_decodeTokenResponse($data);
-        if ($decoded_payload['respCode'] !== '0000') {
+        if (($decoded_payload['respCode'] ?? null) !== '0000') {
             $cat_mailer = new CatMailer(Configure::read('Default.from_email'));
             Log::write('debug', 'invalid respCode when verifying payment');
             $cat_mailer->mail('verify_payment', 'Invalid Payment Response', Configure::read('Default.company_email'), [
@@ -292,11 +292,19 @@ class Payment2C2P
      * @return array
      */
     private function _decodeTokenResponse($response_json) {
-        $payloadResponse = $response_json['payload'];
-        $decodedPayload = JWT::decode($payloadResponse, new Key($this->_secretkey, 'HS256'));        
-        $decoded_array = (array) $decodedPayload;
+        $payloadResponse = is_array($response_json) ? ($response_json['payload'] ?? null) : null;
+        if (!is_string($payloadResponse) || $payloadResponse === '') {
+            return [];
+        }
+        try {
+            $decodedPayload = JWT::decode($payloadResponse, new Key($this->_secretkey, 'HS256'));
+        } catch (\Throwable $e) {
+            // Invalid signature / malformed token: reject without exposing the key in error output.
+            Log::write('warning', '2C2P payload rejected: ' . get_class($e));
+            return [];
+        }
 
-        return $decoded_array;
+        return (array)$decodedPayload;
     }
 
     

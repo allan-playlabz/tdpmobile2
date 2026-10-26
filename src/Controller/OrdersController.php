@@ -357,7 +357,7 @@ class OrdersController extends AppController
         }
         $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
         $api_url = Configure::read('Api.url');
-        $response = $http->post($api_url.'/order/create',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false]);
+        $response = $http->post($api_url.'/order/create',$data,['headers' => $headers]);
         $errorMessage = '<h4>' . __('Booking Temporarily Unavailable for this Supplier') . '</h4><br>' .
                          __('We\'re experiencing a temporary connection issue with the ticketing system. Please try again in a few minutes.') . '<br><br>' .
                          '<strong>' . __('What to do:') . '</strong><br>' .
@@ -445,7 +445,7 @@ class OrdersController extends AppController
             $data = ['sku_id'=>$sku_id,'from_mobile'=> true];
             $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
             try {
-                $response = $http->get($api_url . '/attraction/details', $data, ['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false, 'timeout' => Configure::read('Api.timeout')]);
+                $response = $http->get($api_url . '/attraction/details', $data, ['headers' => $headers, 'timeout' => Configure::read('Api.timeout')]);
                 if ($response->isOk()) {
                     $res_data = $response->getJson();
                     if (!empty($res_data['response']['data']['tickets'])) {
@@ -539,7 +539,7 @@ class OrdersController extends AppController
             $data = ['order_ref_id'=>$order->order_ref_id,'action'=>'pay','from_mobile'=> true];
             $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
             try {
-              $response = $http->post($api_url.'/order/update',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
+              $response = $http->post($api_url.'/order/update',$data,['headers' => $headers,'timeout'=>Configure::read('Api.timeout')]);
               if ($response->isOk()) {
                 $res_data = $response->getJson();
                 if (empty($res_data)) {
@@ -699,7 +699,7 @@ class OrdersController extends AppController
         $data = ['order_ref_id'=>$order_ref_id,'action'=>'complete'];
         $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
         try {
-          $response = $http->post($api_url.'/order/complete',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
+          $response = $http->post($api_url.'/order/complete',$data,['headers' => $headers,'timeout'=>Configure::read('Api.timeout')]);
           if ($response->isOk()) {
             $res_data = $response->getJson();
 
@@ -756,7 +756,7 @@ class OrdersController extends AppController
        $data = ['order_ref_id'=>$order->order_ref_id];
        $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
       try {
-        $response = $http->get($api_url.'/order/status',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
+        $response = $http->get($api_url.'/order/status',$data,['headers' => $headers,'timeout'=>Configure::read('Api.timeout')]);
         if ($response->isOk()) {
           $res_data = $response->getJson();
           if ($res_data['status'] == '1000') {
@@ -871,7 +871,7 @@ class OrdersController extends AppController
           $agent_user = $this->AgentUsers->find()->where(['id'=>$order->agent_user_id])->first();
           $headers = $this->_buildHeaders($data,$agent_user->email,$agent_user->id);
           try {
-            $response = $http->post($api_url.'/order/complete',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
+            $response = $http->post($api_url.'/order/complete',$data,['headers' => $headers,'timeout'=>Configure::read('Api.timeout')]);
             if ($response->isOk()) {
               $res_data = $response->getJson();
               // $this->log(json_encode($res_data),'debug');
@@ -942,7 +942,7 @@ class OrdersController extends AppController
         try {
           $data = ['depart_sku_id' => $ticket->sku_id, 'return_sku_id' => $return_ticket->sku_id, 'depart_datetime' => $time_from,'return_datetime' => $time_to, 'is_two_way' => true];
           $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
-          $response = $http->get($api_url . '/ticket/availabilities', $data, ['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false, 'timeout' => Configure::read('Api.timeout')]);
+          $response = $http->get($api_url . '/ticket/availabilities', $data, ['headers' => $headers, 'timeout' => Configure::read('Api.timeout')]);
           if ($response->isOk()) {
             $res = $response->getJson();
             if (!empty($res['response']['data'])) {
@@ -977,7 +977,7 @@ class OrdersController extends AppController
         try {
           $data = ['sku_id' => $ticket->sku_id, 'time_from' => $time_from,'time_to' => $time_from];
           $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
-          $response = $http->get($api_url.'/ticket/availabilities',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
+          $response = $http->get($api_url.'/ticket/availabilities',$data,['headers' => $headers,'timeout'=>Configure::read('Api.timeout')]);
           if ($response->isOk()) {
             $res = $response->getJson();
             if (!empty($res['response']['data'])) {
@@ -2008,7 +2008,7 @@ class OrdersController extends AppController
       $data = ['order_ref_id'=>$id];
       $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
       try {
-        $response = $http->get($api_url.'/order/details',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
+        $response = $http->get($api_url.'/order/details',$data,['headers' => $headers,'timeout'=>Configure::read('Api.timeout')]);
         if ($response->isOk()) {
           $res_data = $response->getJson();
           if ($res_data['status'] == '1000') {
@@ -2048,7 +2048,7 @@ class OrdersController extends AppController
   //     $data = ['order_ref_id'=>$order_ref_id,'action'=>'cancel'];
   //     $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
   //    try {
-  //      $response = $http->post($api_url.'/order/update',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
+  //      $response = $http->post($api_url.'/order/update',$data,['headers' => $headers,'timeout'=>Configure::read('Api.timeout')]);
   //      if ($response->isOk()) {
   //        $res_data = $response->getJson();
   //        if ($res_data['status'] == '1000') {
@@ -2086,7 +2086,7 @@ class OrdersController extends AppController
       $data = ['code'=>$code,'action'=>'cancel'];
       $headers = $this->_buildHeaders($data,$this->getAuthUser('email'),$this->getAuthUser('id'));
       try {
-        $response = $http->post($api_url.'/voucher/cancel',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
+        $response = $http->post($api_url.'/voucher/cancel',$data,['headers' => $headers,'timeout'=>Configure::read('Api.timeout')]);
         if ($response->isOk()) {
           $res_data = $response->getJson();
           if ($res_data['status'] == '1000') {

@@ -98,7 +98,7 @@ class PaymentStripe
         $payload = @file_get_contents('php://input');
         $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
         $event = null;
-        Log::write('debug', Configure::read('Payment.Stripe'));
+        // (Payment.Stripe config — incl. secret_key/signing_secret — is no longer logged here.)
         try {
             $event = \Stripe\Webhook::constructEvent(
                 $payload,

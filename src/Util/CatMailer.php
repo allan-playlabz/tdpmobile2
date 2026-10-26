@@ -119,7 +119,7 @@ class CatMailer
     //     $headers = $this->_buildHeaders($method, $url, $date, $md5, $email_data);
     //     $sent_to_mailer = false;
     //     try {
-    //         $response = $http->post(Configure::read('Mailer.url') . $url, $email_data, ['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false]);
+    //         $response = $http->post(Configure::read('Mailer.url') . $url, $email_data, ['headers' => $headers]);
     //         if ($response->isOk()) {
     //             $sent_to_mailer = true;
     //         } else {

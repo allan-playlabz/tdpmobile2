@@ -87,7 +87,7 @@ public function validationDefault(Validator $validator): Validator
         $api_url = Configure::read('Api.url');
         $http = new Client();
         $headers = $this->_buildHeaders($data);
-        $response = $http->post($api_url.'/signup',$data,['headers'=>$headers/*'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false*/]);
+        $response = $http->post($api_url.'/signup',$data,['headers'=>$headers/**/]);
         $res = $response->getJson();
         if ($res['status'] == '1000') {
             return true;

@@ -60,7 +60,7 @@ class VouchersController extends AppController
                 $http = new \Cake\Http\Client();
                 $headers = $this->_buildHeaders($data, $this->getAuthUser('email'), $this->getAuthUser('id'));
                 $api_url = Configure::read('Api.url');
-                $response = $http->get($api_url . '/voucher/download', ['voucher_id' => $voucher->id], ['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false]);
+                $response = $http->get($api_url . '/voucher/download', ['voucher_id' => $voucher->id], ['headers' => $headers]);
                 if ($response->isOk()) {
                     if (in_array($voucher->order_item->order->agent_id, Configure::read('Vouchers.display_in_browser.agent_ids'))) {
                         return $this->response->withStringBody($response->getStringBody())->withType('pdf');
@@ -237,7 +237,7 @@ class VouchersController extends AppController
                 }
                 $headers = $this->_buildHeaders($data, $auth_user_email, $auth_user_id);
                 $api_url = Configure::read('Api.url');
-                $response = $http->get($api_url . '/voucher/download-order', ['order_ref_id' => $order->order_ref_id], ['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false]);
+                $response = $http->get($api_url . '/voucher/download-order', ['order_ref_id' => $order->order_ref_id], ['headers' => $headers]);
                 if ($response->isOk()) {
                     if (in_array($order->agent_id, Configure::read('Vouchers.display_in_browser.agent_ids'))) {
                         return $this->response->withStringBody($response->getStringBody())->withType('pdf');
@@ -299,7 +299,7 @@ class VouchersController extends AppController
             }
             $headers = $this->_buildHeaders($data, $auth_user_email, $auth_user_id);
             $api_url = Configure::read('Api.url');
-            $response = $http->get($api_url . '/voucher/download', ['voucher_id' => $voucher->id], ['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false]);
+            $response = $http->get($api_url . '/voucher/download', ['voucher_id' => $voucher->id], ['headers' => $headers]);
             if ($response->isOk()) {
                 $resp_json = $response->getJson();
                 if (!empty($resp_json) && !empty($resp_json['status'])) {

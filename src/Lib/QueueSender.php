@@ -37,9 +37,9 @@ class QueueSender
         try {
             $response = null;
             if ($type === 'get') {
-                $response = $http->get(Configure::read('Mailer.api_url') . $url, $data, ['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout' => Configure::read('Mailer.timeout')]);
+                $response = $http->get(Configure::read('Mailer.api_url') . $url, $data, ['headers' => $headers,'timeout' => Configure::read('Mailer.timeout')]);
             } else {
-                $response = $http->post(Configure::read('Mailer.api_url') . $url, $data, ['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout' => Configure::read('Mailer.timeout')]);
+                $response = $http->post(Configure::read('Mailer.api_url') . $url, $data, ['headers' => $headers,'timeout' => Configure::read('Mailer.timeout')]);
             }
             
             if (!$response->isOk()) {

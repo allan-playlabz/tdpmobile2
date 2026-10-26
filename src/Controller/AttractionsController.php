@@ -539,7 +539,7 @@ class AttractionsController extends AppController
         }
         if (!empty($ticket_ids)) {
           try {
-            $response = $http->get($api_url.'/availabilities',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
+            $response = $http->get($api_url.'/availabilities',$data,['headers' => $headers,'timeout'=>Configure::read('Api.timeout')]);
             if ($response->isOk()) {
               $res = $response->getJson();
               $availabilities = $res['response']['data'] ?? null;
@@ -920,7 +920,7 @@ class AttractionsController extends AppController
       $data = ['sku_id' => $attraction->sku_id, 'depart_datetime' => $time_from, 'return_datetime' => $return_time_from];
       $headers = $this->_buildHeaders($data, $this->getAuthUser('email'), $this->getAuthUser('id'));
       try {
-        $response = $http->get($api_url . '/availabilities', $data, ['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false, 'timeout' => Configure::read('Api.timeout')]);
+        $response = $http->get($api_url . '/availabilities', $data, ['headers' => $headers, 'timeout' => Configure::read('Api.timeout')]);
         if ($response->isOk()) {
           $res = $response->getJson();
           if (!empty($res['response']['data'])) {
@@ -1095,7 +1095,7 @@ class AttractionsController extends AppController
           }
           if (!empty($ticket_ids)) {
             try {
-              $response = $http->get($api_url.'/availabilities',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
+              $response = $http->get($api_url.'/availabilities',$data,['headers' => $headers,'timeout'=>Configure::read('Api.timeout')]);
               if ($response->isOk()) {
                 $res = $response->getJson();
                 $availabilities = $res['response']['data'] ?? null;
@@ -1182,7 +1182,7 @@ class AttractionsController extends AppController
           
           if (!empty($ticket_ids)) {
             try {
-              $response = $http->get($api_url.'/availabilities',$data,['headers' => $headers, 'ssl_verify_peer' => false, 'ssl_verify_peer_name' => false,'timeout'=>Configure::read('Api.timeout')]);
+              $response = $http->get($api_url.'/availabilities',$data,['headers' => $headers,'timeout'=>Configure::read('Api.timeout')]);
               if ($response->isOk()) {
                 $res = $response->getJson();
                 $availabilities = $res['response']['data'] ?? null;
