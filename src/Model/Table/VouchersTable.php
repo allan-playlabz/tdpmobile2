@@ -108,6 +108,38 @@ class VouchersTable extends Table
         return $rules;
     }
 
+    /**
+     * Whether the voucher with this code belongs to an order of the given agent
+     * (orders.agent_id, or the ordering user's agent for older rows without it).
+     *
+     * @param mixed $code Voucher code_id
+     * @param mixed $agent_id Agent id
+     * @return bool
+     */
+    public function belongsToAgent($code, $agent_id): bool
+    {
+        if (!is_string($code) || $code === '' || !is_string($agent_id) || $agent_id === '') {
+            return false;
+        }
+        $voucher = $this->find()
+            ->where(['code_id' => $code])
+            ->contain(['OrderItems' => ['Orders']])
+            ->first();
+        $order = $voucher?->order_item?->order;
+        if (!$order) {
+            return false;
+        }
+        $order_agent_id = $order->agent_id;
+        if ($order_agent_id === null && $order->agent_user_id !== null) {
+            $order_agent_id = TableRegistry::getTableLocator()->get('AgentUsers')->find()
+                ->select(['agent_id'])
+                ->where(['id' => $order->agent_user_id])
+                ->first()?->agent_id;
+        }
+
+        return $order_agent_id !== null && $order_agent_id === $agent_id;
+    }
+
     public function isCancellable($code, $agent_id)
     {
         $Agents = TableRegistry::getTableLocator()->get('Agents');
@@ -125,19 +157,8 @@ class VouchersTable extends Table
         if (!$voucher) {
             return false;
         }
-        // voucher must belong to this agent (orders.agent_id, or the ordering user's agent for older rows)
-        $order = $voucher->order_item->order ?? null;
-        if (!$order) {
-            return false;
-        }
-        $order_agent_id = $order->agent_id;
-        if ($order_agent_id === null && $order->agent_user_id !== null) {
-            $order_agent_id = TableRegistry::getTableLocator()->get('AgentUsers')->find()
-                ->select(['agent_id'])
-                ->where(['id' => $order->agent_user_id])
-                ->first()?->agent_id;
-        }
-        if ($order_agent_id === null || $order_agent_id !== $agent_id) {
+        // voucher must belong to this agent
+        if (!$this->belongsToAgent($code, $agent_id)) {
             return false;
         }
         // is ticket api cancellable

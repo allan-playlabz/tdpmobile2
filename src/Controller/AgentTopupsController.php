@@ -6,6 +6,7 @@ use App\Util\Csv;
 use Cake\I18n\DateTime;
 use Cake\I18n\Number;
 use Cake\Core\Configure;
+use Cake\Utility\Text;
 use App\Filesystem\File;
 use App\Filesystem\Folder;
 use App\Controller\AppController;
@@ -19,6 +20,17 @@ use App\Controller\AppController;
  */
 class AgentTopupsController extends AppController
 {
+    /**
+     * Accepted top-up proof image types: MIME => file extension.
+     */
+    private const TOPUP_IMAGE_TYPES = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/gif' => 'gif',
+        'image/webp' => 'webp',
+        'image/bmp' => 'bmp',
+    ];
+
 
     public function initialize(): void {
         parent::initialize();
@@ -165,10 +177,13 @@ class AgentTopupsController extends AppController
           $agentTopup->status = 'pending';
           if ($this->request->getData('image')) {
             if ($this->request->getData('image')->getError() == 0) {
-              if (getimagesize($this->request->getData('image')->getStream()->getMetadata('uri'))) {
+              $image_info = getimagesize($this->request->getData('image')->getStream()->getMetadata('uri'));
+              $image_ext = $image_info ? (self::TOPUP_IMAGE_TYPES[$image_info['mime']] ?? null) : null;
+              if ($image_ext) {
                 if ($this->AgentTopups->save($agentTopup)) {
                     $this->Flash->success(__('The agent top up has been saved.'));
-                        $filename = $this->getAuthUser('agent_id').'/'.$this->request->getData('image')->getClientFilename();
+                        // Server-side name + extension from the detected image type (never the client filename).
+                        $filename = $this->getAuthUser('agent_id').'/'.Text::uuid().'.'.$image_ext;
                         $image_filename = 'agenttopups/'.$filename;
                         $this->S3->putObject($image_filename,$this->request->getData('image')->getStream()->getMetadata('uri'));
                         $agentTopup->image = 'agent-topups/topup-images/'. $image_filename;
@@ -176,8 +191,9 @@ class AgentTopupsController extends AppController
                         if (!$this->AgentTopups->save($agentTopup)) {
                         }
                       
-                    if ($this->request->getQuery('redirect')) {
-                      return $this->redirect($this->request->getQuery('redirect'));
+                    $redirect = $this->safeRedirectTarget($this->request->getQuery('redirect'));
+                    if ($redirect) {
+                      return $this->redirect($redirect);
                     }
                     return $this->redirect(['action' => 'index']);
                 }
@@ -201,15 +217,24 @@ class AgentTopupsController extends AppController
     {
         $this->autoRender = false;
         
+        // Only this agent's top-up images: agenttopups/<own agent_id>/<file>.<image ext>
+        $prefix = 'agenttopups/' . $this->getAuthUser('agent_id') . '/';
+        $ext = is_string($key) ? strtolower(pathinfo($key, PATHINFO_EXTENSION)) : '';
+        $mime = array_search($ext === 'jpeg' ? 'jpg' : $ext, self::TOPUP_IMAGE_TYPES, true);
+        if (!is_string($key) || !str_starts_with($key, $prefix) || str_contains($key, '..')
+            || str_contains(substr($key, strlen($prefix)), '/') || $mime === false) {
+            return $this->response->withStatus(404);
+        }
         if ($key) {
 
             // $response = $this->response->withFile(WWW_ROOT.'order_files'.DS.$voucher->order_item->order->id.DS.$voucher->code_id.'.pdf',['download' => true,]);
             $file = $this->S3->getObject($key);
             $response = $this->response;
             if ($file) {
-                $filenames = explode('.', $key);
-                $ext = end($filenames);
-                $response = $this->response->withStringBody($file->__toString())->withType($ext);
+                $response = $this->response->withStringBody($file->__toString())
+                    ->withType($mime)
+                    ->withHeader('X-Content-Type-Options', 'nosniff')
+                    ->withHeader('Content-Disposition', 'inline; filename="' . basename($key) . '"');
                 // $response = $response->withDownload(end($filenames));
             }
             else {

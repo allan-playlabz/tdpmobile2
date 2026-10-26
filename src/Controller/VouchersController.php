@@ -84,6 +84,12 @@ class VouchersController extends AppController
     {
         $this->autoRender = false;
 
+        // Only well-formed paths, and only vouchers of the logged-in user's agent.
+        if (!preg_match('/^\d{4}$/', (string)$year) || !preg_match('/^\d{4}$/', (string)$monthday)
+            || !preg_match('/^[A-Za-z0-9._-]+$/', (string)$code) || str_contains((string)$code, '..')
+            || !$this->Vouchers->belongsToAgent(explode('_', (string)$code)[0], $this->getAuthUser('agent_id'))) {
+            return $this->response->withStatus(404);
+        }
         $filename = $year . '/' . $monthday . '/' . $code . '.pdf';
         $file = $this->S3->getObject('vouchers/' . $filename);
         $response = $this->response;
@@ -129,7 +135,7 @@ class VouchersController extends AppController
         if (!$id || !$check) {
             return $this->response->withStatus(404);
         }
-        if ($check != md5($id . Configure::read('Api.secret'))) {
+        if (!$this->_isValidVoucherCheck($id, $check)) {
             return $this->response->withStatus(404);
         }
         $id_parts = explode('_', $id);
@@ -177,7 +183,7 @@ class VouchersController extends AppController
         if (!$id || !$check) {
             return $this->response->withStatus(404);
         }
-        if ($check != md5($id . Configure::read('Api.secret'))) {
+        if (!$this->_isValidVoucherCheck($id, $check)) {
             return $this->response->withStatus(404);
         }
         $filename = $year . '/' . $monthday . '/' . $code . '.pdf';
@@ -263,7 +269,7 @@ class VouchersController extends AppController
         if (!$id || !$check) {
             return $this->response->withStatus(404);
         }
-        if ($check != md5($id . Configure::read('Api.secret')) && $check != md5($id . Configure::read('App.secret'))) {
+        if (!$this->_isValidVoucherCheck($id, $check)) {
             return $this->response->withStatus(404);
         }
         $voucher = $this->Vouchers->get($id, contain: ['OrderItems' => ['Orders' => ['AgentUsers']]]);
@@ -313,6 +319,33 @@ class VouchersController extends AppController
         }
 
         $this->set('voucher', $voucher);
+    }
+
+    /**
+     * Validates the `check` token of a voucher link.
+     *
+     * Current format: HMAC-SHA256 of the id with Api.secret. Old emailed links use
+     * md5(id . Api.secret); they are accepted only while Vouchers.allowLegacyMd5Links
+     * is true. Comparisons are constant-time.
+     *
+     * @param mixed $id Voucher id / code from the URL.
+     * @param mixed $check Token from the URL.
+     * @return bool
+     */
+    private function _isValidVoucherCheck($id, $check): bool
+    {
+        $secret = (string)Configure::read('Api.secret');
+        if (!is_string($id) || !is_string($check) || $id === '' || $check === '' || $secret === '') {
+            return false;
+        }
+        if (hash_equals(hash_hmac('sha256', $id, $secret), $check)) {
+            return true;
+        }
+        if (Configure::read('Vouchers.allowLegacyMd5Links', true) && hash_equals(md5($id . $secret), $check)) {
+            return true;
+        }
+
+        return false;
     }
 
     private function _buildHeaders($data, $email, $user_id)
