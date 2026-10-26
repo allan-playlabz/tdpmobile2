@@ -31,7 +31,9 @@ Tests: schema comes from `tests/schema/app.sql` + `tests/schema/log.sql` (schema
 - `config/app_config.php` – loaded after `app.php` (see `config/bootstrap.php`); this project's local override (instead of the skeleton's `app_local.php`). Template: `config/app_config.example.php`. Key groups: `Datasources` (`default`, `log_ds`, `log_ds_ro`, `database_log`), `Api` (backend API), `AWS`/`AWSPublic` (S3), `Mailer` (queue server), `PdfGenerator`, `Translation.languages`, `Login` (rate limiting), `Features`, `TDP`.
 - `config/.env` is loaded by bootstrap if `APP_NAME` isn't set (DB URLs, `COOKIE_DOMAIN`, …). Locally `COOKIE_DOMAIN=tpp.localhost`, so the session only works on that host.
 - `config/plugins.php` registers plugins (Authentication, CakePdf, DatabaseLog, DebugKit/Bake/Migrations dev/CLI only).
-- `app_config.php` and `.env` contain real credentials — never echo or commit their values.
+- `app_config.php`, `.env` and `config/.setenv.properties` (Apache `SetEnv`, untracked; template `config/.setenv.properties.example`) contain real credentials — never echo or commit their values.
+- Security-related settings: `SECURITY_SALT` (required — bootstrap throws without it), `DEBUG` (defaults to false), `APP_FULL_BASE_URL` (set in production so absolute links don't come from the Host header), `SESSION_COOKIE_SECURE` (default true; `false` only for local http), `Vouchers.allowLegacyMd5Links` (accept old `md5(id.Api.secret)` voucher links; new format is HMAC-SHA256), `Security.cfConnectingIp` (`cloudflare` default / `always` / `never` — when to trust `CF-Connecting-IP`, see `src/Util/ClientIp.php`).
+- Local CLI: the `php` on PATH may not be 8.x; use the Laragon PHP 8.5 binary for `bin/cake`, `phpunit` and the dev server (`php -S localhost:8765 -t webroot webroot/index.php`).
 
 ## Architecture
 
