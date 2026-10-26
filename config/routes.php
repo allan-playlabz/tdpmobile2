@@ -103,7 +103,7 @@ return static function (RouteBuilder $routes): void {
     $routes->connect('/attractions/toggle-favorite', ['controller' => 'Attractions', 'action' => 'toggleFavorite']);
 
    //  agents
-    $routes->connect('/agents', ['controller' => 'Agents', 'action' => 'index']);
+    // '/agents' (AgentsController::index) removed: it lists every agent incl. credentials.
 
     //  agent topups
     $routes->connect('/agent-topups', ['controller' => 'AgentTopups', 'action' => 'index']);
@@ -127,6 +127,7 @@ return static function (RouteBuilder $routes): void {
     $routes->connect('/agent-users/resend-otp', ['controller' => 'AgentUsers', 'action' => 'resendOtp']);
     $routes->connect('/agent-users/change-password', ['controller' => 'AgentUsers', 'action' => 'changePassword']);
     $routes->connect('/agent-users/set-password', ['controller' => 'AgentUsers', 'action' => 'setPassword']);
+    $routes->connect('/agent-users/set-password/{code}', ['controller' => 'AgentUsers', 'action' => 'setPassword'], ['pass' => ['code']]);
     $routes->connect('/agent-users/forgot-password', ['controller' => 'AgentUsers', 'action' => 'forgotPassword']);
     $routes->connect('/agent-users/reset-password/{email}/{check}', ['controller' => 'AgentUsers', 'action' => 'resetPassword'], ['pass' => ['email', 'check']]);
 

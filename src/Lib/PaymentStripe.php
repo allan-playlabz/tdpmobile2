@@ -72,7 +72,7 @@ class PaymentStripe
         if ($session) {
             $this->Orders = TableRegistry::getTableLocator()->get('Orders');
             $order = $this->Orders->find()->where(['order_ref_id' => $order_ref_id])->first();
-            debug($order);
+            // (removed debug output)
             if ($order) {
                 $this->Orders->setPaymentId($order, $session->id);
                 $session_id = $session->id;

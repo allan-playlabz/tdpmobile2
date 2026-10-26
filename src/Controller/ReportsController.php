@@ -110,7 +110,7 @@ class ReportsController extends AppController
                     exec($cmd);
                 }
             } catch (\Exception $exc) {
-                debug('Error: '.$exc);
+                \Cake\Log\Log::error((string)json_encode('Error: '.$exc));
             }
             $this->Flash->success('We are generating the report. Please check the Generated Reports link to download your report file.');
 

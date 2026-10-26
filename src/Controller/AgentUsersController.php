@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use App\Util\ClientIp;
 use Cake\I18n\DateTime;
 use Cake\Utility\Text;
 use App\Lib\Translator;
@@ -20,7 +21,7 @@ class AgentUsersController extends AppController
 
     public function initialize(): void {
       parent::initialize();
-      $this->Authentication->addUnauthenticatedActions(['otp','resendOtp','forgotPassword','resetPassword']);
+      $this->Authentication->addUnauthenticatedActions(['otp','resendOtp','forgotPassword','resetPassword','setPassword']);
       $this->Logins = $this->fetchTable('Logins');
       $this->Logs = $this->fetchTable('Logs');
     }
@@ -78,7 +79,10 @@ class AgentUsersController extends AppController
         }
         
         if ($agent && $agent->password === null) {
-          return $this->redirect(['action'=>'setPassword',$agent->verification_code]);
+          // Never hand out the verification code (or reveal the account) to whoever typed
+          // the email; such accounts get a password via the master's "Reset Password".
+          $this->Flash->error(__('Wrong login information.'));
+          return;
         }
         if ($agent==null || $agent->agent->status == 'inactive') {
           $this->Flash->error(__('Wrong login information.'));
@@ -108,11 +112,7 @@ class AgentUsersController extends AppController
             $session->renew();
 
             /* save user ip address */
-            $clientIp = $this->request->getHeaderLine('CF-Connecting-IP');
-
-            if(empty($clientIp)) {
-              $clientIp = $this->request->clientIp();
-            }
+            $clientIp = ClientIp::fromRequest($this->request);
 
             $agent_ipaddress = $this->UsersIpaddress->find()
               ->where(['ip_address'=>$clientIp,'user_id'=>$auth_agent['id'],'type'=>'agent'])->limit(3)->orderBy(['modified'=>'desc'])->first();
@@ -139,10 +139,7 @@ class AgentUsersController extends AppController
             /* end bypass otp */
           }
           // check if using a new ip redirect send otp
-          $clientIp = $this->request->getHeaderLine('CF-Connecting-IP');
-          if(empty($clientIp)) {
-            $clientIp = $this->request->clientIp();
-          }
+          $clientIp = ClientIp::fromRequest($this->request);
           // Allow login without OTP when the current IP is one of the agent
           // user's last 3 OTP-trusted IPs (kept per agent user in last_otp_ips);
           // otherwise send an OTP to verify the unfamiliar IP.
@@ -150,7 +147,7 @@ class AgentUsersController extends AppController
           if (!in_array($clientIp, $last_three_ips, true)) {
             $agent = $this->AgentUsers->get($auth_agent['id'], contain: ['Agents']);
             $this->request->getSession()->write('agent_id',$agent->id);
-            $otp_code = mt_rand(100001, 999999);
+            $otp_code = random_int(100001, 999999);
             $agent->otp = $otp_code;
             $date = new \DateTime();
             $agent->otp_created = $date->format('Y-m-d H:i:s');
@@ -160,8 +157,10 @@ class AgentUsersController extends AppController
             $this->Mailer->mail('OTP','new_ip_otp','Please confirm account access',$agent->email,['user'=>$agent]);
             $this->AgentUsers->save($agent);
             $this->Flash->error(__('We don\'t recognize the IP address ({0}) you are using. Please check your email for your One Time Password (OTP).', $clientIp));
-            if ($this->request->getQuery('redirect')) {
-              return $this->redirect(['action'=>'otp','?'=>['redirect'=>$this->request->getQuery('redirect')]]);
+            $this->request->getSession()->delete('otp_resends');
+            $redirect = $this->safeRedirectTarget($this->request->getQuery('redirect'));
+            if ($redirect) {
+              return $this->redirect(['action'=>'otp','?'=>['redirect'=>$redirect]]);
             }
             return $this->redirect(['action'=>'otp']);
           }
@@ -174,8 +173,9 @@ class AgentUsersController extends AppController
           }
           $this->setAuthUser($agent);
           $this->Logs->logCustom('login', 'agent_users', 'agent_users', $agent->id, [], ['login' => 'success']);
-          if ($this->request->getQuery('redirect')) {
-              return $this->redirect($this->request->getQuery('redirect'));
+          $redirect = $this->safeRedirectTarget($this->request->getQuery('redirect'));
+          if ($redirect) {
+              return $this->redirect($redirect);
           }
           $default_cities = Configure::read('Default.cities');
           return $this->redirect(['controller'=>'Attractions', '?' => ['city_id' => $default_cities]]);
@@ -195,7 +195,7 @@ class AgentUsersController extends AppController
         if ($this->request->is(['patch', 'post', 'put'])) {
             $dph = new DefaultPasswordHasher();
             if ($dph->check($this->request->getData('old_password'),$agent_user->password)) {
-              $agent_user = $this->AgentUsers->patchEntity($agent_user, $this->request->getData());
+              $agent_user = $this->AgentUsers->patchEntity($agent_user, $this->request->getData(), ['fields' => ['password', 'confirm_password']]);
               if ($this->AgentUsers->save($agent_user)) {
                   $this->Flash->success(__('You have successfully changed your password.'));
 
@@ -254,16 +254,19 @@ class AgentUsersController extends AppController
           return $this->redirect(['action'=>'login']);
         }
 
-        if(trim($data['otp'])==$agent->otp) {
+        $submitted_otp = trim((string)($data['otp'] ?? ''));
+        if ($agent->otp !== null && $submitted_otp !== '' && hash_equals((string)$agent->otp, $submitted_otp)) {
+          // One-time: the code can't be replayed after a successful login.
+          $this->AgentUsers->updateAll(['otp' => null, 'otp_created' => null], ['id' => $agent->id]);
+          $agent->otp = null;
+          $agent->otp_created = null;
+          $session->delete('otp_resends');
           if ($agent && $agent->agent) {
             $agent->agent->last_activity = date('Y-m-d H:i:s');
             $this->AgentUsers->Agents->save($agent->agent);
           }
           $this->UsersIpaddress = $this->fetchTable('UsersIpaddress');
-          $clientIp = $this->request->getHeaderLine('CF-Connecting-IP');
-          if(empty($clientIp)) {
-            $clientIp = $this->request->clientIp();
-          }
+          $clientIp = ClientIp::fromRequest($this->request);
           $user_ipaddress = $this->UsersIpaddress->find()->where(['user_id'=>$agent->id,'ip_address'=>$clientIp,'type'=>'agent'])->first();
           if (!$user_ipaddress) {
             $user_ipaddress = $this->UsersIpaddress->newEntity(['user_id'=>$agent->id,'ip_address'=>$clientIp,'type'=>'agent']);
@@ -277,8 +280,9 @@ class AgentUsersController extends AppController
           }
           $this->setAuthUser($agent->toArray());
           $this->Logs->logCustom('login', 'agent_users', 'agent_users', $agent->id, [], ['login' => 'success']);
-          if ($this->request->getQuery('redirect')) {
-            return $this->redirect($this->request->getQuery('redirect'));
+          $redirect = $this->safeRedirectTarget($this->request->getQuery('redirect'));
+          if ($redirect) {
+            return $this->redirect($redirect);
           }
           $default_cities = Configure::read('Default.cities');
           return $this->redirect(['controller'=>'Attractions', '?' => ['city_id' => $default_cities]]);
@@ -298,11 +302,15 @@ class AgentUsersController extends AppController
       if (!empty($agent_id)) {
         $agent_user = $this->AgentUsers->findById($agent_id)->first();
         if (!empty($agent_user)) {
-          $clientIp = $this->request->getHeaderLine('CF-Connecting-IP');
-          if(empty($clientIp)) {
-            $clientIp = $this->request->clientIp();
+          // Limit re-sends per password login (each re-send emails a fresh code).
+          $resends = (int)$session->read('otp_resends');
+          if ($resends >= 3) {
+            $this->Flash->error(__('Too many OTP requests. Please log in again.'));
+            return $this->redirect(['action'=>'otp']);
           }
-          $otp_code = rand(100001, 999999);
+          $session->write('otp_resends', $resends + 1);
+          $clientIp = ClientIp::fromRequest($this->request);
+          $otp_code = random_int(100001, 999999);
           $agent_user->otp = $otp_code;
           $date = new \DateTime();
           $agent_user->otp_created = $date->format('Y-m-d H:i:s');
@@ -352,9 +360,12 @@ class AgentUsersController extends AppController
 
     public function setPassword($verification_code = null) {
       $this->viewBuilder()->setLayout('login');
-        if ($this->request->getSession()->check('login')) {
-            $agent = $this->AgentUsers->find()->where(['email'=>$this->request->getSession()->read('login')])->first();
-            if ($agent && $agent->password === null && $agent->verification_code !== null) {
+        // Only the holder of the account's verification code may set its first password
+        // (previously the email typed on the login form was enough).
+        if (is_string($verification_code) && $verification_code !== '') {
+            $agent = $this->AgentUsers->find()->where(['verification_code' => $verification_code])->first();
+            if ($agent && $agent->password === null && $agent->verification_code !== null
+                && hash_equals((string)$agent->verification_code, $verification_code)) {
                 if ($this->request->is('post')) {
                   if ($this->request->getData('password') == $this->request->getData('confirm_password')) {
                     $agent->password = $this->request->getData('password');
@@ -376,6 +387,8 @@ class AgentUsersController extends AppController
             else {
               return $this->redirect(['action'=>'login']);
             }
+        } else {
+            return $this->redirect(['action'=>'login']);
         }
     }
 
@@ -393,7 +406,7 @@ class AgentUsersController extends AppController
             $this->Mailer->mail('Password Reset','password_reset', 'Reset your password', $email, ['password_reset'=>$password_reset,'agent'=>$agent]);
           }
           else {
-            debug($password_reset->getErrors());
+            $this->log('Password reset not saved: ' . json_encode($password_reset->getErrors()), 'error');
           }
         }
         $this->Flash->success(__('You should receive an email to reset your password. Please check your email and click the link provided within 24 hours.'));
@@ -449,16 +462,14 @@ class AgentUsersController extends AppController
       }
       $agent_user = $this->AgentUsers->newEmptyEntity();
       if ($this->request->is('post')) {
-        $clientIp = $this->request->getHeaderLine('CF-Connecting-IP');
-        if(empty($clientIp)) {
-          $clientIp = $this->request->clientIp();
-        }
+        $clientIp = ClientIp::fromRequest($this->request);
         // $this->log('add_user:'.$clientIp.' '.json_encode($this->getAuthUser()),'debug');
         
         $data = $this->request->getData();
         $data['password'] = $this->_getRandomPassword();
-        $agent_user = $this->AgentUsers->patchEntity($agent_user, $data);
-        $agent_user->role = in_array($this->request->getData('role'), ['normal', 'viewer']) ? $this->request->getData('role') : 'normal';
+        $agent_user = $this->AgentUsers->patchEntity($agent_user, $data, ['fields' => ['name', 'email', 'password']]);
+        $agent_user->role = in_array($this->request->getData('role'), ['normal', 'viewer'], true) ? $this->request->getData('role') : 'normal';
+        $agent_user->status = in_array($this->request->getData('status'), ['active', 'inactive'], true) ? $this->request->getData('status') : 'active';
         $agent_user->agent_id = $agent_id;
         $agent_user->verification_code = Text::uuid();
         if ($this->AgentUsers->save($agent_user)) {
@@ -499,19 +510,17 @@ class AgentUsersController extends AppController
         }
       }
       $agent_user = $agent_user_id === null ? null : $this->AgentUsers->find()->where(['id'=>$agent_user_id])->first();
-      if($agent_user?->agent_id!=$this->getAuthUser('agent_id')) {
+      // Same agent only, and masters can't edit other masters.
+      if($agent_user === null || $agent_user->agent_id != $this->getAuthUser('agent_id') || in_array($agent_user->role, ['master', 'master2'], true)) {
         $this->Flash->error(__('You are not authorized to access that location.'));
         return $this->redirect('/');
       }
       if ($this->request->is(['patch', 'post', 'put'])) {
         $data = $this->request->getData();
-        if ($this->request->getData('name')) {
-          $data['name'] = $this->request->getData('name');
+        $agent_user = $this->AgentUsers->patchEntity($agent_user, $data, ['fields' => ['name']]);
+        if (isset($data['role']) && in_array($data['role'], ['normal', 'viewer'], true)) {
+          $agent_user->role = $data['role'];
         }
-        if (isset($data['role']) && !in_array($data['role'], ['normal', 'viewer'])) {
-          unset($data['role']);
-        }
-        $agent_user = $this->AgentUsers->patchEntity($agent_user, $data);
         if ($this->AgentUsers->save($agent_user)) {
             $this->Flash->success(__('The agent user has been saved.'));
 
@@ -525,7 +534,11 @@ class AgentUsersController extends AppController
     public function agentResetPassword($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
-        $agentUser = $this->AgentUsers->get($id);
+        $agentUser = $this->_getManageableAgentUser($id);
+        if ($agentUser === null) {
+          $this->Flash->error(__('You are not authorized to access that location.'));
+          return $this->redirect(['controller'=>'AgentUsers','action' => 'index']);
+        }
         $password = $this->_getRandomPassword();
         $agentUser->password = $password;
         $agentUser->setDirty('password', true);
@@ -543,7 +556,11 @@ class AgentUsersController extends AppController
     public function suspend($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
-        $agentUser = $this->AgentUsers->get($id);
+        $agentUser = $this->_getManageableAgentUser($id);
+        if ($agentUser === null) {
+          $this->Flash->error(__('You are not authorized to access that location.'));
+          return $this->redirect(['controller'=>'AgentUsers','action' => 'index']);
+        }
         $agentUser->status = 'inactive';
         $agentUser->setDirty('status', true);
         if ($this->AgentUsers->save($agentUser)) {
@@ -555,6 +572,26 @@ class AgentUsersController extends AppController
         return $this->redirect(['controller'=>'AgentUsers','action' => 'index']);
     }
 
+    /**
+     * A sub-user the logged-in master may manage: same agent, not a master, not themselves.
+     *
+     * @param mixed $id Agent user id from the URL.
+     * @return \App\Model\Entity\AgentUser|null
+     */
+    private function _getManageableAgentUser($id) {
+      if (!in_array($this->getAuthUser('role'), ['master', 'master2'], true) || !is_string($id) || $id === '' || $id === $this->getAuthUser('id')) {
+        return null;
+      }
+      $agentUser = $this->AgentUsers->find()
+        ->where(['id' => $id, 'agent_id' => $this->getAuthUser('agent_id')])
+        ->first();
+      if ($agentUser === null || in_array($agentUser->role, ['master', 'master2'], true)) {
+        return null;
+      }
+
+      return $agentUser;
+    }
+
     private function _getRandomPassword() {
         $digits = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz_^!';//abcdefghijklmnopqrstuvwxyz
         $max = strlen($digits)-1;
@@ -563,7 +600,7 @@ class AgentUsersController extends AppController
         // $prefix = ['VC','PK'];
         $code = '';
         for ($i=0; $i < $len ; $i++) {
-            $code .= $digits[mt_rand(0,$max)];
+            $code .= $digits[random_int(0,$max)];
         }
         return $code;
     }

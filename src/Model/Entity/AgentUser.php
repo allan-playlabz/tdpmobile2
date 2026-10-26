@@ -31,20 +31,13 @@ class AgentUser extends Entity
      *
      * @var array
      */
+    // agent_id, role, status, credits, rebates and associations are never mass-assigned:
+    // controllers set them explicitly after checking the logged-in user's rights.
     protected array $_accessible = [
-        'agent_id' => true,
-        'role' => true,
         'name' => true,
         'email' => true,
         'password' => true,
-        'credits' => true,
-        'rebates' => true,
-        'status' => true,
         'last_read_time' => true,
-        'created' => true,
-        'modified' => true,
-        'agent' => true,
-        'orders' => true
     ];
 
     /**

@@ -51,7 +51,7 @@ class OrdersController extends AppController
 
   public function beforeFilter(\Cake\Event\EventInterface $event) {
     parent::beforeFilter($event);
-    $viewerBlockedActions = ['addToCart', 'subtractQuantity', 'removeFromCart', 'cart', 'checkout', 'removeTicket', 'index', 'myTickets'];
+    $viewerBlockedActions = ['addToCart', 'subtractQuantity', 'removeFromCart', 'cart', 'checkout', 'removeTicket', 'index', 'myTickets', 'cancelVoucher'];
     if ($this->getAuthUser('role') == 'viewer' && in_array($this->request->getParam('action'), $viewerBlockedActions)) {
       $this->Flash->error(__('You are not authorized to access that location.'));
       return $this->redirect('/');
@@ -773,7 +773,7 @@ class OrdersController extends AppController
             return $this->response->withStatus(500)->withStringBody(json_encode($res_data));
           }
         } else {
-          var_dump($response);
+          \Cake\Log\Log::error('Order status API response not ok: ' . $response->getStatusCode());
           return $this->response->withStatus(500)->withStringBody('Response not ok');
         }
       } catch (\Cake\Http\Exception\HttpException $e) {
@@ -969,7 +969,7 @@ class OrdersController extends AppController
             }
           }
         } catch (\Exception $e) {
-          debug($e->getMessage());
+          \Cake\Log\Log::error((string)json_encode($e->getMessage()));
         }
 
         return $ticket_price;
@@ -2075,6 +2075,12 @@ class OrdersController extends AppController
       /* new order using api */
       $this->request->allowMethod(['post','delete']);
       $this->autoRender = false;
+      // Same rules as the Cancel button (own agent, cancel allowed, credits order, not redeemed),
+      // enforced here so a crafted POST can't cancel other agents' vouchers.
+      if (!$this->Vouchers->isCancellable($code, $this->getAuthUser('agent_id'))) {
+        $this->Flash->error(__('Voucher {0} cannot be cancelled.', $code));
+        return $this->redirect($this->referer());
+      }
       $http = new \Cake\Http\Client();
       $api_url = Configure::read('Api.url');
       $data = ['code'=>$code,'action'=>'cancel'];

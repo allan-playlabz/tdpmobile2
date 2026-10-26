@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Table;
 
+use App\Util\ClientIp;
 use Cake\ORM\Table;
 use Cake\Core\Configure;
 use Cake\ORM\RulesChecker;
@@ -97,10 +98,7 @@ class LoginsTable extends Table
         /* Delete first logins more than x minutes ago */
         $this->deleteAll(['created < ' => \Cake\I18n\DateTime::now()->subMinutes($max_login_minutes)]);
 
-        $clientIp = $request->getHeaderLine('CF-Connecting-IP');
-        if(empty($clientIp)) {
-            $clientIp = $request->clientIp();
-        }
+        $clientIp = ClientIp::fromRequest($request);
         $email = $request->getData('email');
         $system = 'agent';
         $login_count = $this->find()->where([
@@ -129,10 +127,7 @@ class LoginsTable extends Table
      * @return void
      */
     public function clearLogin($request) {
-        $clientIp = $request->getHeaderLine('CF-Connecting-IP');
-        if(empty($clientIp)) {
-            $clientIp = $request->clientIp();
-        }
+        $clientIp = ClientIp::fromRequest($request);
         $this->deleteAll(['ip' => $clientIp, 'loc' => 'agent']);
     }
 }

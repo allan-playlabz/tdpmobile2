@@ -125,6 +125,21 @@ class VouchersTable extends Table
         if (!$voucher) {
             return false;
         }
+        // voucher must belong to this agent (orders.agent_id, or the ordering user's agent for older rows)
+        $order = $voucher->order_item->order ?? null;
+        if (!$order) {
+            return false;
+        }
+        $order_agent_id = $order->agent_id;
+        if ($order_agent_id === null && $order->agent_user_id !== null) {
+            $order_agent_id = TableRegistry::getTableLocator()->get('AgentUsers')->find()
+                ->select(['agent_id'])
+                ->where(['id' => $order->agent_user_id])
+                ->first()?->agent_id;
+        }
+        if ($order_agent_id === null || $order_agent_id !== $agent_id) {
+            return false;
+        }
         // is ticket api cancellable
         if (!$voucher->order_item->ticket->api_cancellable) {
             return false;

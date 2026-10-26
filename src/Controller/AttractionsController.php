@@ -962,7 +962,7 @@ class AttractionsController extends AppController
           }
         }
       } catch (\Exception $e) {
-        debug($e->getMessage());
+        \Cake\Log\Log::error((string)json_encode($e->getMessage()));
       }
       $response_data = ['tickets' => array_values($tickets), 'tickets_max_quantity' => $tickets_max_quantity, 'return_ticket_ids' => $return_ticket_ids];
 

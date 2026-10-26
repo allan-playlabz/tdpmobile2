@@ -95,7 +95,7 @@ class PaymentResponsesTable extends Table
         if ($this->save($payment_response)) {
             return $payment_response;
         }
-        debug($payment_response->getErrors());
+        \Cake\Log\Log::error((string)json_encode($payment_response->getErrors()));
         return false;
     }
 

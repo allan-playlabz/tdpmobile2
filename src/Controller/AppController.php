@@ -92,6 +92,27 @@ class AppController extends Controller
     }
 
     /**
+     * A `?redirect=` target that is safe to redirect to: a local path only.
+     *
+     * Rejects absolute URLs, protocol-relative `//host`, backslash tricks and
+     * control characters, so login/top-up redirects can't send users off-site.
+     *
+     * @param mixed $url Candidate target (usually a query value).
+     * @return string|null The path, or null if it is not a safe local path.
+     */
+    protected function safeRedirectTarget(mixed $url): ?string
+    {
+        if (!is_string($url) || $url === '' || !str_starts_with($url, '/')) {
+            return null;
+        }
+        if (str_starts_with($url, '//') || str_contains($url, '\\') || preg_match('/[\x00-\x1F\x7F]/', $url)) {
+            return null;
+        }
+
+        return $url;
+    }
+
+    /**
      * paginate() returning a plain array, for actions that post-process the rows.
      *
      * Also sets the paginated result as a view var so PaginatorHelper finds the

@@ -44,6 +44,8 @@ class AgentsController extends AppController
      */
     public function index()
     {
+      // Admin-style listing of all agents (incl. credentials) — not for agent-portal users.
+      throw new \Cake\Http\Exception\NotFoundException();
       $options=['first_name'=>'First Name', 'last_name'=>'Last Name'];
       $this->loadComponent('Search');
       $query=$this->Search->buildQuery($this->request->getQuery(), $options);
@@ -302,7 +304,7 @@ class AgentsController extends AppController
                 $this->loadComponent('Mailer');
                 $this->Mailer->mail('New Account','new_agent_account','Account Created',$agentUser->email,['agent_user'=>$agentUser,'temp_password' => $data['password'],'user'=>$this->getAuthUser()],null,null);
               } else {
-                print_r($agentUser->getErrors());
+                \Cake\Log\Log::error((string)json_encode($agentUser->getErrors()));
               }
 
 
