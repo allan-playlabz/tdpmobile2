@@ -46,3 +46,4 @@ nbproject/*
 composer.lock
 
 /.phpunit.cache
+/config/.setenv.properties

@@ -19,6 +19,7 @@
  */
 use Cake\Http\Middleware\CsrfProtectionMiddleware;
 use Cake\Routing\RouteBuilder;
+use function Cake\Core\env;
 use Cake\Routing\Route\DashedRoute;
 
 /**
@@ -61,7 +62,9 @@ return static function (RouteBuilder $routes): void {
     $routes->scope('/', function (RouteBuilder $routes): void {
    // Register scoped middleware for in scopes.
    $csrf = new CsrfProtectionMiddleware([
-      'httponly' => true
+      'httponly' => true,
+      'secure' => filter_var(env('SESSION_COOKIE_SECURE', true), FILTER_VALIDATE_BOOLEAN),
+      'samesite' => 'Lax',
    ]);
 
    $csrf->skipCheckCallback(function ($request) {

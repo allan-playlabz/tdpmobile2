@@ -18,7 +18,7 @@ return [
      * Development Mode:
      * true: Errors and warnings shown.
      */
-    'debug' => filter_var(env('DEBUG', true), FILTER_VALIDATE_BOOLEAN),
+    'debug' => filter_var(env('DEBUG', false), FILTER_VALIDATE_BOOLEAN),
 
     /*
      * Configure basic information about the application.
@@ -60,7 +60,9 @@ return [
         'webroot' => 'webroot',
         'wwwRoot' => WWW_ROOT,
         //'baseUrl' => env('SCRIPT_NAME'),
-        'fullBaseUrl' => false,
+        // Set APP_FULL_BASE_URL in production so absolute links (password reset, payment
+        // return URLs) never come from the request's Host header.
+        'fullBaseUrl' => env('APP_FULL_BASE_URL', false),
         'imageBaseUrl' => 'img/',
         'cssBaseUrl' => 'css/',
         'jsBaseUrl' => 'js/',
@@ -79,7 +81,8 @@ return [
      *   You should treat it as extremely sensitive data.
      */
     'Security' => [
-        'salt' => env('SECURITY_SALT', '4b430ced64078c568c506a61678fb87e515136631db75155cc8ec1d928f39e67'),
+        // Required; config/bootstrap.php stops if it is missing.
+        'salt' => env('SECURITY_SALT'),
     ],
 
     /*
@@ -487,7 +490,9 @@ return [
         ],
         'timeout' => 360,
         'ini' => [
-            'session.cookie_secure' => false,
+            // SESSION_COOKIE_SECURE=false only for local http (also used for the CSRF cookie).
+            'session.cookie_secure' => filter_var(env('SESSION_COOKIE_SECURE', true), FILTER_VALIDATE_BOOLEAN),
+            'session.cookie_samesite' => 'Lax',
             'session.cookie_path' => '/',
             'session.cookie_domain' => env('COOKIE_DOMAIN', null),
             'session.cookie_lifetime' => 14400,
@@ -517,6 +522,15 @@ return [
      *  - `variablesPanelMaxDepth` - Defines how many levels of nested data should be shown in the variables tab.
      *     Default is 5. WARNING: Increasing the max depth level can lead to an out of memory error.
      */
+    /*
+     * Voucher download links: `check` = HMAC-SHA256(id, Api.secret).
+     * allowLegacyMd5Links keeps old emailed links (md5(id . Api.secret)) working;
+     * set to false (e.g. in app_config.php) to stop accepting them.
+     */
+    'Vouchers' => [
+        'allowLegacyMd5Links' => true,
+    ],
+
     'DebugKit' => [
         'forceEnable' => filter_var(env('DEBUG_KIT_FORCE_ENABLE', false), FILTER_VALIDATE_BOOLEAN),
         'safeTld' => env('DEBUG_KIT_SAFE_TLD', null),

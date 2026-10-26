@@ -188,7 +188,12 @@ ConnectionManager::setConfig(Configure::consume('Datasources'));
 TransportFactory::setConfig(Configure::consume('EmailTransport'));
 Mailer::setConfig(Configure::consume('Email'));
 Log::setConfig(Configure::consume('Log'));
-Security::setSalt(Configure::consume('Security.salt'));
+$securitySalt = Configure::consume('Security.salt');
+if (empty($securitySalt)) {
+    throw new \RuntimeException('SECURITY_SALT is not set. Configure it in the environment (or config/.env locally).');
+}
+Security::setSalt($securitySalt);
+unset($securitySalt);
 
 /*
  * Setup detectors for mobile and tablet.
