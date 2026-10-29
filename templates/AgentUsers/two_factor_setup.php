@@ -10,7 +10,7 @@ $this->Html->css(['two-factor'], ['block' => true]);
 ?>
 <div class="tf-card text-left" style="margin-top:20px;">
     <?php if (!$loggedIn) : ?>
-        <?= $this->Flash->render('flash', ['element' => 'Flash/default']) ?>
+        <?= $this->Flash->render('flash', ['element' => 'flash/default']) ?>
     <?php endif; ?>
     <h4 class="mb-1"><?= __('Set up your authenticator app') ?></h4>
     <p class="text-muted small mb-4"><?= $loggedIn ? __('Scan the new code with your phone. Your old app codes stop working once this is confirmed.') : __('Your account now asks for a code from an authenticator app when you sign in.') ?></p>

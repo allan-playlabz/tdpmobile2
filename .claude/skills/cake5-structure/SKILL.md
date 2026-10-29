@@ -1,6 +1,6 @@
 ---
 name: cake5-structure
-description: Phase 2 of a CakePHP 3 → 5 upgrade — moves src/Template to templates/ (.ctp → .php; lowercase layout/element/email/cell, but Error stays capitalised), converts Shells to Commands, replaces untouched skeleton files with the 5.x skeleton's, and updates Application.php, config/bootstrap.php, paths.php, plugins.php, routes.php and the entry points. Use when restructuring a CakePHP project's files for CakePHP 5, or when asked to convert shells to commands.
+description: Phase 2 of a CakePHP 3 → 5 upgrade — moves src/Template to templates/ (.ctp → .php; lowercase layout/element/email/cell, but Error stays capitalised, and element/layout names in code to match), converts Shells to Commands, replaces untouched skeleton files with the 5.x skeleton's, and updates Application.php, config/bootstrap.php, paths.php, plugins.php, routes.php and the entry points. Use when restructuring a CakePHP project's files for CakePHP 5, or when asked to convert shells to commands.
 user-invocable: true
 ---
 
@@ -22,6 +22,8 @@ Then:
 - `config/app.php`: `'App' => ['paths' => ['templates' => [ROOT . DS . 'templates' . DS]]]`.
 - Email templates: `templates/email/html|text/`; email layouts: `templates/layout/email/html|text/`.
 - Search code for hard-coded paths: `grep -rn "Template" src config | grep -v "templates"` (e.g. `APP . 'Template'`, `->setTemplatePath('Email')`).
+- **Lowercase the names in code too**: `'element' => 'Flash/default'` → `'flash/default'`, `$this->element('Element/x')`, `setLayout('Ajax')` → whatever the file is now. Windows/macOS find either case and Linux doesn't ("Element file `Flash/default.php` could not be found" on the server only). `grep -rnE "(element|setLayout|setTemplate)\b.*['\"][A-Z]" src templates` lists candidates; the audit scan's `template-name-case` check confirms them against the files git tracks.
+- On Windows/macOS check the disk matches git after the renames (`path-case-drift` in the scan). With `core.ignorecase=true` a folder can stay `Flash/` on disk while git has `flash/`; the editor then shows the old case, and new files can be committed into a second, differently-cased folder.
 - Commit this step on its own — it touches every template.
 
 ## 2. Replace untouched skeleton files

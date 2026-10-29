@@ -27,6 +27,10 @@ Severity meaning:
 - **warning** — deprecated alias still works in 5.x but will break in 6 or behaves differently (e.g. `FrozenTime` → immutable `DateTime`).
 - **info** — style/consistency (e.g. global function usage in config).
 
+Two built-in checks go beyond regexes (both report under `cake5-structure`):
+- **`template-name-case`** (blocker): names in `->element('…')`, `'element' => '…'` (FlashComponent adds `flash/`), `setLayout('…')`, `->layout = '…'` and `setTemplate('…')` are resolved against the template files **git tracks** and must match their case exactly. A name that matches only case-insensitively works on Windows/macOS and fails on Linux. Names with no matching file in any case (plugin or core templates) are ignored.
+- **`path-case-drift`** (warning): a folder spelled differently on disk than in git (possible with `core.ignorecase=true`), or tracked by git under two spellings.
+
 The regexes are line-based heuristics: confirm each hit before editing, and expect a few false positives (e.g. `->order(` on a non-Query object). Multi-line chains (`find('all', [` … `])->toList()`) are only partly caught — check the files the scan already flags. `*.php` patterns also cover `.ctp` templates, so the first audit counts template issues before the rename.
 
 Some failures can't be found statically at all — the trial upgrade's runtime-only bugs were an `ArrayObject` identity in tests and a missing skeleton middleware class. That's why phases 3–5 have runtime gates.

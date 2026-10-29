@@ -58,7 +58,7 @@ Expected effort split (trial on a small 3.10 app): Rector fixed ~60% of blocker 
 2. Smoke test with the user, using the project's real flows: login per role, list/view/add/edit/delete, a 404 page (checks `templates/Error/`), a PDF/email if the app has them, each CLI command used by cron, and any inbound webhook routes (see gotchas: CSRF).
 3. Run `composer cs-check` (CakePHP codesniffer ^5) and fix what's mechanical.
 4. Update the target project's `CLAUDE.md` with a "CakePHP 5 Migration Notes" section: version jump, Commands not Shells, shims added, patches applied, plugins replaced.
-5. Deployment notes for the user: install on **Linux** catches case problems Windows hides (`templates/Error`); run migrations/SQL; update cron (`bin/cake <command>` names); clear `tmp/cache`; restart PHP-FPM/OPcache or rebuild Docker images.
+5. Deployment notes for the user: install on **Linux** catches case problems Windows hides (`templates/Error`, element/layout names like `'Flash/default'`; the scan's `template-name-case` finds these beforehand); run migrations/SQL; update cron (`bin/cake <command>` names); clear `tmp/cache`; restart PHP-FPM/OPcache or rebuild Docker images.
 
 ## When to stop and ask
 - A plugin has no 5.x release and no obvious replacement.
