@@ -14,7 +14,7 @@
         "cunheise/phpqrcode": "^1.0",
         "dereuromark/cakephp-databaselog": "^4.0",
         "dompdf/dompdf": "^3.0",
-        "firebase/php-jwt": "^6.3",
+        "firebase/php-jwt": "^7.0",
         "friendsofcake/cakepdf": "^5.0",
         "mobiledetect/mobiledetectlib": "^4.8.03",
         "mustache/mustache": "^2.14",
