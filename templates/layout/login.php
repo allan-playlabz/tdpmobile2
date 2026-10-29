@@ -17,12 +17,14 @@
     <?= $this->fetch('internal_css') ?>
     <?= $this->fetch('css') ?>
 </head>
-<body>
-    <div class="container">
-      <div class="row">
-        <div class="col-md-8 col-lg-6 offset-md-2 offset-lg-3">
-          <?= $this->Flash->render('flash') ?>
-          <?= $this->fetch('content') ?>
+<body class="auth-body">
+    <div class="auth-page">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-8 col-lg-6 offset-md-2 offset-lg-3">
+            <?= $this->Flash->render('flash') ?>
+            <?= $this->fetch('content') ?>
+          </div>
         </div>
       </div>
     </div>

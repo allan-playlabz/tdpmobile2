@@ -26,21 +26,11 @@
   <?php endif ?>
   </div>
 </div>
-<div class="timestamp">
-  <?php
-    $date = new \DateTime();
-    $current = $date->format('Y-m-d H:i:s');
-    echo $current;
-  ?>
+<?php $now = \Cake\I18n\DateTime::now(); ?>
+<div class="auth-timestamp">
+  <i class="fa fa-clock-o"></i>
+  <time datetime="<?= h($now->toIso8601String()) ?>"><?= h($now->i18nFormat("EEEE, d MMMM y '·' h:mm a (O)")) ?></time>
 </div>
 <style>
-html, body {
-  display: block;
-  height: 100%;
-}
-body {padding-top: 0; padding-bottom:30px;}
 .form-description {text-align: center;}
-.container {height: 100%;}
-.form-signin {height: 100%;}
-.timestamp { position: absolute; bottom: 10px; right: 10px; }
 </style>
