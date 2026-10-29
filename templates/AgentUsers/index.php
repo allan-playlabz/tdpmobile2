@@ -23,6 +23,9 @@
                 <td>
                     <?php echo $this->Html->link('<i class="fa fa-pencil"></i>',['controller' => 'AgentUsers', 'action' => 'edit', $agent_user->id],['escape'=>false,'class'=>'btn btn-primary']) ?>
                     <?php echo $this->Form->postLink(__('Reset Password'),['controller' => 'AgentUsers', 'action' => 'agentResetPassword', $agent_user->id],['escape'=>false,'class'=>'btn btn-primary','confirm'=>__('Are you sure you want to reset password of {0}', $agent_user->name)]) ?>
+                    <?php if ($agent_user->totp_enabled): ?>
+                    <?php echo $this->Form->postLink(__('Reset Authenticator'),['controller' => 'AgentUsers', 'action' => 'resetTwoFactor', $agent_user->id],['class'=>'btn btn-outline-primary','confirm'=>__('Reset the authenticator app of {0}? Only do this after confirming with them in person or by phone. They will set it up again at their next login.', $agent_user->name)]) ?>
+                    <?php endif ?>
                 </td>
           </tr>
         <?php endforeach; ?>

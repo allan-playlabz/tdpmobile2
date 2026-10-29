@@ -125,6 +125,10 @@ return static function (RouteBuilder $routes): void {
     $routes->connect('/agent-users/logout', ['controller' => 'AgentUsers', 'action' => 'logout']);
     $routes->connect('/agent-users/otp', ['controller' => 'AgentUsers', 'action' => 'otp']);
     $routes->connect('/agent-users/resend-otp', ['controller' => 'AgentUsers', 'action' => 'resendOtp']);
+    $routes->connect('/agent-users/two-factor', ['controller' => 'AgentUsers', 'action' => 'twoFactor']);
+    $routes->connect('/agent-users/two-factor/setup', ['controller' => 'AgentUsers', 'action' => 'twoFactorSetup']);
+    $routes->connect('/agent-users/two-factor/backup-codes', ['controller' => 'AgentUsers', 'action' => 'twoFactorBackupCodes']);
+    $routes->connect('/agent-users/reset-two-factor/{id}', ['controller' => 'AgentUsers', 'action' => 'resetTwoFactor'], ['pass' => ['id']]);
     $routes->connect('/agent-users/change-password', ['controller' => 'AgentUsers', 'action' => 'changePassword']);
     $routes->connect('/agent-users/set-password', ['controller' => 'AgentUsers', 'action' => 'setPassword']);
     $routes->connect('/agent-users/set-password/{code}', ['controller' => 'AgentUsers', 'action' => 'setPassword'], ['pass' => ['code']]);

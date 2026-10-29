@@ -164,7 +164,8 @@ class AppController extends Controller
     {
         $session = $this->request->getSession();
         $session->renew();
-        $session->write('Auth.User', $user);
+        // Store entities as arrays so hidden fields (password, OTP, TOTP secret) stay out of the session.
+        $session->write('Auth.User', $user instanceof EntityInterface ? $user->toArray() : $user);
     }
 
     /**

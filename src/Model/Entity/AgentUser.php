@@ -14,6 +14,12 @@ use Authentication\PasswordHasher\DefaultPasswordHasher;
  * @property string $email
  * @property string $password
  * @property string $status
+ * @property bool $two_factor_enabled
+ * @property string $two_factor_method 'authenticator' or 'email_otp'
+ * @property string|null $totp_secret Encrypted TOTP secret
+ * @property \Cake\I18n\DateTime|null $totp_enabled
+ * @property int|null $totp_last_step
+ * @property string|null $backup_codes JSON list of password hashes
  * @property \Cake\I18n\DateTime|null $created
  * @property \Cake\I18n\DateTime|null $modified
  *
@@ -46,8 +52,13 @@ class AgentUser extends Entity
      * @var array
      */
 
+    // Kept out of toArray(), so out of the Auth.User session data and logs.
     protected array $_hidden = [
-        'password'
+        'password',
+        'otp',
+        'totp_secret',
+        'totp_last_step',
+        'backup_codes',
     ];
 
     protected function _setPassword($value){

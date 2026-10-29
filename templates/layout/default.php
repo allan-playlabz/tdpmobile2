@@ -137,6 +137,7 @@ $available_languages = Configure::read('Translation.languages');
             <?php if ($auth_user['role'] != 'viewer'): ?>
             <a class="dropdown-item" href="<?= $this->Url->build(['controller'=>'AgentUsers','action'=>'contact']) ?>"><?= __('Contact Us') ?></a>
             <?php endif ?>
+            <a class="dropdown-item" href="<?= $this->Url->build(['controller'=>'AgentUsers','action'=>'twoFactor']) ?>"><?= __('Two-factor sign-in') ?></a>
             <a class="dropdown-item" href="<?= $this->Url->build(['controller'=>'AgentUsers','action'=>'logout']) ?>"><?= __('Logout') ?></a>
           </div>
         </li>

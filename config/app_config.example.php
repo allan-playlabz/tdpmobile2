@@ -86,6 +86,11 @@ return [
         ],
         'merged_expiration' => 60,
     ],
+    // Set TWO_FACTOR_KEY in the environment (or encryptionKey here) before anyone sets up an authenticator.
+    'TwoFactor' => [
+        // 'encryptionKey' => '',
+        // 'issuer' => 'TDP Agent',
+    ],
     'Mailer' => [
         'api_url' => '',
         'secret' => '',
