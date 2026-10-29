@@ -531,6 +531,17 @@ return [
         'allowLegacyMd5Links' => true,
     ],
 
+    /*
+     * Authenticator-app sign-in (src/Lib/TwoFactor.php).
+     * - encryptionKey: encrypts the stored TOTP secrets (TWO_FACTOR_KEY env; falls back
+     *   to Security.salt). Changing or losing it means every user must be reset.
+     * - issuer: name shown next to the account in the authenticator app.
+     */
+    'TwoFactor' => [
+        'encryptionKey' => env('TWO_FACTOR_KEY'),
+        'issuer' => 'TDP Agent',
+    ],
+
     'DebugKit' => [
         'forceEnable' => filter_var(env('DEBUG_KIT_FORCE_ENABLE', false), FILTER_VALIDATE_BOOLEAN),
         'safeTld' => env('DEBUG_KIT_SAFE_TLD', null),

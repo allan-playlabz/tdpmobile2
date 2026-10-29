@@ -21,6 +21,9 @@
 
     SetEnv APP_SECRET ""
 
+    # Encrypts authenticator-app secrets; set once, back it up, never change.
+    SetEnv TWO_FACTOR_KEY ""
+
     SetEnv ADMIN_APPROOT ""
     SetEnv ADMIN_WEBROOT ""
     SetEnv API_URL ""

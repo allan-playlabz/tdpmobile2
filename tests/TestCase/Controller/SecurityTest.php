@@ -65,6 +65,8 @@ class SecurityTest extends TestCase
             $this->db->insert('agent_users', [
                 'id' => $id, 'agent_id' => $agentId, 'name' => $role . ' user', 'email' => $email,
                 'password' => $hash, 'role' => $role, 'status' => 'active',
+                // The trusted-IP / OTP tests here are about the email-code flow (see TwoFactorLoginTest).
+                'two_factor_method' => 'email_otp',
             ], ['id' => 'binaryuuid', 'agent_id' => 'binaryuuid']);
         }
         $this->configRequest(['environment' => ['REMOTE_ADDR' => '10.1.2.3']]);

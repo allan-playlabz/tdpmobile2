@@ -25,6 +25,12 @@ input, textarea, .btn, .form-control, input.datepicker { border-radius:  0px; }
 .datepicker table tr td.disabled { font-weight: normal; }
 .tr-10 { top: 10px; right: 10px; }
 .box-wrapper { max-width: 320px;margin:20px auto; }
+/* Login layout: content centred vertically; taller pages (signup) just grow and scroll. */
+.auth-body { margin: 0; padding: 0; }
+.auth-page { min-height: 100vh; display: flex; align-items: center; padding: 24px 0; }
+.auth-page > .container { width: 100%; }
+.auth-timestamp { margin-top: 12px; text-align: center; color: #6c757d; font-size: .85rem; }
+.auth-timestamp .fa { margin-right: 4px; }
 .order-search {
 	display: flex;
 	flex-direction: row;

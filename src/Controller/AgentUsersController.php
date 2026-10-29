@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use App\Lib\TwoFactor;
 use App\Util\ClientIp;
 use Cake\I18n\DateTime;
 use Cake\Utility\Text;
@@ -21,7 +22,7 @@ class AgentUsersController extends AppController
 
     public function initialize(): void {
       parent::initialize();
-      $this->Authentication->addUnauthenticatedActions(['otp','resendOtp','forgotPassword','resetPassword','setPassword']);
+      $this->Authentication->addUnauthenticatedActions(['otp','resendOtp','twoFactorSetup','twoFactorBackupCodes','forgotPassword','resetPassword','setPassword']);
       $this->Logins = $this->fetchTable('Logins');
       $this->Logs = $this->fetchTable('Logs');
     }
@@ -100,7 +101,8 @@ class AgentUsersController extends AppController
         if ($auth_agent) {
           $this->Logins->clearLogin($this->request);
 
-          if (!$agent->agent->mobile_otp/* Configure::read('Features.otp') !== true */) {
+          // 2FA when the agent has OTP on and the user's own switch is on.
+          if (!TwoFactor::required($agent)) {
             /* bypass otp */
             $parent_agent = $this->AgentUsers->Agents->find()
 								->where(['id'=>$auth_agent['agent_id']])
@@ -138,31 +140,34 @@ class AgentUsersController extends AppController
             return $this->redirect(['controller'=>'Attractions', '?' => ['city_id' => $default_cities]]);
             /* end bypass otp */
           }
-          // check if using a new ip redirect send otp
           $clientIp = ClientIp::fromRequest($this->request);
-          // Allow login without OTP when the current IP is one of the agent
+          $redirect = $this->safeRedirectTarget($this->request->getQuery('redirect'));
+          $otp_url = $redirect ? ['action'=>'otp','?'=>['redirect'=>$redirect]] : ['action'=>'otp'];
+          // Authenticator users enter an app code at every login (no trusted-IP skip).
+          // Without an app yet, an emailed code comes first, then the set-up page:
+          // linking a phone needs both the password and the mailbox.
+          if (TwoFactor::usesAuthenticator($agent)) {
+            $session->write('agent_id', $agent->id);
+            $session->delete('otp_resends');
+            $session->delete('TwoFactor');
+            if (!TwoFactor::isSetUp($agent)) {
+              $this->_sendEmailOtp($agent, $clientIp);
+              $this->Flash->success(__('Please check your email for your One Time Password (OTP). Next, you will set up an authenticator app.'));
+            }
+            return $this->redirect($otp_url);
+          }
+          // Email OTP: allow login without OTP when the current IP is one of the agent
           // user's last 3 OTP-trusted IPs (kept per agent user in last_otp_ips);
           // otherwise send an OTP to verify the unfamiliar IP.
           $last_three_ips = $this->LastOtpIps->getLatestIps($auth_agent['id']);
           if (!in_array($clientIp, $last_three_ips, true)) {
             $agent = $this->AgentUsers->get($auth_agent['id'], contain: ['Agents']);
-            $this->request->getSession()->write('agent_id',$agent->id);
-            $otp_code = random_int(100001, 999999);
-            $agent->otp = $otp_code;
-            $date = new \DateTime();
-            $agent->otp_created = $date->format('Y-m-d H:i:s');
-            $agent->clientIp = $clientIp;
-            $this->loadComponent('Mailer');
-            // ($name,$template, $subject, $to, $data, $cc = null)
-            $this->Mailer->mail('OTP','new_ip_otp','Please confirm account access',$agent->email,['user'=>$agent]);
-            $this->AgentUsers->save($agent);
+            $session->write('agent_id',$agent->id);
+            $session->delete('TwoFactor');
+            $this->_sendEmailOtp($agent, $clientIp);
             $this->Flash->error(__('We don\'t recognize the IP address ({0}) you are using. Please check your email for your One Time Password (OTP).', $clientIp));
-            $this->request->getSession()->delete('otp_resends');
-            $redirect = $this->safeRedirectTarget($this->request->getQuery('redirect'));
-            if ($redirect) {
-              return $this->redirect(['action'=>'otp','?'=>['redirect'=>$redirect]]);
-            }
-            return $this->redirect(['action'=>'otp']);
+            $session->delete('otp_resends');
+            return $this->redirect($otp_url);
           }
           // Recognised IP (within the last 3): refresh its recency in the OTP
           // list, and keep the historical users_ipaddress record up to date.
@@ -212,28 +217,46 @@ class AgentUsersController extends AppController
     public function otp() {
       $session = $this->request->getSession();
       $agent_id = $session->read('agent_id');
+      $agent = $agent_id ? $this->AgentUsers->find()
+                  ->where(['AgentUsers.id'=>$agent_id])
+                  ->contain(['Agents'])
+                  ->first() : null;
+      // The method comes from the user's record, never from the session.
+      $use_app = $agent && TwoFactor::usesAuthenticator($agent) && TwoFactor::isSetUp($agent);
       if ($this->request->is('post')) {
         $data = $this->request->getData();
-        if (intval($session->read('otp_attempts') ?? 0) >= intval(Configure::read('Login.max_count_per_max_minutes') ?? 5)) {
+        if ($this->_otpAttemptsExceeded()) {
           $session->destroy();
           $this->Flash->error(__('You have exceeded maximum attempts. Please log in again.'));
           return $this->redirect(['action'=>'login']);
-        }        
+        }
 
-        if(!$agent_id) {
+        if(!$agent) {
           $session->destroy();
           $this->Flash->error(__('Session has expired. Please log in again.'));
           return $this->redirect(['action'=>'login']);
         }
 
-        $agent = $this->AgentUsers->find()
-                    ->where(['AgentUsers.id'=>$agent_id])
-                    ->contain(['Agents'])
-                    ->first();
-        if(!$agent) {
-          $session->destroy();
-          $this->Flash->error(__('Session has expired. Please log in again.'));
-          return $this->redirect(['action'=>'login']);
+        $redirect = $this->safeRedirectTarget($this->request->getQuery('redirect'));
+        $submitted_otp = trim((string)($data['otp'] ?? ''));
+
+        if ($use_app) {
+          $left = null;
+          if (TwoFactor::verify($agent, $submitted_otp) || ($left = TwoFactor::useBackupCode($agent, $submitted_otp)) !== null) {
+            $response = $this->_completeLogin($agent, $redirect);
+            if ($left !== null) {
+              $this->Flash->warning(__n(
+                'You signed in with a backup code. {0} backup code is left.',
+                'You signed in with a backup code. {0} backup codes are left.',
+                $left,
+                $left
+              ) . ($left <= 2 ? ' ' . __('Create new ones under Two-factor sign-in.') : ''));
+            }
+            return $response;
+          }
+          $this->_countOtpAttempt();
+          $this->Flash->error(__('Incorrect code. Please try again.'));
+          return $this->redirect($redirect ? ['action'=>'otp','?'=>['redirect'=>$redirect]] : ['action'=>'otp']);
         }
 
         $date = new \DateTime();
@@ -254,44 +277,24 @@ class AgentUsersController extends AppController
           return $this->redirect(['action'=>'login']);
         }
 
-        $submitted_otp = trim((string)($data['otp'] ?? ''));
         if ($agent->otp !== null && $submitted_otp !== '' && hash_equals((string)$agent->otp, $submitted_otp)) {
           // One-time: the code can't be replayed after a successful login.
           $this->AgentUsers->updateAll(['otp' => null, 'otp_created' => null], ['id' => $agent->id]);
-          $agent->otp = null;
-          $agent->otp_created = null;
           $session->delete('otp_resends');
-          if ($agent && $agent->agent) {
-            $agent->agent->last_activity = date('Y-m-d H:i:s');
-            $this->AgentUsers->Agents->save($agent->agent);
+          if (TwoFactor::usesAuthenticator($agent) && !TwoFactor::isSetUp($agent)) {
+            // Mailbox proven: now link the authenticator app.
+            $session->write('TwoFactor.setup_pending', time());
+            $session->write('TwoFactor.redirect', $redirect);
+            return $this->redirect(['action'=>'twoFactorSetup']);
           }
-          $this->UsersIpaddress = $this->fetchTable('UsersIpaddress');
-          $clientIp = ClientIp::fromRequest($this->request);
-          $user_ipaddress = $this->UsersIpaddress->find()->where(['user_id'=>$agent->id,'ip_address'=>$clientIp,'type'=>'agent'])->first();
-          if (!$user_ipaddress) {
-            $user_ipaddress = $this->UsersIpaddress->newEntity(['user_id'=>$agent->id,'ip_address'=>$clientIp,'type'=>'agent']);
-            $this->UsersIpaddress->save($user_ipaddress);
-          }
-          // Trust this newly-verified IP for the agent user, keeping newest 3.
-          $this->LastOtpIps = $this->fetchTable('LastOtpIps');
-          $this->LastOtpIps->addAndPrune($agent->id, $clientIp);
-          if($agent->role == 'master2')  {
-            $agent->role = 'master';
-          }
-          $this->setAuthUser($agent->toArray());
-          $this->Logs->logCustom('login', 'agent_users', 'agent_users', $agent->id, [], ['login' => 'success']);
-          $redirect = $this->safeRedirectTarget($this->request->getQuery('redirect'));
-          if ($redirect) {
-            return $this->redirect($redirect);
-          }
-          $default_cities = Configure::read('Default.cities');
-          return $this->redirect(['controller'=>'Attractions', '?' => ['city_id' => $default_cities]]);
+          return $this->_completeLogin($agent, $redirect);
         } else {
-          $session->write('otp_attempts', ($session->read('otp_attempts') ?? 0) + 1);
+          $this->_countOtpAttempt();
           $this->Flash->error(__('Incorrect OTP. Please try again.'));
         }
       }
 
+      $this->set('method', $use_app ? TwoFactor::METHOD_AUTHENTICATOR : TwoFactor::METHOD_EMAIL);
       $this->viewBuilder()->setLayout('login');
     }
 
@@ -300,8 +303,9 @@ class AgentUsersController extends AppController
       $session = $this->request->getSession();
       $agent_id = $session->read('agent_id');
       if (!empty($agent_id)) {
-        $agent_user = $this->AgentUsers->findById($agent_id)->first();
-        if (!empty($agent_user)) {
+        $agent_user = $this->AgentUsers->find()->where(['AgentUsers.id' => $agent_id])->contain(['Agents'])->first();
+        // Authenticator users have no emailed code.
+        if (!empty($agent_user) && !(TwoFactor::usesAuthenticator($agent_user) && TwoFactor::isSetUp($agent_user))) {
           // Limit re-sends per password login (each re-send emails a fresh code).
           $resends = (int)$session->read('otp_resends');
           if ($resends >= 3) {
@@ -309,20 +313,162 @@ class AgentUsersController extends AppController
             return $this->redirect(['action'=>'otp']);
           }
           $session->write('otp_resends', $resends + 1);
-          $clientIp = ClientIp::fromRequest($this->request);
-          $otp_code = random_int(100001, 999999);
-          $agent_user->otp = $otp_code;
-          $date = new \DateTime();
-          $agent_user->otp_created = $date->format('Y-m-d H:i:s');
-          $agent_user->clientIp = $clientIp;
-          $this->loadComponent('Mailer');
-          // ($name,$template, $subject, $to, $data, $cc = null)
-          $this->Mailer->mail('OTP','new_ip_otp','Please confirm account access',$agent_user->email,['user'=>$agent_user]);
-          $this->AgentUsers->save($agent_user);
+          $this->_sendEmailOtp($agent_user, ClientIp::fromRequest($this->request));
         }
       }
 
       return $this->redirect(['action'=>'otp']);
+    }
+
+    /**
+     * Authenticator set-up: QR code and key for a new secret, saved once a code
+     * from the app matches. Reached during login (after the emailed code, when the
+     * user's method is the authenticator and none is linked yet) or from the
+     * Two-factor sign-in page ("set up a new phone").
+     *
+     * @return \Cake\Http\Response|null
+     */
+    public function twoFactorSetup() {
+      $session = $this->request->getSession();
+      $logged_in = (bool)$this->getAuthUser('id');
+      $agent = $this->_twoFactorFlowUser($logged_in, (bool)$session->read($logged_in ? 'TwoFactor.change' : 'TwoFactor.setup_pending'));
+      if ($agent === null) {
+        return $logged_in ? $this->redirect(['action'=>'twoFactor']) : $this->_restartLogin();
+      }
+      if (!$logged_in) {
+        if (TwoFactor::isSetUp($agent)) {
+          return $this->_restartLogin();
+        }
+        $this->viewBuilder()->setLayout('login');
+      }
+      $secret = (string)$session->read('TwoFactor.setup_secret');
+      if ($secret === '') {
+        $secret = TwoFactor::newSecret();
+        $session->write('TwoFactor.setup_secret', $secret);
+      }
+
+      if ($this->request->is('post')) {
+        if (!$logged_in && $this->_otpAttemptsExceeded()) {
+          $session->destroy();
+          $this->Flash->error(__('You have exceeded maximum attempts. Please log in again.'));
+          return $this->redirect(['action'=>'login']);
+        }
+        $step = TwoFactor::matchStep($secret, (string)$this->request->getData('code'));
+        if ($step > 0) {
+          $codes = TwoFactor::enable($agent, $secret, $step);
+          $session->delete('TwoFactor.setup_secret');
+          $session->write('TwoFactor.backup_codes', $codes);
+          $this->Logs->logCustom('two_factor_setup', 'agent_users', 'agent_users', $agent->id, [], ['two_factor' => 'authenticator set up']);
+          return $this->redirect(['action'=>'twoFactorBackupCodes']);
+        }
+        if (!$logged_in) {
+          $this->_countOtpAttempt();
+        }
+        $this->Flash->error(__('That code didn\'t match. Check the time on your phone and enter the newest code.'));
+      }
+
+      $this->set([
+        'qr' => TwoFactor::qrSvg($agent->email, $secret),
+        'secret' => TwoFactor::formatSecret($secret),
+        'email' => $agent->email,
+        'loggedIn' => $logged_in,
+      ]);
+    }
+
+    /**
+     * Shows new backup codes once; confirming finishes the login (or returns to
+     * the Two-factor sign-in page).
+     *
+     * @return \Cake\Http\Response|null
+     */
+    public function twoFactorBackupCodes() {
+      $session = $this->request->getSession();
+      $logged_in = (bool)$this->getAuthUser('id');
+      $codes = (array)$session->read('TwoFactor.backup_codes');
+      $agent = $this->_twoFactorFlowUser($logged_in, $codes !== [] && ($logged_in || $session->read('TwoFactor.setup_pending')));
+      if ($agent === null) {
+        return $logged_in ? $this->redirect(['action'=>'twoFactor']) : $this->_restartLogin();
+      }
+      if (!$logged_in) {
+        $this->viewBuilder()->setLayout('login');
+      }
+
+      if ($this->request->is('post')) {
+        $redirect = $session->read('TwoFactor.redirect');
+        $session->delete('TwoFactor');
+        if (!$logged_in) {
+          $this->Flash->success(__('Two-factor sign-in is set up. Next time, enter the code from your authenticator app.'));
+          return $this->_completeLogin($agent, $this->safeRedirectTarget($redirect));
+        }
+        $this->Flash->success(__('Your backup codes are saved.'));
+        return $this->redirect(['action'=>'twoFactor']);
+      }
+
+      $this->set(['codes' => $codes, 'loggedIn' => $logged_in]);
+    }
+
+    /**
+     * The signed-in user's Two-factor sign-in page: method and status, backup codes
+     * left, "new backup codes" and "set up a new phone" (both need a current app
+     * code once an authenticator is linked). The switch and the method themselves
+     * are managed in the back office.
+     *
+     * @return \Cake\Http\Response|null
+     */
+    public function twoFactor() {
+      $agent = $this->AgentUsers->get($this->getAuthUser('id'), contain: ['Agents']);
+      $uses_app = TwoFactor::usesAuthenticator($agent);
+      $is_set_up = TwoFactor::isSetUp($agent);
+
+      if ($this->request->is('post') && $uses_app) {
+        $session = $this->request->getSession();
+        $do = (string)$this->request->getData('do');
+        if ($is_set_up && !TwoFactor::verify($agent, (string)$this->request->getData('code'))) {
+          $this->Flash->error(__('Incorrect code. Enter the current code from your authenticator app.'));
+          return $this->redirect(['action'=>'twoFactor']);
+        }
+        if ($do === 'regenerate' && $is_set_up) {
+          $session->write('TwoFactor.backup_codes', TwoFactor::regenerateBackupCodes($agent));
+          $this->Logs->logCustom('two_factor_backup_codes', 'agent_users', 'agent_users', $agent->id, [], ['two_factor' => 'backup codes regenerated']);
+          return $this->redirect(['action'=>'twoFactorBackupCodes']);
+        }
+        if ($do === 'setup') {
+          $session->write('TwoFactor.change', true);
+          $session->delete('TwoFactor.setup_secret');
+          return $this->redirect(['action'=>'twoFactorSetup']);
+        }
+        return $this->redirect(['action'=>'twoFactor']);
+      }
+
+      $this->set([
+        'required' => TwoFactor::required($agent),
+        'usesApp' => $uses_app,
+        'isSetUp' => $is_set_up,
+        'setUpOn' => $agent->totp_enabled,
+        'codesLeft' => TwoFactor::backupCodesLeft($agent),
+      ]);
+    }
+
+    /**
+     * A master removes a sub-user's authenticator and backup codes (lost phone and
+     * no backup codes left). The user sets it up again at the next login, after an
+     * emailed code. Masters themselves are reset with `bin/cake two_factor reset`.
+     *
+     * @param string|null $id Agent user id
+     * @return \Cake\Http\Response|null
+     */
+    public function resetTwoFactor($id = null) {
+      $this->request->allowMethod(['post']);
+      $agentUser = $this->_getManageableAgentUser($id);
+      if ($agentUser === null) {
+        $this->Flash->error(__('You are not authorized to access that location.'));
+        return $this->redirect(['action' => 'index']);
+      }
+      TwoFactor::reset($agentUser->id);
+      $this->Logs->logCustom('two_factor_reset', 'agent_users', 'agent_users', $agentUser->id, [], ['two_factor' => 'reset', 'by' => $this->getAuthUser('id')]);
+      $this->Flash->success(__('The authenticator of {0} was reset. They will set it up again at their next login.', $agentUser->email));
+
+      return $this->redirect(['action' => 'index']);
     }
 
     public function resetPassword($email,$reset_code) {
@@ -570,6 +716,113 @@ class AgentUsersController extends AppController
         $this->Flash->error(__('The agent user password could not be reset. Please, try again or contact administrator.'));
 
         return $this->redirect(['controller'=>'AgentUsers','action' => 'index']);
+    }
+
+    /**
+     * Emails a fresh 6-digit OTP (valid 5 minutes) to the agent user.
+     *
+     * @param \App\Model\Entity\AgentUser $agent_user Agent user
+     * @param string $clientIp IP shown in the email
+     * @return void
+     */
+    private function _sendEmailOtp($agent_user, string $clientIp): void {
+      $agent_user->otp = random_int(100001, 999999);
+      $date = new \DateTime();
+      $agent_user->otp_created = $date->format('Y-m-d H:i:s');
+      $agent_user->clientIp = $clientIp;
+      $this->loadComponent('Mailer');
+      // ($name,$template, $subject, $to, $data, $cc = null)
+      $this->Mailer->mail('OTP','new_ip_otp','Please confirm account access',$agent_user->email,['user'=>$agent_user]);
+      $this->AgentUsers->save($agent_user);
+    }
+
+    /**
+     * Logs the agent user in after the second factor: clears the OTP and the pending
+     * login state, trusts the IP, stores the user and redirects.
+     *
+     * @param \App\Model\Entity\AgentUser $agent Agent user loaded with Agents
+     * @param string|null $redirect Safe local redirect target
+     * @return \Cake\Http\Response|null
+     */
+    private function _completeLogin($agent, ?string $redirect) {
+      $session = $this->request->getSession();
+      $this->AgentUsers->updateAll(['otp' => null, 'otp_created' => null], ['id' => $agent->id]);
+      $agent->otp = null;
+      $agent->otp_created = null;
+      foreach (['agent_id', 'otp_resends', 'otp_attempts', 'TwoFactor'] as $key) {
+        $session->delete($key);
+      }
+      if ($agent->agent) {
+        $agent->agent->last_activity = date('Y-m-d H:i:s');
+        $this->AgentUsers->Agents->save($agent->agent);
+      }
+      $this->UsersIpaddress = $this->fetchTable('UsersIpaddress');
+      $clientIp = ClientIp::fromRequest($this->request);
+      $user_ipaddress = $this->UsersIpaddress->find()->where(['user_id'=>$agent->id,'ip_address'=>$clientIp,'type'=>'agent'])->first();
+      if (!$user_ipaddress) {
+        $user_ipaddress = $this->UsersIpaddress->newEntity(['user_id'=>$agent->id,'ip_address'=>$clientIp,'type'=>'agent']);
+        $this->UsersIpaddress->save($user_ipaddress);
+      }
+      // Trust this newly-verified IP for the agent user, keeping newest 3.
+      $this->LastOtpIps = $this->fetchTable('LastOtpIps');
+      $this->LastOtpIps->addAndPrune($agent->id, $clientIp);
+      if($agent->role == 'master2')  {
+        $agent->role = 'master';
+      }
+      $this->setAuthUser($agent->toArray());
+      $this->Logs->logCustom('login', 'agent_users', 'agent_users', $agent->id, [], ['login' => 'success']);
+      if ($redirect) {
+        return $this->redirect($redirect);
+      }
+      $default_cities = Configure::read('Default.cities');
+      return $this->redirect(['controller'=>'Attractions', '?' => ['city_id' => $default_cities]]);
+    }
+
+    private function _otpAttemptsExceeded(): bool {
+      return intval($this->request->getSession()->read('otp_attempts') ?? 0) >= intval(Configure::read('Login.max_count_per_max_minutes') ?? 5);
+    }
+
+    private function _countOtpAttempt(): void {
+      $session = $this->request->getSession();
+      $session->write('otp_attempts', ($session->read('otp_attempts') ?? 0) + 1);
+    }
+
+    /**
+     * The user of a two-factor set-up step: the logged-in user, or (during login)
+     * the pending user from the session within 15 minutes of the emailed code.
+     *
+     * @param bool $logged_in Whether a user is logged in
+     * @param bool $allowed Whether the step's session flag is present
+     * @return \App\Model\Entity\AgentUser|null
+     */
+    private function _twoFactorFlowUser(bool $logged_in, bool $allowed) {
+      $session = $this->request->getSession();
+      if (!$allowed) {
+        return null;
+      }
+      if ($logged_in) {
+        $id = $this->getAuthUser('id');
+      } else {
+        $id = $session->read('agent_id');
+        if (time() - (int)$session->read('TwoFactor.setup_pending') > 15 * 60) {
+          return null;
+        }
+      }
+      if (!is_string($id) || $id === '') {
+        return null;
+      }
+      $agent = $this->AgentUsers->find()->where(['AgentUsers.id' => $id, 'AgentUsers.status' => 'active'])->contain(['Agents'])->first();
+      if ($agent === null || (!$logged_in && !TwoFactor::usesAuthenticator($agent))) {
+        return null;
+      }
+
+      return $agent;
+    }
+
+    private function _restartLogin() {
+      $this->request->getSession()->destroy();
+      $this->Flash->error(__('Session has expired. Please log in again.'));
+      return $this->redirect(['action'=>'login']);
     }
 
     /**

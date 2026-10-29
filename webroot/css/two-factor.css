@@ -1,0 +1,130 @@
+.tf-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(16, 24, 40, 0.06);
+    margin: 0 auto;
+    max-width: 460px;
+    padding: 1.75rem;
+    width: 100%;
+}
+
+.tf-steps {
+    counter-reset: tf-step;
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+}
+
+.tf-steps > li {
+    counter-increment: tf-step;
+    padding: 0 0 1.25rem 2.5rem;
+    position: relative;
+}
+
+.tf-steps > li::before {
+    align-items: center;
+    background: #007bff;
+    border-radius: 50%;
+    color: #fff;
+    content: counter(tf-step);
+    display: flex;
+    font-size: 0.8rem;
+    font-weight: 600;
+    height: 1.6rem;
+    justify-content: center;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 1.6rem;
+}
+
+.tf-step-title {
+    font-weight: 600;
+}
+
+.tf-qr {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    display: inline-block;
+    line-height: 0;
+    padding: 0.5rem;
+}
+
+.tf-qr svg {
+    height: 180px;
+    width: 180px;
+}
+
+.tf-secret {
+    background: #f3f4f6;
+    border-radius: 6px;
+    color: #111827;
+    display: inline-block;
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    margin: 0.35rem 0;
+    padding: 0.35rem 0.6rem;
+    word-break: break-all;
+}
+
+.tf-code {
+    font-family: SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.2em;
+    max-width: 9rem;
+}
+
+.tf-codes {
+    display: grid;
+    gap: 0.5rem 1.5rem;
+    grid-template-columns: 1fr 1fr;
+    margin: 1rem 0 1.25rem;
+    padding-left: 1.5rem;
+}
+
+.tf-codes code {
+    color: #111827;
+    font-size: 1rem;
+    letter-spacing: 0.06em;
+}
+
+.tf-status-icon {
+    align-items: center;
+    background: #f3f4f6;
+    border-radius: 12px;
+    color: #6b7280;
+    display: flex;
+    flex-shrink: 0;
+    font-size: 1.4rem;
+    height: 3rem;
+    justify-content: center;
+    width: 3rem;
+}
+
+.tf-status-icon.is-on {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+@media print {
+    .tf-no-print,
+    .sidebar,
+    header,
+    nav {
+        display: none !important;
+    }
+
+    .tf-card {
+        border: 0;
+        box-shadow: none;
+    }
+}
+
+.tf-row {
+    display: flex;
+}
+
+.tf-row > * + * {
+    margin-left: 0.5rem;
+}
