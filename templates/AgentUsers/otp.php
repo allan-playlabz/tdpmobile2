@@ -1,7 +1,7 @@
 
 <div style="margin:20px auto;" class="card">
   <div class="card-body">
-  <?= $this->Flash->render('flash', ['element'=>'Flash/default']) ?>
+  <?= $this->Flash->render('flash', ['element'=>'flash/default']) ?>
   <?= $this->Form->create() ?>
     <!-- <h2 class="form-signin-heading"><img src="/img/winner_logo_header.png"/></h2> -->
     <?php if (($method ?? null) === 'authenticator'): ?>

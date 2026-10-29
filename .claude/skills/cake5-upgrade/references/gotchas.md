@@ -92,6 +92,14 @@ Make the patch with `git diff` inside a copy of the package (paths relative to t
 ## Template folder case (Linux)
 CakePHP 5 renders error pages from **`templates/Error/`** (it's `ErrorController`'s template path) while `element/`, `layout/`, `email/` and `cell/` are lowercase. Windows and macOS don't care, so a lowercased `templates/error/` passes every local test and then the custom 400/500 pages can't be found on a Linux server. `cake5-structure/scripts/move_templates.sh` keeps `Error/` and lowercases `Cell/`; fix an existing `templates/error/` with two `git mv` steps.
 
+Renaming the folders is only half of it: **names in code must match the new case too.** In a real upgrade, `$this->Flash->render('flash', ['element' => 'Flash/default'])` (the 3.x folder name) worked on Windows and failed on the Linux server with "Element file `Flash/default.php` could not be found", because git held `templates/element/flash/default.php`. The same applies to `$this->element('X')`, Flash `'element' => 'X'` options (FlashComponent prefixes `flash/`), `setLayout('X')` (including mailer layouts in `layout/email/html|text/`) and `setTemplate('X')`. Plain `$this->Flash->render()` and `->error()` without an element option are fine.
+
+Two things hide it on Windows/macOS:
+- the filesystem matches any case, so every local request and test passes;
+- with `core.ignorecase=true`, the **disk folder can keep the old case** (`Flash/`) while git records the new one (`flash/`). The editor shows `Flash/`, so `'Flash/default'` looks right. Files added later under that folder may be committed with the disk's spelling, giving two folders on Linux.
+
+`cake5-audit/scripts/scan.php` checks both: `template-name-case` (blocker) resolves those names against the paths **git tracks**, with exact case; `path-case-drift` (warning) lists folders whose disk case differs from git, or that git tracks in two cases. To fix drift, rename the folder on disk to git's spelling: `git mv` it via a temp name, or rename it in Explorer, then confirm `git status` is clean.
+
 ## Untouched skeleton files call removed APIs
 Projects carry 3.x skeleton files nobody edited — and they break: `templates/Pages/home.php` calls `Connection::connect()` (removed — `/pages/home` returns 500), the skeleton tests extend `IntegrationTestCase` (removed), `ConsoleShell` and `AjaxView` have no 5.x equivalent. Replace untouched skeleton files with the 5.x skeleton's (`cake5-structure` step 2). The 5.4 `Application.php` needs `src/Middleware/HostHeaderMiddleware.php` from the same skeleton.
 

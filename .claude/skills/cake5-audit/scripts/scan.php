@@ -11,7 +11,9 @@ declare(strict_types=1);
  * Patterns globbed `*.php` also match `.ctp` templates (before cake5-structure renames them).
  * Scans src/, templates/, config/, tests/, plugins/ and webroot/index.php (skips
  * vendor/, tmp/, logs/, node_modules/) for the patterns in references/patterns.json
- * and prints per-pattern counts with file:line hits. Exit code: 1 if any
+ * and prints per-pattern counts with file:line hits. Also checks element/layout/template
+ * names against the git-tracked template files with exact case (template-name-case) and
+ * disk-vs-git folder case (path-case-drift). Exit code: 1 if any
  * blocker-severity pattern matched, else 0 — usable as a gate.
  *
  * Plain PHP 8, no dependencies.
@@ -120,6 +122,137 @@ foreach ($files as $path) {
                 $results[$p['id']]['count']++;
                 $results[$p['id']]['hits'][] = $rel . ':' . ($i + 1) . '  ' . trim(mb_substr($line, 0, 140));
             }
+        }
+    }
+}
+
+/*
+ * Case checks. Windows/macOS find `Flash/default` when the file is `flash/default.php`;
+ * Linux doesn't. Template names in code are compared with the paths git tracks (what a
+ * Linux checkout gets), falling back to the disk when the project isn't a git repo.
+ */
+$caseChecks = [
+    'template-name-case' => [
+        'id' => 'template-name-case',
+        'severity' => 'blocker',
+        'phase' => 'cake5-structure',
+        'fix' => 'Element/layout/template name differs in case from the file (works on Windows/macOS, "could not be found" on Linux). '
+            . "Use the file's exact case: 5.x folders are lowercase (element/flash/default.php → 'flash/default'), except templates/Error/.",
+    ],
+    'path-case-drift' => [
+        'id' => 'path-case-drift',
+        'severity' => 'warning',
+        'phase' => 'cake5-structure',
+        'fix' => 'Disk and git disagree on case (core.ignorecase hides it), or git tracks one folder in two cases (two folders on Linux). '
+            . 'Rename to the intended case with two `git mv` steps via a temp name; new files added under the wrong-case folder land in a second folder on Linux.',
+    ],
+];
+foreach ($caseChecks as $id => $p) {
+    if ($opts['phase'] === null || $p['phase'] === $opts['phase']) {
+        $results[$id] = ['pattern' => $p, 'count' => 0, 'hits' => []];
+    }
+}
+
+$tracked = [];
+$gitOut = @shell_exec('git -C ' . escapeshellarg($root) . ' ls-files -z -- templates src plugins 2>' . (DIRECTORY_SEPARATOR === '\\' ? 'NUL' : '/dev/null'));
+if (is_string($gitOut) && $gitOut !== '') {
+    $tracked = array_values(array_filter(explode("\0", $gitOut)));
+} else {
+    foreach ($files as $path) {
+        $tracked[] = substr($path, strlen($root) + 1);
+    }
+}
+$templateFiles = array_values(array_filter($tracked, fn($t) => str_starts_with($t, 'templates/') && str_ends_with($t, '.php')));
+$exact = array_flip($templateFiles);
+$byLower = [];
+foreach ($templateFiles as $t) {
+    $byLower[strtolower($t)][] = $t;
+}
+
+/** Candidate template paths for a name used in code. */
+$candidates = function (string $kind, string $name, string $rel): array {
+    $name = ltrim($name, '/');
+    return match ($kind) {
+        // FlashComponent prefixes 'flash/'; in templates the name is already relative to element/.
+        'element' => str_starts_with($rel, 'templates/') ? ["templates/element/$name.php"] : ["templates/element/flash/$name.php"],
+        'layout' => ["templates/layout/$name.php", "templates/layout/email/html/$name.php", "templates/layout/email/text/$name.php"],
+        default => [],
+    };
+};
+
+if (isset($results['template-name-case'])) {
+    $refs = [
+        'element' => ['~->element\(\s*[\'"]([^\'"$.]+)[\'"]~', '~[\'"]element[\'"]\s*=>\s*[\'"]([^\'"$.]+)[\'"]~'],
+        'layout' => ['~setLayout\(\s*[\'"]([^\'"$.]+)[\'"]~', '~->layout\s*=\s*[\'"]([^\'"$.]+)[\'"]~'],
+        'template' => ['~setTemplate\(\s*[\'"]([^\'"$.]+)[\'"]~'],
+    ];
+    foreach ($files as $path) {
+        $rel = substr($path, strlen($root) + 1);
+        foreach (file($path, FILE_IGNORE_NEW_LINES) ?: [] as $i => $line) {
+            if (empty($opts['comments']) && preg_match('~^\s*(//|#|\*|/\*)~', $line)) {
+                continue;
+            }
+            foreach ($refs as $kind => $regexes) {
+                foreach ($regexes as $re) {
+                    if (!preg_match_all($re, $line, $m)) {
+                        continue;
+                    }
+                    foreach ($m[1] as $name) {
+                        if ($kind === 'template') {
+                            // Relative to a controller/mailer folder: accept any file ending in /<name>.php.
+                            $suffix = '/' . ltrim($name, '/') . '.php';
+                            $ok = (bool)array_filter($templateFiles, fn($t) => str_ends_with($t, $suffix));
+                            $ci = array_values(array_filter($templateFiles, fn($t) => str_ends_with(strtolower($t), strtolower($suffix))));
+                        } else {
+                            $paths = $candidates($kind, $name, $rel);
+                            $ok = (bool)array_filter($paths, fn($c) => isset($exact[$c]));
+                            $ci = array_merge(...array_map(fn($c) => $byLower[strtolower($c)] ?? [], $paths ?: ['']));
+                        }
+                        // Not found in any case: probably a plugin/core template, not a case problem.
+                        if (!$ok && $ci) {
+                            $results['template-name-case']['count']++;
+                            $results['template-name-case']['hits'][] = "$rel:" . ($i + 1) . "  '$name' → file is {$ci[0]}";
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+if (isset($results['path-case-drift'])) {
+    // One folder tracked under two spellings.
+    $dirVariants = [];
+    foreach ($tracked as $t) {
+        $dir = dirname($t);
+        $dirVariants[strtolower($dir)][$dir] = true;
+    }
+    foreach ($dirVariants as $variants) {
+        if (count($variants) > 1) {
+            $results['path-case-drift']['count']++;
+            $results['path-case-drift']['hits'][] = 'git tracks: ' . implode(' + ', array_keys($variants));
+        }
+    }
+    // Disk spelling differs from git's (each differing folder reported once).
+    $listing = [];
+    $seen = [];
+    foreach ($tracked as $t) {
+        $parts = explode('/', $t);
+        $parent = $root;
+        $so = '';
+        foreach ($parts as $part) {
+            $listing[$parent] ??= is_dir($parent) ? (scandir($parent) ?: []) : [];
+            $so = $so === '' ? $part : "$so/$part";
+            if (!in_array($part, $listing[$parent], true)) {
+                $onDisk = current(array_filter($listing[$parent], fn($n) => strcasecmp($n, $part) === 0));
+                if ($onDisk !== false && !isset($seen[$so])) {
+                    $seen[$so] = true;
+                    $results['path-case-drift']['count']++;
+                    $results['path-case-drift']['hits'][] = "git: $so — disk: " . (dirname($so) === '.' ? '' : dirname($so) . '/') . $onDisk;
+                }
+                break;
+            }
+            $parent .= '/' . $part;
         }
     }
 }
