@@ -39,7 +39,7 @@ sudo find "$APP_DIR" -path "$APP_DIR/.git" -prune -o -type d -exec chmod g+s {} 
 
 # Clear CakePHP caches (models, routes, translations) so the new code is used.
 echo "Clearing cache..."
-bin/cake cache clear_all
+php bin/cake.php cache clear_all
 
 for service in $WEB_SERVICE; do
   sudo systemctl reload "$service"
