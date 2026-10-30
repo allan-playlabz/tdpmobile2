@@ -7,6 +7,7 @@ use App\Lib\Payments;
 use App\Util\Rounder;
 use Cake\I18n\Number;
 use App\Lib\ApiCaller;
+use App\Lib\QueueSender;
 use Cake\Core\Configure;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\TableRegistry;
@@ -255,14 +256,16 @@ class OrdersTable extends Table
     }
 
     private function _createPdf($template_text, $data) {
-        $CakePdf = new \CakePdf\Pdf\CakePdf();        
-        $CakePdf->margin(0, 0, 0, 0);
-        // $CakePdf->template(''.'test_voucher', 'pdf');        
-        
         $mustache = new Mustache_Engine();
         $html_text = $mustache->render($template_text, $data);
-        
-        return $CakePdf->output($html_text);
+
+        // The queue server converts the HTML (wkhtmltopdf isn't installed on the web servers).
+        $convert_pdf = QueueSender::send('/convert-html-to-pdf', 'post', ['pdf_html' => $html_text, 'page_size' => 'A4']);
+        if ($convert_pdf === null) {
+            return false;
+        }
+
+        return $convert_pdf->getStringBody();
     }
 
     private function _createInvoiceTable($order_data) {
