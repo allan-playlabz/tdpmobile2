@@ -246,7 +246,7 @@ class OrdersTable extends Table
             'payment_method' => $order_data['payment_method'] ? ucwords(Inflector::humanize($order_data['payment_method'])) : '',
             'mobile' => $order_data['mobile'] ?? '',
             'customer_email' => $order_data['email'] ?? '',
-            'order_total' => Number::currency($order_data['total']),
+            'order_total' => Number::currency($order_data['total'] ?? 0),
             'invoice_table' => $invoice_table,
             // 'order_items' => $order_items
         ];
@@ -287,11 +287,11 @@ class OrdersTable extends Table
             <td style="padding: 5px; vertical-align: top; border-bottom: 1px solid #eee;">'.$order_item['attraction_title'].'
             '.$order_item['ticket_name'].'</td>
             <td style="padding: 5px; vertical-align: top; text-align: right; border-bottom: 1px solid #eee;">
-            '.Number::precision($order_item['price'], 2).'</td>
+            '.Number::precision($order_item['price'] ?? 0, 2).'</td>
             <td style="padding: 5px; vertical-align: top; text-align: right; border-bottom: 1px solid #eee;">
             '.$order_item['quantity'].'</td>
             <td style="padding: 5px; vertical-align: top; text-align: right; border-bottom: 1px solid #eee;">
-            '.Number::precision($order_item['total'], 2).'</td>
+            '.Number::precision($order_item['total'] ?? 0, 2).'</td>
         </tr>';
         }
         $invoice_table .='
@@ -301,7 +301,7 @@ class OrdersTable extends Table
                         <td style="padding: 5px; vertical-align: top;">&nbsp;</td>
                         <td
                             style="padding: 5px; vertical-align: top; text-align: right;">
-                            Convenience Fee: ' . Number::precision($order_data['convenience_fee'], 2) . '</td>
+                            Convenience Fee: ' . Number::precision($order_data['convenience_fee'] ?? 0, 2) . '</td>
                     </tr>';
         $invoice_table .='
                     <tr class="total">
@@ -310,7 +310,7 @@ class OrdersTable extends Table
                         <td style="padding: 5px; vertical-align: top;">&nbsp;</td>
                         <td
                             style="padding: 5px; vertical-align: top; text-align: right; font-weight: bold;">
-                            Total: ' . Number::currency($order_data['total']) . '</td>
+                            Total: ' . Number::currency($order_data['total'] ?? 0) . '</td>
                     </tr>
                 </tbody>
             </table>';
