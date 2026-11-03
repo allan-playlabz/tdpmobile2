@@ -93,9 +93,8 @@ class PaymentStripeTest extends TestCase
 
     public function testCompletedCheckoutReturnsOrderRefId(): void
     {
-        // Unreachable from a CLI test (needs a signed checkout.session.completed body in php://input).
-        // Found by reading: that branch calls $this->Orders->find(), but $this->Orders is only set in
-        // getRedirectLink(), never in getOrderRefId().
-        $this->markTestSkipped('BUG: PaymentStripe::getOrderRefId() uses $this->Orders without loading it (and returns a query, not an order) for checkout.session.completed.');
+        // getOrderRefId() reads the signed checkout.session.completed body from php://input, which a CLI test can't supply.
+        // (It used $this->Orders without loading it and returned a query; fixed, it now loads Orders and takes ->first().)
+        $this->markTestSkipped('Not testable from the CLI: needs a signed Stripe webhook body in php://input.');
     }
 }
