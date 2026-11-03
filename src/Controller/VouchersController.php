@@ -67,7 +67,7 @@ class VouchersController extends AppController
                     }
                     return $this->response->withStringBody($response->getStringBody())->withDownload($filename)->withType('pdf');
                 }
-                $response = $response->withStatus(404);
+                $response = $this->response->withStatus(404);
             }
             return $response;
         } else {
@@ -311,7 +311,7 @@ class VouchersController extends AppController
                     return $this->response->withStringBody($response->getStringBody())->withDownload($filename)->withType('pdf');
                 }
             }
-            $response = $response->withStatus(404);
+            $response = $this->response->withStatus(404);
 
             return $response;
         } else {

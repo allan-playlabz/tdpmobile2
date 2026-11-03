@@ -158,7 +158,7 @@ class OrdersController extends AppController
                   }
                 } 
                 elseif ($ticket->attraction->pricing_type == PricingType::TWO_WAY_FDATETIME) {
-                  return $this->redirect(['controller' => 'Attractions', 'action' => 'checkout']);
+                  return $this->redirect(['action' => 'checkout']);
                 }
                 else {
                   $ticket = $this->TicketsHelper->getFixeddateResellerPrice($ticket,$ticket->attraction,$this->getAuthUser(),$datetime);

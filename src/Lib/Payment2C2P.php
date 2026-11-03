@@ -90,8 +90,8 @@ class Payment2C2P
             "amount" => Number::precision($total, 2),
             "currencyCode" => "SGD",
             "paymentChannel" => $payment_channels[$payment_method],
-            'frontendReturnUrl' => Router::url(['_scheme' => 'https', 'controller'=> 'Orders', 'action' => 'frontendNotificationReceiver', '2C2P', $order_ref_id], ['fullBase'=>true]),
-            'backendReturnUrl' => Router::url(['_scheme' => 'https', 'controller'=> 'Orders', 'action' => 'notificationReceiver', '2C2P'], ['fullBase'=>true])
+            'frontendReturnUrl' => Router::url(['_scheme' => 'https', 'controller'=> 'Orders', 'action' => 'frontendNotificationReceiver', '2C2P', $order_ref_id], true),
+            'backendReturnUrl' => Router::url(['_scheme' => 'https', 'controller'=> 'Orders', 'action' => 'notificationReceiver', '2C2P'], true)
         );
 
         $jwt = JWT::encode($payload, $this->_secretkey, 'HS256');

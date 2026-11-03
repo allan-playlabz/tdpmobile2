@@ -61,8 +61,8 @@ class PaymentStripe
         $stripe_session = [
             'payment_method_types' => $payment_method_types,
             'line_items' => $line_items,
-            'success_url' => Router::url(['action' => 'thankYou'], ['fullBase' => true]),
-            'cancel_url' => Router::url(['action' => 'confirmation'], ['fullBase' => true]),
+            'success_url' => Router::url(['action' => 'thankYou'], true),
+            'cancel_url' => Router::url(['action' => 'confirmation'], true),
         ];
         if ($payment_method_options != null) {
             $stripe_session['payment_method_options'] = $payment_method_options;
