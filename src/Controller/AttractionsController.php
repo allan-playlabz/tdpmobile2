@@ -11,6 +11,7 @@ use App\Controller\AppController;
 use App\Lib\PricingType;
 use Cake\Http\Client;
 use Cake\Http\Response;
+use Cake\Http\Exception\NotFoundException;
 use Exception;
 
 /**
@@ -343,6 +344,9 @@ class AttractionsController extends AppController
     public function view($id = null)
     {
         $now = DateTime::now();
+        if (!$this->_isAgentAttraction($id)) {
+          throw new NotFoundException(__('Attraction not found.'));
+        }
         $attraction = $this->Attractions->get($id,
         contain: ['Merchants', 'Categories', 'AttractionMedias'],
         conditions: ['Attractions.status'=>'published']);
@@ -594,6 +598,9 @@ class AttractionsController extends AppController
     public function viewTwoWay($id = null)
     {
         $now = DateTime::now();
+        if (!$this->_isAgentAttraction($id)) {
+          throw new NotFoundException(__('Attraction not found.'));
+        }
         $attraction = $this->Attractions->get($id, contain: ['Merchants', 'Categories', 'AttractionMedias']);
         $attraction->is_favorite = $this->Attractions->FavoriteAttractions->exists(['attraction_id'=>$id,'agent_user_id'=>$this->getAuthUser('id')]);
         if ($this->request->getSession()->check('language')) {
@@ -709,6 +716,29 @@ class AttractionsController extends AppController
 
         $this->set('attraction', $attraction);
         $this->set('cart_count',$this->ShoppingCart->getCount());
+    }
+
+    /**
+     * Whether the attraction is tagged to the logged-in user's agent, using the same
+     * rule as the attraction list in index(): a settlement rate for the agent, or a
+     * ticket in one of the agent's fixed-date settlement groups.
+     *
+     * @param mixed $attraction_id Attraction id from the URL
+     * @return bool
+     */
+    private function _isAgentAttraction($attraction_id): bool {
+      $agent_id = $this->getAuthUser('agent_id');
+      if (!is_string($attraction_id) || $attraction_id === '' || !$agent_id) {
+        return false;
+      }
+      if ($this->SettlementAgents->exists(['attraction_id' => $attraction_id, 'agent_id' => $agent_id])) {
+        return true;
+      }
+
+      return $this->fetchTable('FdatesettlementsAgents')->find()
+        ->innerJoinWith('Tickets')
+        ->where(['FdatesettlementsAgents.agent_id' => $agent_id, 'Tickets.attraction_id' => $attraction_id])
+        ->count() > 0;
     }
 
     private function _isVoucherEnough($attraction,$ticket_id,$qty,$data = null) {
