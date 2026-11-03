@@ -36,7 +36,7 @@ class VoucherMergingControllerTest extends TestCase
         }
     }
 
-    private function status(string $ref): mixed
+    private function mergeStatus(string $ref): mixed
     {
         $this->get('/voucher-merging/get-status?order_ref_id=' . $ref);
         $this->assertResponseOk();
@@ -50,7 +50,7 @@ class VoucherMergingControllerTest extends TestCase
     public function testOwnMergeIsReturned(): void
     {
         $this->loginAs(self::NORMAL_A);
-        $merge = $this->status('REFA1');
+        $merge = $this->mergeStatus('REFA1');
 
         $this->assertSame('REFA1', $merge['order_ref_id']);
         $this->assertSame('done', $merge['status']);
@@ -61,7 +61,7 @@ class VoucherMergingControllerTest extends TestCase
     {
         $this->loginAs(self::MASTER_A);
 
-        $this->assertNull($this->status('REFB1'));
+        $this->assertNull($this->mergeStatus('REFB1'));
     }
 
     public function testRequiresLogin(): void

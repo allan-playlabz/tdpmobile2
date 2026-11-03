@@ -251,6 +251,7 @@ class AppController extends Controller
           $auth_user['allowed_api_cancel'] = $agent->allowed_api_cancel;
           $auth_user['announcements_read'] = $current_agentuser->announcements_read;
           $auth_user['agent']['mobile_otp'] = $agent->mobile_otp;
+          $auth_user['agent']['hide_voucher_status'] = $agent->hide_voucher_status;
           $this->set('auth_user',$auth_user);
         }
 

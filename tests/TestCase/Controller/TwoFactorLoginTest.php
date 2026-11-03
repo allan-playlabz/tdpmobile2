@@ -7,10 +7,10 @@ use App\Lib\TwoFactor;
 use Authentication\PasswordHasher\DefaultPasswordHasher;
 use Cake\Database\Connection;
 use Cake\I18n\DateTime;
-use Cake\Mailer\TransportFactory;
 use Cake\TestSuite\EmailTrait;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
+use Cake\Utility\Hash;
 use RobThree\Auth\Providers\Qr\BaconQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
 
@@ -45,9 +45,6 @@ class TwoFactorLoginTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        TransportFactory::drop('default');
-        TransportFactory::setConfig('default', ['className' => 'Debug']);
-
         $this->db = $this->getTableLocator()->get('Agents')->getConnection();
         // Raw inserts: the ORM would run LoggableBehavior, which isn't the subject here.
         foreach ([self::AGENT_A => 'Agent A', self::AGENT_B => 'Agent B'] as $id => $name) {
@@ -236,7 +233,8 @@ class TwoFactorLoginTest extends TestCase
         $this->get('/agent-users/two-factor/setup');
         $this->assertResponseOk();
         $this->assertResponseContains('<svg');
-        $secret = $this->_requestSession->read('TwoFactor.setup_secret');
+        // Server::run() closes the session; reading it through the Session object would restart (and wipe) it in CLI.
+        $secret = Hash::get($_SESSION, 'TwoFactor.setup_secret');
         $this->assertNotEmpty($secret);
 
         $this->session(['agent_id' => self::MASTER_A, 'TwoFactor' => ['setup_pending' => time(), 'setup_secret' => $secret]]);
@@ -244,7 +242,7 @@ class TwoFactorLoginTest extends TestCase
         $this->post('/agent-users/two-factor/setup', ['code' => $this->appCode($secret)]);
         $this->assertRedirectContains('/agent-users/two-factor/backup-codes');
         $this->assertNotNull($this->row(self::MASTER_A)['totp_enabled']);
-        $codes = $this->_requestSession->read('TwoFactor.backup_codes');
+        $codes = Hash::get($_SESSION, 'TwoFactor.backup_codes');
         $this->assertCount(TwoFactor::BACKUP_CODE_COUNT, $codes);
 
         $this->session(['agent_id' => self::MASTER_A, 'TwoFactor' => ['setup_pending' => time(), 'backup_codes' => $codes]]);

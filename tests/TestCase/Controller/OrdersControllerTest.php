@@ -155,9 +155,6 @@ class OrdersControllerTest extends TestCase
         $this->loginWithCart(self::NORMAL_A, [self::TICKET => [self::VISIT_DATE . ' 10:00' => 1]]);
         $this->get('/orders/cart');
 
-        if ($this->_response->getStatusCode() === 500) {
-            $this->markTestSkipped('BUG: cart() redirects two-way tickets to Attractions::checkout, which has no route (500).');
-        }
         $this->assertRedirect('/orders/checkout');
     }
 

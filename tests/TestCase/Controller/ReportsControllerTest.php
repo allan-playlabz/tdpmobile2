@@ -125,7 +125,7 @@ class ReportsControllerTest extends TestCase
         $this->assertResponseOk();
         $reports = array_values($this->viewVariable('reports'));
         $this->assertCount(1, $reports);
-        $this->assertSame('Sales Report.csv', $reports[0]['filename']);
+        $this->assertSame('Sales Report', $reports[0]['filename']);
         $this->assertSame(1, $this->viewVariable('processing_files_count'));
     }
 

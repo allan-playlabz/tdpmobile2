@@ -54,7 +54,7 @@ class OrdersController extends AppController
     $viewerBlockedActions = ['addToCart', 'subtractQuantity', 'removeFromCart', 'cart', 'checkout', 'removeTicket', 'index', 'myTickets', 'cancelVoucher'];
     if ($this->getAuthUser('role') == 'viewer' && in_array($this->request->getParam('action'), $viewerBlockedActions)) {
       $this->Flash->error(__('You are not authorized to access that location.'));
-      return $this->redirect('/');
+      $event->setResult($this->redirect('/'));
     }
   }
 

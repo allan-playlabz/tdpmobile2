@@ -20,6 +20,9 @@ class PaymentStripe
 
     private $_secretkey;
 
+    /** @var \App\Model\Table\OrdersTable|null */
+    private $Orders = null;
+
     public function __construct()
     {
         $this->_secretkey = Configure::read('Payment.Stripe.secret_key');
@@ -119,8 +122,9 @@ class PaymentStripe
         switch ($event->type) {
             case 'checkout.session.completed':
                 $session = $event->data->object; // contains a StripePaymentIntent
-                $order = $this->Orders->find()->where(['pi_id'=>$session->id])
-                ->contain(['OrderItems'=>['Tickets'=>['Attractions']]]);
+                $order = TableRegistry::getTableLocator()->get('Orders')->find()->where(['pi_id'=>$session->id])
+                ->contain(['OrderItems'=>['Tickets'=>['Attractions']]])
+                ->first();
                 if ($order) {
                     return $order->order_ref_id;
                 }

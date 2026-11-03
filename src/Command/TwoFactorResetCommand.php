@@ -61,7 +61,7 @@ class TwoFactorResetCommand extends Command
         // Not LogsTable::logCustom(): it reads request headers, which don't exist on the CLI.
         $Logs = $this->fetchTable('Logs');
         $log = $Logs->newEmptyEntity();
-        $log->set([
+        $log->patch([
             'user_table' => 'agent_users',
             'type' => 'two_factor_reset',
             'table_name' => 'agent_users',

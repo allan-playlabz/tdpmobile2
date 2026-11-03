@@ -24,6 +24,9 @@ class Payment2C2P
 
     private $_secretkey;
 
+    /** @var \App\Model\Table\OrdersTable|null */
+    private $Orders = null;
+
     public function __construct()
     {
         $this->_secretkey = Configure::read('Payment.2C2P.secret_key');
@@ -90,8 +93,8 @@ class Payment2C2P
             "amount" => Number::precision($total, 2),
             "currencyCode" => "SGD",
             "paymentChannel" => $payment_channels[$payment_method],
-            'frontendReturnUrl' => Router::url(['_scheme' => 'https', 'controller'=> 'Orders', 'action' => 'frontendNotificationReceiver', '2C2P', $order_ref_id], true),
-            'backendReturnUrl' => Router::url(['_scheme' => 'https', 'controller'=> 'Orders', 'action' => 'notificationReceiver', '2C2P'], true)
+            'frontendReturnUrl' => $this->_httpsUrl(['controller'=> 'Orders', 'action' => 'frontendNotificationReceiver', '2C2P', $order_ref_id]),
+            'backendReturnUrl' => $this->_httpsUrl(['controller'=> 'Orders', 'action' => 'notificationReceiver', '2C2P'])
         );
 
         $jwt = JWT::encode($payload, $this->_secretkey, 'HS256');
@@ -307,5 +310,14 @@ class Payment2C2P
         return (array)$decodedPayload;
     }
 
-    
+    /**
+     * Absolute URL for a route, forced to https (2C2P only accepts https return URLs).
+     *
+     * @param array $route Route array
+     * @return string
+     */
+    private function _httpsUrl(array $route): string
+    {
+        return (string)preg_replace('#^http://#i', 'https://', Router::url($route, true));
+    }
 }
