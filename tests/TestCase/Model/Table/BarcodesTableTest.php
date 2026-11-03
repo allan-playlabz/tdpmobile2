@@ -1,82 +1,70 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Test\TestCase\Model\Table;
 
 use App\Model\Table\BarcodesTable;
-use Cake\ORM\TableRegistry;
+use App\Test\TestCase\Support\AppDataTrait;
 use Cake\TestSuite\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
- * App\Model\Table\BarcodesTable Test Case
+ * The `code` field has a validateUnique rule (queries the table), so every case needs the database.
  */
 class BarcodesTableTest extends TestCase
 {
-    /**
-     * Test subject
-     *
-     * @var \App\Model\Table\BarcodesTable
-     */
-    public $Barcodes;
+    use AppDataTrait;
+    use ValidationTestTrait;
 
-    /**
-     * Fixtures
-     *
-     * @var array
-     */
-    protected array $fixtures = [
-        'app.Barcodes',
-    ];
+    protected array $fixtures = ['app.Barcodes', 'app.Agents'];
 
-    /**
-     * setUp method
-     *
-     * @return void
-     */
-    public function setUp(): void
+    private BarcodesTable $Barcodes;
+
+    protected function setUp(): void
     {
         parent::setUp();
-        $config = TableRegistry::getTableLocator()->exists('Barcodes') ? [] : ['className' => BarcodesTable::class];
-        $this->Barcodes = TableRegistry::getTableLocator()->get('Barcodes', $config);
+        $this->Barcodes = $this->getTableLocator()->get('Barcodes');
+        $this->insertRow('barcodes', [
+            'id' => '00000000-0000-4000-8000-000000000b01', 'code' => 'TAKEN-001', 'ticket_sku_id' => 'SKU-1',
+            'validity_start_date' => '2026-01-01', 'validity_end_date' => '2027-01-01', 'status' => 'new',
+        ]);
     }
 
-    /**
-     * tearDown method
-     *
-     * @return void
-     */
-    public function tearDown(): void
+    protected function validData(): array
     {
-        unset($this->Barcodes);
-
-        parent::tearDown();
+        return ['code' => 'NEW-001', 'validity_start_date' => '2026-01-01', 'validity_end_date' => '2027-01-01', 'status' => 'new'];
     }
 
-    /**
-     * Test initialize method
-     *
-     * @return void
-     */
-    public function testInitialize()
+    public static function validationProvider(): array
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        return [
+            'valid' => [[], []],
+            'valid optional fields' => [['package_code' => 'PKG', 'sold' => '1', 'redeemed_datetime' => '2026-02-01 10:00:00', 'custom_data' => '{}'], []],
+            'missing code' => [['code' => self::UNSET], ['code' => ['_required']]],
+            'empty code' => [['code' => ''], ['code' => ['_empty']]],
+            'long code' => [['code' => str_repeat('c', 256)], ['code' => ['maxLength']]],
+            'duplicate code' => [['code' => 'TAKEN-001'], ['code' => ['unique']]],
+            'missing validity_start_date' => [['validity_start_date' => self::UNSET], ['validity_start_date' => ['_required']]],
+            'invalid validity_end_date' => [['validity_end_date' => '2027-02-30'], ['validity_end_date' => ['date']]],
+            'empty status' => [['status' => ''], ['status' => ['_empty']]],
+            'long package_code' => [['package_code' => str_repeat('p', 101)], ['package_code' => ['maxLength']]],
+            'long custom_data' => [['custom_data' => str_repeat('d', 501)], ['custom_data' => ['maxLength']]],
+            'invalid redeemed_datetime' => [['redeemed_datetime' => 'later'], ['redeemed_datetime' => ['dateTime']]],
+        ];
     }
 
-    /**
-     * Test validationDefault method
-     *
-     * @return void
-     */
-    public function testValidationDefault()
+    #[DataProvider('validationProvider')]
+    public function testValidation(array $changes, array $expected): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertValidation($this->Barcodes, $changes, $expected);
     }
 
-    /**
-     * Test buildRules method
-     *
-     * @return void
-     */
-    public function testBuildRules()
+    public function testRulesUniqueCode(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertTrue($this->Barcodes->checkRules($this->Barcodes->newEntity($this->validData())));
+
+        $duplicate = $this->Barcodes->newEntity(['code' => 'TAKEN-001'] + $this->validData(), ['validate' => false]);
+        $this->assertFalse($this->Barcodes->checkRules($duplicate));
+        $this->assertArrayHasKey('_isUnique', $duplicate->getError('code'));
     }
 }

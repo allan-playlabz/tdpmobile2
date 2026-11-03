@@ -1,82 +1,87 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Test\TestCase\Model\Table;
 
+use App\Model\Entity\PaymentResponse;
 use App\Model\Table\PaymentResponsesTable;
-use Cake\ORM\TableRegistry;
+use App\Test\TestCase\Support\AppDataTrait;
+use Cake\Log\Engine\ArrayLog;
+use Cake\Log\Log;
 use Cake\TestSuite\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
-/**
- * App\Model\Table\PaymentResponsesTable Test Case
- */
 class PaymentResponsesTableTest extends TestCase
 {
-    /**
-     * Test subject
-     *
-     * @var \App\Model\Table\PaymentResponsesTable
-     */
-    public $PaymentResponses;
+    use AppDataTrait;
+    use ValidationTestTrait;
 
-    /**
-     * Fixtures
-     *
-     * @var array
-     */
-    protected array $fixtures = [
-        'app.PaymentResponses',
-    ];
+    protected array $fixtures = ['app.PaymentResponses', 'app.Agents'];
 
-    /**
-     * setUp method
-     *
-     * @return void
-     */
-    public function setUp(): void
+    private PaymentResponsesTable $PaymentResponses;
+
+    protected function setUp(): void
     {
         parent::setUp();
-        $config = TableRegistry::getTableLocator()->exists('PaymentResponses') ? [] : ['className' => PaymentResponsesTable::class];
-        $this->PaymentResponses = TableRegistry::getTableLocator()->get('PaymentResponses', $config);
+        $this->PaymentResponses = $this->getTableLocator()->get('PaymentResponses');
+        $this->errorLog()->clear();
     }
 
-    /**
-     * tearDown method
-     *
-     * @return void
-     */
-    public function tearDown(): void
+    private function errorLog(): ArrayLog
     {
-        unset($this->PaymentResponses);
+        /** @var \Cake\Log\Engine\ArrayLog $engine */
+        $engine = Log::engine('error');
 
-        parent::tearDown();
+        return $engine;
     }
 
-    /**
-     * Test initialize method
-     *
-     * @return void
-     */
-    public function testInitialize()
+    protected function validData(): array
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        return ['provider' => '2C2P', 'data' => '{"a":1}'];
     }
 
-    /**
-     * Test validationDefault method
-     *
-     * @return void
-     */
-    public function testValidationDefault()
+    public static function validationProvider(): array
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        return [
+            'valid' => [[], []],
+            'missing provider' => [['provider' => self::UNSET], ['provider' => ['_required']]],
+            'long provider' => [['provider' => str_repeat('p', 46)], ['provider' => ['maxLength']]],
+            'missing data' => [['data' => self::UNSET], ['data' => ['_required']]],
+            'empty data' => [['data' => ''], ['data' => ['_empty']]],
+        ];
     }
 
-    /**
-     * Test buildRules method
-     *
-     * @return void
-     */
-    public function testBuildRules()
+    #[DataProvider('validationProvider')]
+    public function testValidation(array $changes, array $expected): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertValidation($this->PaymentResponses, $changes, $expected);
+    }
+
+    public function testCreateStoresJsonEncodedData(): void
+    {
+        $response = $this->PaymentResponses->create('Stripe', ['id' => 'evt_1', 'amount' => 1050]);
+
+        $this->assertInstanceOf(PaymentResponse::class, $response);
+        $this->assertNotEmpty($response->id);
+        $row = $this->fetchRow('SELECT provider, data, order_ref_id FROM payment_responses WHERE id = ?', [$response->id]);
+        $this->assertSame(['provider' => 'Stripe', 'data' => '{"id":"evt_1","amount":1050}', 'order_ref_id' => null], $row);
+    }
+
+    public function testCreateInvalidLogsErrorsAndReturnsFalse(): void
+    {
+        $this->assertFalse($this->PaymentResponses->create('', ['id' => 'evt_1']));
+
+        $this->assertSame(0, $this->countRows('payment_responses'));
+        $logs = implode("\n", $this->errorLog()->read());
+        $this->assertStringContainsString('provider', $logs);
+    }
+
+    public function testSetOrderRefId(): void
+    {
+        $response = $this->PaymentResponses->create('Paypal', ['id' => 'PAY-1']);
+
+        $this->assertTrue($this->PaymentResponses->setOrderRefId($response, 'REF0000000000001'));
+
+        $this->assertSame('REF0000000000001', $this->fetchRow('SELECT order_ref_id FROM payment_responses WHERE id = ?', [$response->id])['order_ref_id']);
     }
 }

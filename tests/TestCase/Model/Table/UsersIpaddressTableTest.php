@@ -1,82 +1,76 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Test\TestCase\Model\Table;
 
 use App\Model\Table\UsersIpaddressTable;
-use Cake\ORM\TableRegistry;
+use App\Test\TestCase\Support\AppDataTrait;
+use Cake\I18n\DateTime;
 use Cake\TestSuite\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
-/**
- * App\Model\Table\UsersIpaddressTable Test Case
- */
 class UsersIpaddressTableTest extends TestCase
 {
-    /**
-     * Test subject
-     *
-     * @var \App\Model\Table\UsersIpaddressTable
-     */
-    public $UsersIpaddress;
+    use AppDataTrait;
+    use ValidationTestTrait;
 
-    /**
-     * Fixtures
-     *
-     * @var array
-     */
-    protected array $fixtures = [
-        'app.UsersIpaddress',
-    ];
+    protected array $fixtures = self::USER_FIXTURES;
 
-    /**
-     * setUp method
-     *
-     * @return void
-     */
-    public function setUp(): void
+    private UsersIpaddressTable $UsersIpaddress;
+
+    protected function setUp(): void
     {
         parent::setUp();
-        $config = TableRegistry::getTableLocator()->exists('UsersIpaddress') ? [] : ['className' => UsersIpaddressTable::class];
-        $this->UsersIpaddress = TableRegistry::getTableLocator()->get('UsersIpaddress', $config);
+        $this->UsersIpaddress = $this->getTableLocator()->get('UsersIpaddress');
     }
 
-    /**
-     * tearDown method
-     *
-     * @return void
-     */
-    public function tearDown(): void
+    protected function validData(): array
     {
-        unset($this->UsersIpaddress);
-
-        parent::tearDown();
+        return ['ip_address' => '10.0.0.1', 'type' => 'agent'];
     }
 
-    /**
-     * Test initialize method
-     *
-     * @return void
-     */
-    public function testInitialize()
+    public static function validationProvider(): array
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        return [
+            'valid' => [[], []],
+            'missing ip_address' => [['ip_address' => self::UNSET], ['ip_address' => ['_required']]],
+            'long ip_address' => [['ip_address' => str_repeat('1', 65)], ['ip_address' => ['maxLength']]],
+            'missing type' => [['type' => self::UNSET], ['type' => ['_required']]],
+            'long type' => [['type' => str_repeat('t', 46)], ['type' => ['maxLength']]],
+        ];
     }
 
-    /**
-     * Test validationDefault method
-     *
-     * @return void
-     */
-    public function testValidationDefault()
+    #[DataProvider('validationProvider')]
+    public function testValidation(array $changes, array $expected): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertValidation($this->UsersIpaddress, $changes, $expected);
     }
 
-    /**
-     * Test buildRules method
-     *
-     * @return void
-     */
-    public function testBuildRules()
+    public function testAddOrUpdateCreatesThenTouchesTheSameRow(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $data = ['ip_address' => '10.0.0.1', 'user_id' => self::MASTER_A, 'type' => 'agent', 'ignored' => 'x'];
+
+        $created = $this->UsersIpaddress->addOrUpdate($data);
+
+        $this->assertFalse($created->isNew());
+        $this->assertSame(1, $this->countRows('users_ipaddress'));
+
+        $this->db()->execute('UPDATE users_ipaddress SET modified = ?', [(new DateTime('-10 days'))->format('Y-m-d H:i:s')]);
+        $updated = $this->UsersIpaddress->addOrUpdate($data);
+
+        $this->assertSame($created->id, $updated->id);
+        $this->assertSame(1, $this->countRows('users_ipaddress'));
+        $modified = $this->fetchRow('SELECT modified FROM users_ipaddress')['modified'];
+        $this->assertGreaterThan((new DateTime('-1 day'))->format('Y-m-d H:i:s'), $modified);
+    }
+
+    public function testAddOrUpdateKeepsSeparateRowsPerIpUserAndType(): void
+    {
+        $this->UsersIpaddress->addOrUpdate(['ip_address' => '10.0.0.1', 'user_id' => self::MASTER_A, 'type' => 'agent']);
+        $this->UsersIpaddress->addOrUpdate(['ip_address' => '10.0.0.2', 'user_id' => self::MASTER_A, 'type' => 'agent']);
+        $this->UsersIpaddress->addOrUpdate(['ip_address' => '10.0.0.1', 'user_id' => self::NORMAL_A, 'type' => 'agent']);
+        $this->UsersIpaddress->addOrUpdate(['ip_address' => '10.0.0.1', 'user_id' => self::MASTER_A, 'type' => 'admin']);
+
+        $this->assertSame(4, $this->countRows('users_ipaddress'));
     }
 }
