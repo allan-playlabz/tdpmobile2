@@ -20,6 +20,9 @@ class PaymentStripe
 
     private $_secretkey;
 
+    /** @var \App\Model\Table\OrdersTable|null */
+    private $Orders = null;
+
     public function __construct()
     {
         $this->_secretkey = Configure::read('Payment.Stripe.secret_key');
@@ -61,8 +64,8 @@ class PaymentStripe
         $stripe_session = [
             'payment_method_types' => $payment_method_types,
             'line_items' => $line_items,
-            'success_url' => Router::url(['action' => 'thankYou'], ['fullBase' => true]),
-            'cancel_url' => Router::url(['action' => 'confirmation'], ['fullBase' => true]),
+            'success_url' => Router::url(['action' => 'thankYou'], true),
+            'cancel_url' => Router::url(['action' => 'confirmation'], true),
         ];
         if ($payment_method_options != null) {
             $stripe_session['payment_method_options'] = $payment_method_options;
@@ -119,8 +122,9 @@ class PaymentStripe
         switch ($event->type) {
             case 'checkout.session.completed':
                 $session = $event->data->object; // contains a StripePaymentIntent
-                $order = $this->Orders->find()->where(['pi_id'=>$session->id])
-                ->contain(['OrderItems'=>['Tickets'=>['Attractions']]]);
+                $order = TableRegistry::getTableLocator()->get('Orders')->find()->where(['pi_id'=>$session->id])
+                ->contain(['OrderItems'=>['Tickets'=>['Attractions']]])
+                ->first();
                 if ($order) {
                     return $order->order_ref_id;
                 }

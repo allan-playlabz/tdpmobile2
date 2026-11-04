@@ -18,7 +18,7 @@
         "firebase/php-jwt": "^7.0",
         "friendsofcake/cakepdf": "^5.0",
         "mobiledetect/mobiledetectlib": "^4.8.03",
-        "mustache/mustache": "^2.14",
+        "mustache/mustache": "^3.2",
         "picqer/php-barcode-generator": "^0.3.0",
         "robthree/twofactorauth": "^3",
         "stripe/stripe-php": "^7.25"

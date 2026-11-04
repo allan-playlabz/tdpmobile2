@@ -1,84 +1,98 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Test\TestCase\Model\Table;
 
+use App\Model\Entity\FavoriteAttraction;
 use App\Model\Table\FavoriteAttractionsTable;
-use Cake\ORM\TableRegistry;
+use App\Test\TestCase\Support\AppDataTrait;
 use Cake\TestSuite\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
-/**
- * App\Model\Table\FavoriteAttractionsTable Test Case
- */
 class FavoriteAttractionsTableTest extends TestCase
 {
-    /**
-     * Test subject
-     *
-     * @var \App\Model\Table\FavoriteAttractionsTable
-     */
-    public $FavoriteAttractions;
+    use AppDataTrait;
+    use ValidationTestTrait;
 
-    /**
-     * Fixtures
-     *
-     * @var array
-     */
-    protected array $fixtures = [
-        'app.FavoriteAttractions',
-        'app.Attractions',
-        'app.AgentUsers',
-    ];
+    private const ATTRACTION = '00000000-0000-4000-8000-000000001201';
+    private const MISSING = '00000000-0000-4000-8000-0000000000ff';
 
-    /**
-     * setUp method
-     *
-     * @return void
-     */
-    public function setUp(): void
+    protected array $fixtures = [...self::USER_FIXTURES, ...self::CATALOGUE_FIXTURES];
+
+    private FavoriteAttractionsTable $FavoriteAttractions;
+
+    protected function setUp(): void
     {
         parent::setUp();
-        $config = TableRegistry::getTableLocator()->exists('FavoriteAttractions') ? [] : ['className' => FavoriteAttractionsTable::class];
-        $this->FavoriteAttractions = TableRegistry::getTableLocator()->get('FavoriteAttractions', $config);
+        $this->FavoriteAttractions = $this->getTableLocator()->get('FavoriteAttractions');
     }
 
-    /**
-     * tearDown method
-     *
-     * @return void
-     */
-    public function tearDown(): void
+    protected function validData(): array
     {
-        unset($this->FavoriteAttractions);
-
-        parent::tearDown();
+        return ['attraction_id' => self::ATTRACTION];
     }
 
-    /**
-     * Test initialize method
-     *
-     * @return void
-     */
-    public function testInitialize()
+    public static function validationProvider(): array
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        return [
+            'valid' => [[], []],
+            'empty attraction_id' => [['attraction_id' => ''], ['attraction_id' => ['_empty']]],
+            'long attraction_id' => [['attraction_id' => str_repeat('a', 37)], ['attraction_id' => ['maxLength']]],
+            'non-integer id' => [['id' => 'x'], ['id' => ['integer']]],
+        ];
     }
 
-    /**
-     * Test validationDefault method
-     *
-     * @return void
-     */
-    public function testValidationDefault()
+    #[DataProvider('validationProvider')]
+    public function testValidation(array $changes, array $expected): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertValidation($this->FavoriteAttractions, $changes, $expected);
     }
 
-    /**
-     * Test buildRules method
-     *
-     * @return void
-     */
-    public function testBuildRules()
+    public function testRulesAttractionAndUserMustExist(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->createAgentsAndUsers();
+        $this->createAttraction(self::ATTRACTION);
+
+        $favorite = $this->FavoriteAttractions->newEntity(['attraction_id' => self::ATTRACTION, 'agent_user_id' => self::MASTER_A]);
+        $this->assertTrue($this->FavoriteAttractions->checkRules($favorite));
+
+        $favorite = $this->FavoriteAttractions->newEntity(['attraction_id' => self::MISSING, 'agent_user_id' => self::MASTER_A]);
+        $this->assertFalse($this->FavoriteAttractions->checkRules($favorite));
+        $this->assertArrayHasKey('_existsIn', $favorite->getError('attraction_id'));
+
+        $favorite = $this->FavoriteAttractions->newEntity(['attraction_id' => self::ATTRACTION, 'agent_user_id' => self::MISSING]);
+        $this->assertFalse($this->FavoriteAttractions->checkRules($favorite));
+        $this->assertArrayHasKey('_existsIn', $favorite->getError('agent_user_id'));
+    }
+
+    public function testToggleAddsThenRemoves(): void
+    {
+        $this->createAgentsAndUsers();
+        $this->createAttraction(self::ATTRACTION);
+
+        $added = $this->FavoriteAttractions->toggle(self::ATTRACTION, self::MASTER_A);
+
+        $this->assertInstanceOf(FavoriteAttraction::class, $added);
+        $this->assertNotNull($added->id);
+        $this->assertSame(1, $this->countRows('favorite_attractions'));
+
+        // Another user's favourite is independent.
+        $this->assertNotNull($this->FavoriteAttractions->toggle(self::ATTRACTION, self::NORMAL_A)?->id);
+        $this->assertSame(2, $this->countRows('favorite_attractions'));
+
+        $removed = $this->FavoriteAttractions->toggle(self::ATTRACTION, self::MASTER_A);
+
+        $this->assertInstanceOf(FavoriteAttraction::class, $removed);
+        $this->assertNull($removed->id);
+        $this->assertSame(0, $this->countRows('favorite_attractions', 'agent_user_id = ' . self::uuidSql(), [self::MASTER_A]));
+        $this->assertSame(1, $this->countRows('favorite_attractions'));
+    }
+
+    public function testToggleUnknownAttractionReturnsNull(): void
+    {
+        $this->createAgentsAndUsers();
+
+        $this->assertNull($this->FavoriteAttractions->toggle(self::MISSING, self::MASTER_A));
+        $this->assertSame(0, $this->countRows('favorite_attractions'));
     }
 }

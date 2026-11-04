@@ -1,82 +1,46 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Test\TestCase\Model\Table;
 
 use App\Model\Table\PasswordResetsTable;
-use Cake\ORM\TableRegistry;
 use Cake\TestSuite\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
-/**
- * App\Model\Table\PasswordResetsTable Test Case
- */
 class PasswordResetsTableTest extends TestCase
 {
-    /**
-     * Test subject
-     *
-     * @var \App\Model\Table\PasswordResetsTable
-     */
-    public $PasswordResets;
+    use ValidationTestTrait;
 
-    /**
-     * Fixtures
-     *
-     * @var array
-     */
-    protected array $fixtures = [
-        'app.PasswordResets',
-    ];
+    private PasswordResetsTable $PasswordResets;
 
-    /**
-     * setUp method
-     *
-     * @return void
-     */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
-        $config = TableRegistry::getTableLocator()->exists('PasswordResets') ? [] : ['className' => PasswordResetsTable::class];
-        $this->PasswordResets = TableRegistry::getTableLocator()->get('PasswordResets', $config);
+        $this->PasswordResets = $this->getTableLocator()->get('PasswordResets');
     }
 
-    /**
-     * tearDown method
-     *
-     * @return void
-     */
-    public function tearDown(): void
+    protected function validData(): array
     {
-        unset($this->PasswordResets);
-
-        parent::tearDown();
+        return ['email' => 'jane@example.com', 'reset_code' => str_repeat('c', 64), 'type' => 'agent'];
     }
 
-    /**
-     * Test initialize method
-     *
-     * @return void
-     */
-    public function testInitialize()
+    public static function validationProvider(): array
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        return [
+            'valid' => [[], []],
+            'missing email' => [['email' => self::UNSET], ['email' => ['_required']]],
+            'invalid email' => [['email' => 'nope'], ['email' => ['email']]],
+            'missing reset_code' => [['reset_code' => self::UNSET], ['reset_code' => ['_required']]],
+            'empty reset_code' => [['reset_code' => ''], ['reset_code' => ['_empty']]],
+            'long reset_code' => [['reset_code' => str_repeat('c', 256)], ['reset_code' => ['maxLength']]],
+            'missing type' => [['type' => self::UNSET], ['type' => ['_required']]],
+            'non-integer id' => [['id' => 'abc'], ['id' => ['integer']]],
+        ];
     }
 
-    /**
-     * Test validationDefault method
-     *
-     * @return void
-     */
-    public function testValidationDefault()
+    #[DataProvider('validationProvider')]
+    public function testValidation(array $changes, array $expected): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
-    }
-
-    /**
-     * Test buildRules method
-     *
-     * @return void
-     */
-    public function testBuildRules()
-    {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertValidation($this->PasswordResets, $changes, $expected);
     }
 }

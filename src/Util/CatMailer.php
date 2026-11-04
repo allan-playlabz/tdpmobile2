@@ -19,8 +19,14 @@ class CatMailer
 
     private $from_email;
 
-    public function __construct(string $from_email)
+    /**
+     * @param array|string $from_email Address, or `[address => name]` as in `Default.from_email`.
+     */
+    public function __construct(array|string $from_email)
     {
+        if (is_array($from_email)) {
+            $from_email = (string)array_key_first($from_email);
+        }
         $trimmed_email = trim($from_email);
         if (!filter_var($trimmed_email, FILTER_VALIDATE_EMAIL)) {
             throw new Exception('Invalid from email!');

@@ -1,84 +1,76 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Test\TestCase\Model\Table;
 
 use App\Model\Table\AgentUsersTable;
-use Cake\ORM\TableRegistry;
+use App\Test\TestCase\Support\AppDataTrait;
 use Cake\TestSuite\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
-/**
- * App\Model\Table\AgentUsersTable Test Case
- */
 class AgentUsersTableTest extends TestCase
 {
-    /**
-     * Test subject
-     *
-     * @var \App\Model\Table\AgentUsersTable
-     */
-    public $AgentUsers;
+    use AppDataTrait;
+    use ValidationTestTrait;
 
-    /**
-     * Fixtures
-     *
-     * @var array
-     */
-    protected array $fixtures = [
-        'app.AgentUsers',
-        'app.Agents',
-        'app.Orders',
-    ];
+    protected array $fixtures = self::USER_FIXTURES;
 
-    /**
-     * setUp method
-     *
-     * @return void
-     */
-    public function setUp(): void
+    private AgentUsersTable $AgentUsers;
+
+    protected function setUp(): void
     {
         parent::setUp();
-        $config = TableRegistry::getTableLocator()->exists('AgentUsers') ? [] : ['className' => AgentUsersTable::class];
-        $this->AgentUsers = TableRegistry::getTableLocator()->get('AgentUsers', $config);
+        $this->AgentUsers = $this->getTableLocator()->get('AgentUsers');
     }
 
-    /**
-     * tearDown method
-     *
-     * @return void
-     */
-    public function tearDown(): void
+    protected function validData(): array
     {
-        unset($this->AgentUsers);
-
-        parent::tearDown();
+        return ['role' => 'normal', 'name' => 'Jane', 'email' => 'jane@example.com', 'password' => 'Secret#1', 'status' => 'active'];
     }
 
-    /**
-     * Test initialize method
-     *
-     * @return void
-     */
-    public function testInitialize()
+    public static function validationProvider(): array
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        return [
+            'valid' => [[], []],
+            'missing name' => [['name' => self::UNSET], ['name' => ['_required']]],
+            'empty name' => [['name' => ''], ['name' => ['_empty']]],
+            'long name' => [['name' => str_repeat('a', 101)], ['name' => ['maxLength']]],
+            'missing email' => [['email' => self::UNSET], ['email' => ['_required']]],
+            'invalid email' => [['email' => 'not-an-email'], ['email' => ['email']]],
+            'missing password' => [['password' => self::UNSET], ['password' => ['_required']]],
+            'long password' => [['password' => str_repeat('a', 65)], ['password' => ['maxLength']]],
+            'empty role' => [['role' => ''], ['role' => ['_empty']]],
+            'empty status' => [['status' => ''], ['status' => ['_empty']]],
+        ];
     }
 
-    /**
-     * Test validationDefault method
-     *
-     * @return void
-     */
-    public function testValidationDefault()
+    #[DataProvider('validationProvider')]
+    public function testValidation(array $changes, array $expected): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertValidation($this->AgentUsers, $changes, $expected);
     }
 
-    /**
-     * Test buildRules method
-     *
-     * @return void
-     */
-    public function testBuildRules()
+    public function testUpdateDoesNotRequireFields(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertSame([], $this->validationErrors($this->AgentUsers, ['name' => 'New name'], false));
+    }
+
+    public function testRulesUniqueEmailAndExistingAgent(): void
+    {
+        $this->createAgentsAndUsers();
+
+        $user = $this->AgentUsers->newEntity($this->validData());
+        $user->agent_id = self::AGENT_A;
+        $this->assertTrue($this->AgentUsers->checkRules($user));
+
+        $duplicate = $this->AgentUsers->newEntity(['email' => 'master.a@example.com'] + $this->validData());
+        $duplicate->agent_id = self::AGENT_A;
+        $this->assertFalse($this->AgentUsers->checkRules($duplicate));
+        $this->assertArrayHasKey('_isUnique', $duplicate->getError('email'));
+
+        $orphan = $this->AgentUsers->newEntity($this->validData());
+        $orphan->agent_id = '00000000-0000-4000-8000-0000000000ff';
+        $this->assertFalse($this->AgentUsers->checkRules($orphan));
+        $this->assertArrayHasKey('_existsIn', $orphan->getError('agent_id'));
     }
 }

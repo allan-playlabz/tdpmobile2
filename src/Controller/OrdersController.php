@@ -54,7 +54,7 @@ class OrdersController extends AppController
     $viewerBlockedActions = ['addToCart', 'subtractQuantity', 'removeFromCart', 'cart', 'checkout', 'removeTicket', 'index', 'myTickets', 'cancelVoucher'];
     if ($this->getAuthUser('role') == 'viewer' && in_array($this->request->getParam('action'), $viewerBlockedActions)) {
       $this->Flash->error(__('You are not authorized to access that location.'));
-      return $this->redirect('/');
+      $event->setResult($this->redirect('/'));
     }
   }
 
@@ -158,7 +158,7 @@ class OrdersController extends AppController
                   }
                 } 
                 elseif ($ticket->attraction->pricing_type == PricingType::TWO_WAY_FDATETIME) {
-                  return $this->redirect(['controller' => 'Attractions', 'action' => 'checkout']);
+                  return $this->redirect(['action' => 'checkout']);
                 }
                 else {
                   $ticket = $this->TicketsHelper->getFixeddateResellerPrice($ticket,$ticket->attraction,$this->getAuthUser(),$datetime);
@@ -342,6 +342,13 @@ class OrdersController extends AppController
 
       $tickets_with_question_group = $this->_getTicketsWithQuestionGroup($tickets);
 
+      // Back from the confirmation: refill the form with what was submitted for this same cart.
+      $cart_hash = md5(json_encode($ticket_list));
+      $saved_checkout = $this->request->getSession()->read('Checkout');
+      if ($this->request->is('get') && !empty($saved_checkout['data']) && ($saved_checkout['cart'] ?? null) === $cart_hash) {
+        $this->request = $this->request->withParsedBody($saved_checkout['data']);
+      }
+
       if ($this->request->is(['post','put','patch'])) {
         /* new order using api */
         $http = new \Cake\Http\Client();
@@ -373,6 +380,10 @@ class OrdersController extends AppController
             $order = $this->Orders->find()->where(['order_ref_id'=>$order_ref_id])->first();
             if ($order) {
               $this->request->getSession()->write('order_id',$order->id);
+              // Kept for the confirmation's Back link. Not the tracking number: this order already uses it.
+              $checkout_data = $this->request->getData();
+              unset($checkout_data['_csrfToken'], $checkout_data['_Token'], $checkout_data['tracking_no']);
+              $this->request->getSession()->write('Checkout', ['cart' => $cart_hash, 'data' => $checkout_data]);
               return $this->redirect(['action'=>'confirmation']);
             }
           } else if (is_array($res_data) && $res_data['status'] == '5008') {
@@ -1851,27 +1862,19 @@ class OrdersController extends AppController
         ];
         $query = $this->Orders->find();
         if ($this->request->getQuery('date_type') == 'visit_date') {
+          $start_date = (new \Cake\I18n\DateTime('-6 months'))->hour(0)->minute(0)->second(0);
           if ($this->request->getQuery('from')) {
-            $start_date = null;
+            $from_date = null;
             try {
-              $start_date = DateTime::createFromFormat('d M Y',$this->request->getQuery('from'));
+              $from_date = DateTime::createFromFormat('d M Y',$this->request->getQuery('from'));
             } catch (Exception $e) {
               // just ignore the exception for now
             }
-            if ($start_date) {
-              if ($start_date < $first_date_allowed) {
-                $start_date = $first_date_allowed;
-              }
-              $query = $query->matching('OrderItems', function ($q) use($start_date) {
-                return $q->where(['date_of_visit >=' => $start_date]);
-              });
+            if ($from_date) {
+              $start_date = $from_date < $first_date_allowed ? $first_date_allowed : $from_date->hour(0)->minute(0)->second(0);
             }
-          } else {
-            $start_date = (new \Cake\I18n\DateTime('-6 months'))->hour(0)->minute(0)->second(0);
-            $query = $query->matching('OrderItems', function ($q) use($start_date) {
-              return $q->where(['date_of_visit >=' => $start_date]);
-            });
           }
+          $visit_conditions = ['date_of_visit >=' => $start_date];
           if ($this->request->getQuery('to')) {
             $end_date = null;
             try {
@@ -1880,12 +1883,13 @@ class OrdersController extends AppController
               // just ignore the exception for now
             }
             if ($end_date) {
-              $query = $query->matching('OrderItems', function ($q) use($start_date) {
-                return $q->where(['date_of_visit <=' => $start_date]);
-              });
+              $visit_conditions['date_of_visit <='] = $end_date->hour(23)->minute(59)->second(59);
             }
           }
-          
+          // One matching() for both bounds: a second matching() on OrderItems replaces the first.
+          $query = $query->matching('OrderItems', function ($q) use($visit_conditions) {
+            return $q->where($visit_conditions);
+          });
         } else {
           if ($this->request->getQuery('from')) {
             $start_date = null;
@@ -1954,18 +1958,28 @@ class OrdersController extends AppController
         }
 
         $first_date_allowed = (new DateTime())->subMonths(Configure::read('Default.previous_orders_months_to_view'));
-        $from = $first_date_allowed;        
+        $from = null;
         if ($this->request->getQuery('from')) {
-          $from = DateTime::createFromFormat('d M Y', $this->request->getQuery('from'));
+          try {
+            $from = DateTime::createFromFormat('d M Y', $this->request->getQuery('from'));
+          } catch (Exception $e) {
+            // unparsable date: use the default range below
+          }
+        }
+        if ($from) {
           $from = $from->hour(0)->minute(0)->second(0);
           if ($from < $first_date_allowed) {
             $from = $first_date_allowed;
           }
-          $to = DateTime::now();
+          $to = null;
           if ($this->request->getQuery('to')) {
-            $to = DateTime::createFromFormat('d M Y', $this->request->getQuery('to'));
+            try {
+              $to = DateTime::createFromFormat('d M Y', $this->request->getQuery('to'));
+            } catch (Exception $e) {
+              // unparsable date: up to today
+            }
           }
-          $to = $to->hour(23)->minute(59)->second(59);
+          $to = ($to ?: DateTime::now())->hour(23)->minute(59)->second(59);
           $conditions['Vouchers.created <='] = $to;
         } else {
           $from = (new \Cake\I18n\DateTime('-6 months'))->hour(0)->minute(0)->second(0);

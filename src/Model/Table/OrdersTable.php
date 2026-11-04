@@ -2,7 +2,7 @@
 namespace App\Model\Table;
 
 use Cake\ORM\Table;
-use Mustache_Engine;
+use Mustache\Engine as MustacheEngine;
 use App\Lib\Payments;
 use App\Util\Rounder;
 use Cake\I18n\Number;
@@ -256,7 +256,7 @@ class OrdersTable extends Table
     }
 
     private function _createPdf($template_text, $data) {
-        $mustache = new Mustache_Engine();
+        $mustache = new MustacheEngine();
         $html_text = $mustache->render($template_text, $data);
 
         // The queue server converts the HTML (wkhtmltopdf isn't installed on the web servers).

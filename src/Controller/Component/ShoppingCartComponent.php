@@ -100,6 +100,8 @@ class ShoppingCartComponent extends Component
     public function clear() {
     	$this->session->delete('ShoppingCart');
         $this->session->delete('ShoppingCartReturnDates');
+        // Checkout details kept for the Back link belong to this cart only.
+        $this->session->delete('Checkout');
     }
 
     public function getAll() {

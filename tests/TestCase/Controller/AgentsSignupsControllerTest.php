@@ -1,74 +1,93 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Test\TestCase\Controller;
 
-use App\Controller\AgentsSignupsController;
+use Cake\Http\TestSuite\HttpClientTrait;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
 /**
- * App\Controller\AgentsSignupsController Test Case
- *
+ * App\Controller\AgentsSignupsController: public signup form posting to the backend API.
  */
 class AgentsSignupsControllerTest extends TestCase
 {
+    use HttpClientTrait;
     use IntegrationTestTrait;
 
-    /**
-     * Fixtures
-     *
-     * @var array
-     */
-    protected array $fixtures = [
-        'app.AgentsSignups',
+    // No database: the signup pages are public and only talk to the backend API.
+
+    private const VALID = [
+        'first_name' => 'Jane',
+        'last_name' => 'Tan',
+        'email' => 'jane.tan@example.com',
+        'company_name' => 'Jane Travel Pte Ltd',
+        'country' => 'Singapore',
+        'contact_no' => '+65 6000 0000',
     ];
 
-    /**
-     * Test index method
-     *
-     * @return void
-     */
-    public function testIndex()
+    protected function setUp(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        parent::setUp();
+        $this->enableRetainFlashMessages();
     }
 
-    /**
-     * Test view method
-     *
-     * @return void
-     */
-    public function testView()
+    public function testSignupFormRenders(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/signup');
+
+        $this->assertResponseOk();
+        $this->assertInstanceOf(\App\Form\SignupForm::class, $this->viewVariable('signupForm'));
     }
 
-    /**
-     * Test add method
-     *
-     * @return void
-     */
-    public function testAdd()
+    public function testInvalidSignupDoesNotCallApi(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        // With a mock registered, any other HTTP request throws (-> 500), so a 200 proves no API call.
+        $this->mockClientGet('http://api.test/never-called', $this->newClientResponse(500));
+        $this->enableCsrfToken();
+        $this->post('/signup', ['first_name' => 'Jane', 'email' => 'not-an-email']);
+
+        $this->assertResponseOk();
+        $this->assertNoRedirect();
+        $this->assertFlashMessage('The information could not be saved. Please, try again.');
+        $errors = $this->viewVariable('signupForm')->getErrors();
+        $this->assertArrayHasKey('last_name', $errors);
+        $this->assertArrayHasKey('email', $errors);
+        $this->assertArrayHasKey('company_name', $errors);
+        $this->assertArrayHasKey('country', $errors);
     }
 
-    /**
-     * Test edit method
-     *
-     * @return void
-     */
-    public function testEdit()
+    public function testValidSignupPostsToApiAndRedirects(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->mockClientPost('http://api.test/signup', $this->newClientResponse(200, ['Content-Type: application/json'], '{"status":1000}'));
+        $this->enableCsrfToken();
+        $this->post('/signup', self::VALID);
+
+        $this->assertRedirectContains('/signup/thank-you');
     }
 
-    /**
-     * Test delete method
-     *
-     * @return void
-     */
-    public function testDelete()
+    public function testApiRejectionShowsErrors(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->mockClientPost('http://api.test/signup', $this->newClientResponse(200, ['Content-Type: application/json'], json_encode([
+            'status' => 2001,
+            'response' => ['data' => ['error' => ['email' => ['unique' => 'This email is already registered.']]]],
+        ])));
+        $this->enableCsrfToken();
+        $this->post('/signup', self::VALID);
+
+        $this->assertResponseOk();
+        $this->assertNoRedirect();
+        $this->assertFlashMessage('The information could not be saved. Please, try again.');
+        $this->assertSame(
+            ['unique' => 'This email is already registered.'],
+            $this->viewVariable('signupForm')->getErrors()['email'] ?? null
+        );
+    }
+
+    public function testThankYouRenders(): void
+    {
+        $this->get('/signup/thank-you');
+
+        $this->assertResponseOk();
     }
 }

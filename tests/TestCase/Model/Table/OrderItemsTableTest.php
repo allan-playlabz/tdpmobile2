@@ -1,85 +1,75 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Test\TestCase\Model\Table;
 
 use App\Model\Table\OrderItemsTable;
-use Cake\ORM\TableRegistry;
+use App\Test\TestCase\Support\AppDataTrait;
 use Cake\TestSuite\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
-/**
- * App\Model\Table\OrderItemsTable Test Case
- */
 class OrderItemsTableTest extends TestCase
 {
-    /**
-     * Test subject
-     *
-     * @var \App\Model\Table\OrderItemsTable
-     */
-    public $OrderItems;
+    use AppDataTrait;
+    use ValidationTestTrait;
 
-    /**
-     * Fixtures
-     *
-     * @var array
-     */
-    protected array $fixtures = [
-        'app.OrderItems',
-        'app.Orders',
-        'app.Tickets',
-        'app.Vouchers',
-    ];
+    private const ATTRACTION = '00000000-0000-4000-8000-000000000d01';
+    private const TICKET = '00000000-0000-4000-8000-000000000d02';
+    private const ORDER = '00000000-0000-4000-8000-000000000d03';
 
-    /**
-     * setUp method
-     *
-     * @return void
-     */
-    public function setUp(): void
+    protected array $fixtures = [...self::USER_FIXTURES, ...self::CATALOGUE_FIXTURES, ...self::ORDER_FIXTURES];
+
+    private OrderItemsTable $OrderItems;
+
+    protected function setUp(): void
     {
         parent::setUp();
-        $config = TableRegistry::getTableLocator()->exists('OrderItems') ? [] : ['className' => OrderItemsTable::class];
-        $this->OrderItems = TableRegistry::getTableLocator()->get('OrderItems', $config);
+        $this->OrderItems = $this->getTableLocator()->get('OrderItems');
     }
 
-    /**
-     * tearDown method
-     *
-     * @return void
-     */
-    public function tearDown(): void
+    protected function validData(): array
     {
-        unset($this->OrderItems);
-
-        parent::tearDown();
+        return ['qty' => 2, 'price' => '25.00', 'total' => '50.00'];
     }
 
-    /**
-     * Test initialize method
-     *
-     * @return void
-     */
-    public function testInitialize()
+    public static function validationProvider(): array
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        return [
+            'valid' => [[], []],
+            'valid visit date' => [['date_of_visit' => '2027-01-01', 'time_of_visit' => '10:00', 'order_data' => '{}'], []],
+            'missing qty' => [['qty' => self::UNSET], ['qty' => ['_required']]],
+            'empty qty' => [['qty' => ''], ['qty' => ['_empty']]],
+            'missing price' => [['price' => self::UNSET], ['price' => ['_required']]],
+            'non-numeric price' => [['price' => 'free'], ['price' => ['numeric']]],
+            'missing total' => [['total' => self::UNSET], ['total' => ['_required']]],
+            'non-numeric total' => [['total' => 'x'], ['total' => ['numeric']]],
+            'invalid date_of_visit' => [['date_of_visit' => '2027-13-45'], ['date_of_visit' => ['date']]],
+        ];
     }
 
-    /**
-     * Test validationDefault method
-     *
-     * @return void
-     */
-    public function testValidationDefault()
+    #[DataProvider('validationProvider')]
+    public function testValidation(array $changes, array $expected): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertValidation($this->OrderItems, $changes, $expected);
     }
 
-    /**
-     * Test buildRules method
-     *
-     * @return void
-     */
-    public function testBuildRules()
+    public function testRulesOrderAndTicketMustExist(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->createAgentsAndUsers();
+        $this->createAttraction(self::ATTRACTION);
+        $this->createTicket(self::TICKET, self::ATTRACTION);
+        $this->createOrder(self::ORDER, self::MASTER_A, self::AGENT_A);
+        $missing = '00000000-0000-4000-8000-0000000000ff';
+
+        $item = $this->OrderItems->newEntity(['order_id' => self::ORDER, 'ticket_id' => self::TICKET] + $this->validData());
+        $this->assertTrue($this->OrderItems->checkRules($item));
+
+        $item = $this->OrderItems->newEntity(['order_id' => $missing, 'ticket_id' => self::TICKET] + $this->validData());
+        $this->assertFalse($this->OrderItems->checkRules($item));
+        $this->assertArrayHasKey('_existsIn', $item->getError('order_id'));
+
+        $item = $this->OrderItems->newEntity(['order_id' => self::ORDER, 'ticket_id' => $missing] + $this->validData());
+        $this->assertFalse($this->OrderItems->checkRules($item));
+        $this->assertArrayHasKey('_existsIn', $item->getError('ticket_id'));
     }
 }

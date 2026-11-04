@@ -199,8 +199,12 @@ class AgentUsersController extends AppController
         $agent_user = $this->AgentUsers->get($this->getAuthUser('id'), contain: []);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $dph = new DefaultPasswordHasher();
-            if ($dph->check($this->request->getData('old_password'),$agent_user->password)) {
-              $agent_user = $this->AgentUsers->patchEntity($agent_user, $this->request->getData(), ['fields' => ['password', 'confirm_password']]);
+            if (!$dph->check((string)$this->request->getData('old_password'),$agent_user->password)) {
+              $this->Flash->error(__('Please enter your old password correctly.'));
+            } elseif (empty($this->request->getData('password')) || $this->request->getData('password') !== $this->request->getData('confirm_password')) {
+              $this->Flash->error(__('Wrong confirm password. Please check and try again.'));
+            } else {
+              $agent_user = $this->AgentUsers->patchEntity($agent_user, $this->request->getData(), ['fields' => ['password']]);
               if ($this->AgentUsers->save($agent_user)) {
                   $this->Flash->success(__('You have successfully changed your password.'));
 
@@ -208,8 +212,6 @@ class AgentUsersController extends AppController
               }
               $this->Flash->error(__('Password change failed. Please, try again.'));
             }
-
-            $this->Flash->error(__('Please enter your old password correctly.'));
         }
 
     }
@@ -593,9 +595,12 @@ class AgentUsersController extends AppController
         $this->Flash->error(__('You are not authorized to access that location.'));
         return $this->redirect('/');
       }
+      $sort = $this->request->getQuery('sort');
+      $direction = strtolower((string)$this->request->getQuery('direction')) === 'desc' ? 'DESC' : 'ASC';
+      $order = in_array($sort, ['name', 'email', 'role', 'status'], true) ? ['AgentUsers.' . $sort => $direction] : ['created' => 'DESC'];
       $agents = $this->AgentUsers->find('all')
                   ->where(['agent_id'=>$this->getAuthUser('agent_id'),'role IN'=>['normal','viewer']])
-                  ->orderBy(['created'=>'DESC']);
+                  ->orderBy($order);
 
       $this->set('agents', $agents);
     }

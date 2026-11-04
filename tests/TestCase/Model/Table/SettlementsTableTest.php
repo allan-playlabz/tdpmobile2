@@ -1,84 +1,65 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Test\TestCase\Model\Table;
 
 use App\Model\Table\SettlementsTable;
-use Cake\ORM\TableRegistry;
+use App\Test\TestCase\Support\AppDataTrait;
 use Cake\TestSuite\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
-/**
- * App\Model\Table\SettlementsTable Test Case
- */
 class SettlementsTableTest extends TestCase
 {
-    /**
-     * Test subject
-     *
-     * @var \App\Model\Table\SettlementsTable
-     */
-    public $Settlements;
+    use AppDataTrait;
+    use ValidationTestTrait;
 
-    /**
-     * Fixtures
-     *
-     * @var array
-     */
-    protected array $fixtures = [
-        'app.Settlements',
-        'app.Tickets',
-        'app.SettlementAgents',
-    ];
+    private const ATTRACTION = '00000000-0000-4000-8000-000000001001';
+    private const TICKET = '00000000-0000-4000-8000-000000001002';
 
-    /**
-     * setUp method
-     *
-     * @return void
-     */
-    public function setUp(): void
+    protected array $fixtures = [...self::CATALOGUE_FIXTURES];
+
+    private SettlementsTable $Settlements;
+
+    protected function setUp(): void
     {
         parent::setUp();
-        $config = TableRegistry::getTableLocator()->exists('Settlements') ? [] : ['className' => SettlementsTable::class];
-        $this->Settlements = TableRegistry::getTableLocator()->get('Settlements', $config);
+        $this->Settlements = $this->getTableLocator()->get('Settlements');
     }
 
-    /**
-     * tearDown method
-     *
-     * @return void
-     */
-    public function tearDown(): void
+    protected function validData(): array
     {
-        unset($this->Settlements);
-
-        parent::tearDown();
+        return ['settlement_group' => 1, 'rate' => '25.00', 'rebate' => '0'];
     }
 
-    /**
-     * Test initialize method
-     *
-     * @return void
-     */
-    public function testInitialize()
+    public static function validationProvider(): array
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        return [
+            'valid' => [[], []],
+            'missing settlement_group' => [['settlement_group' => self::UNSET], ['settlement_group' => ['_required']]],
+            'empty settlement_group' => [['settlement_group' => ''], ['settlement_group' => ['_empty']]],
+            'missing rate' => [['rate' => self::UNSET], ['rate' => ['_required']]],
+            'non-numeric rate' => [['rate' => 'cheap'], ['rate' => ['numeric']]],
+            'missing rebate' => [['rebate' => self::UNSET], ['rebate' => ['_required']]],
+            'non-numeric rebate' => [['rebate' => 'x'], ['rebate' => ['numeric']]],
+            'non-integer id' => [['id' => 'x'], ['id' => ['integer']]],
+        ];
     }
 
-    /**
-     * Test validationDefault method
-     *
-     * @return void
-     */
-    public function testValidationDefault()
+    #[DataProvider('validationProvider')]
+    public function testValidation(array $changes, array $expected): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertValidation($this->Settlements, $changes, $expected);
     }
 
-    /**
-     * Test buildRules method
-     *
-     * @return void
-     */
-    public function testBuildRules()
+    public function testRulesTicketMustExist(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->createAttraction(self::ATTRACTION);
+        $this->createTicket(self::TICKET, self::ATTRACTION);
+
+        $this->assertTrue($this->Settlements->checkRules($this->Settlements->newEntity(['ticket_id' => self::TICKET] + $this->validData())));
+
+        $orphan = $this->Settlements->newEntity(['ticket_id' => '00000000-0000-4000-8000-0000000000ff'] + $this->validData());
+        $this->assertFalse($this->Settlements->checkRules($orphan));
+        $this->assertArrayHasKey('_existsIn', $orphan->getError('ticket_id'));
     }
 }

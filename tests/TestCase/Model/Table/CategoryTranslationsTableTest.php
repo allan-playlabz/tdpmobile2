@@ -1,83 +1,73 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Test\TestCase\Model\Table;
 
 use App\Model\Table\CategoryTranslationsTable;
-use Cake\ORM\TableRegistry;
+use App\Test\TestCase\Support\AppDataTrait;
 use Cake\TestSuite\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
-/**
- * App\Model\Table\CategoryTranslationsTable Test Case
- */
 class CategoryTranslationsTableTest extends TestCase
 {
-    /**
-     * Test subject
-     *
-     * @var \App\Model\Table\CategoryTranslationsTable
-     */
-    public $CategoryTranslations;
+    use AppDataTrait;
+    use ValidationTestTrait;
 
-    /**
-     * Fixtures
-     *
-     * @var array
-     */
-    protected array $fixtures = [
-        'app.CategoryTranslations',
-        'app.Categories',
-    ];
+    private const CATEGORY = '00000000-0000-4000-8000-000000001501';
+    private const OTHER_CATEGORY = '00000000-0000-4000-8000-000000001502';
 
-    /**
-     * setUp method
-     *
-     * @return void
-     */
-    public function setUp(): void
+    protected array $fixtures = ['app.CategoryTranslations', 'app.Categories', 'app.Agents'];
+
+    private CategoryTranslationsTable $CategoryTranslations;
+
+    protected function setUp(): void
     {
         parent::setUp();
-        $config = TableRegistry::getTableLocator()->exists('CategoryTranslations') ? [] : ['className' => CategoryTranslationsTable::class];
-        $this->CategoryTranslations = TableRegistry::getTableLocator()->get('CategoryTranslations', $config);
+        $this->CategoryTranslations = $this->getTableLocator()->get('CategoryTranslations');
     }
 
-    /**
-     * tearDown method
-     *
-     * @return void
-     */
-    public function tearDown(): void
+    protected function validData(): array
     {
-        unset($this->CategoryTranslations);
-
-        parent::tearDown();
+        return ['language' => 'zh_CN', 'name' => '动物园'];
     }
 
-    /**
-     * Test initialize method
-     *
-     * @return void
-     */
-    public function testInitialize()
+    public static function validationProvider(): array
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        return [
+            'valid' => [[], []],
+            'missing language' => [['language' => self::UNSET], ['language' => ['_required']]],
+            'long language' => [['language' => 'zh_CN_extra'], ['language' => ['maxLength']]],
+            'missing name' => [['name' => self::UNSET], ['name' => ['_required']]],
+            'empty name' => [['name' => ''], ['name' => ['_empty']]],
+            'long name' => [['name' => str_repeat('a', 101)], ['name' => ['maxLength']]],
+        ];
     }
 
-    /**
-     * Test validationDefault method
-     *
-     * @return void
-     */
-    public function testValidationDefault()
+    #[DataProvider('validationProvider')]
+    public function testValidation(array $changes, array $expected): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertValidation($this->CategoryTranslations, $changes, $expected);
     }
 
-    /**
-     * Test buildRules method
-     *
-     * @return void
-     */
-    public function testBuildRules()
+    public function testFindTranslation(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->insertRow('categories', ['id' => self::CATEGORY, 'name' => 'Zoos']);
+        $this->insertRow('categories', ['id' => self::OTHER_CATEGORY, 'name' => 'Cruises']);
+        $this->insertRow('category_translations', ['category_id' => self::CATEGORY, 'language' => 'zh_CN', 'name' => '动物园']);
+        $this->insertRow('category_translations', ['category_id' => self::OTHER_CATEGORY, 'language' => 'zh_CN', 'name' => '游船']);
+
+        $translation = $this->CategoryTranslations->findTranslation(self::CATEGORY, 'zh_CN');
+
+        $this->assertSame('动物园', $translation->name);
+        $this->assertSame('游船', $this->CategoryTranslations->findTranslation(self::OTHER_CATEGORY, 'zh_CN')->name);
+        $this->assertNull($this->CategoryTranslations->findTranslation(self::CATEGORY, 'en_US'));
+    }
+
+    public function testRulesCategoryMustExist(): void
+    {
+        $this->insertRow('categories', ['id' => self::CATEGORY, 'name' => 'Zoos']);
+
+        $this->assertTrue($this->CategoryTranslations->checkRules($this->CategoryTranslations->newEntity(['category_id' => self::CATEGORY] + $this->validData())));
+        $this->assertFalse($this->CategoryTranslations->checkRules($this->CategoryTranslations->newEntity(['category_id' => self::OTHER_CATEGORY] + $this->validData())));
     }
 }

@@ -1,84 +1,69 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Test\TestCase\Model\Table;
 
 use App\Model\Table\MerchantsTable;
-use Cake\ORM\TableRegistry;
+use App\Test\TestCase\Support\AppDataTrait;
 use Cake\TestSuite\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
-/**
- * App\Model\Table\MerchantsTable Test Case
- */
 class MerchantsTableTest extends TestCase
 {
-    /**
-     * Test subject
-     *
-     * @var \App\Model\Table\MerchantsTable
-     */
-    public $Merchants;
+    use AppDataTrait;
+    use ValidationTestTrait;
 
-    /**
-     * Fixtures
-     *
-     * @var array
-     */
-    protected array $fixtures = [
-        'app.Merchants',
-        'app.Attractions',
-        'app.Invcharts',
-    ];
+    protected array $fixtures = ['app.Merchants', 'app.Agents'];
 
-    /**
-     * setUp method
-     *
-     * @return void
-     */
-    public function setUp(): void
+    private MerchantsTable $Merchants;
+
+    protected function setUp(): void
     {
         parent::setUp();
-        $config = TableRegistry::getTableLocator()->exists('Merchants') ? [] : ['className' => MerchantsTable::class];
-        $this->Merchants = TableRegistry::getTableLocator()->get('Merchants', $config);
+        $this->Merchants = $this->getTableLocator()->get('Merchants');
     }
 
-    /**
-     * tearDown method
-     *
-     * @return void
-     */
-    public function tearDown(): void
+    protected function validData(): array
     {
-        unset($this->Merchants);
-
-        parent::tearDown();
+        return [
+            'name' => 'Zoo Co', 'email' => 'zoo@example.com', 'business_description' => 'Zoo',
+            'contact_person_name' => 'Zed', 'contact_person_designation' => 'Manager', 'contact_person_number' => '+65 1234',
+        ];
     }
 
-    /**
-     * Test initialize method
-     *
-     * @return void
-     */
-    public function testInitialize()
+    public static function validationProvider(): array
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        return [
+            'valid' => [[], []],
+            'valid optional fields' => [['contact_number' => '', 'merchant_website' => 'https://zoo.example.com', 'online_only' => '1', 'multiple_redemption' => '0'], []],
+            'missing name' => [['name' => self::UNSET], ['name' => ['_required']]],
+            'long name' => [['name' => str_repeat('a', 101)], ['name' => ['maxLength']]],
+            'invalid email' => [['email' => 'zoo'], ['email' => ['email']]],
+            'long contact_number' => [['contact_number' => str_repeat('1', 16)], ['contact_number' => ['maxLength']]],
+            'missing business_description' => [['business_description' => self::UNSET], ['business_description' => ['_required']]],
+            'long business_description' => [['business_description' => str_repeat('a', 501)], ['business_description' => ['maxLength']]],
+            'missing contact_person_name' => [['contact_person_name' => self::UNSET], ['contact_person_name' => ['_required']]],
+            'missing contact_person_designation' => [['contact_person_designation' => self::UNSET], ['contact_person_designation' => ['_required']]],
+            'long contact_person_number' => [['contact_person_number' => str_repeat('1', 46)], ['contact_person_number' => ['maxLength']]],
+            'long voucher_template' => [['voucher_template' => str_repeat('v', 46)], ['voucher_template' => ['maxLength']]],
+            'non-boolean online_only' => [['online_only' => 'often'], ['online_only' => ['boolean']]],
+        ];
     }
 
-    /**
-     * Test validationDefault method
-     *
-     * @return void
-     */
-    public function testValidationDefault()
+    #[DataProvider('validationProvider')]
+    public function testValidation(array $changes, array $expected): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->assertValidation($this->Merchants, $changes, $expected);
     }
 
-    /**
-     * Test buildRules method
-     *
-     * @return void
-     */
-    public function testBuildRules()
+    public function testRulesUniqueEmail(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->insertRow('merchants', ['id' => '00000000-0000-4000-8000-000000000f02', 'image' => ''] + $this->validData());
+
+        $this->assertTrue($this->Merchants->checkRules($this->Merchants->newEntity(['email' => 'other@example.com'] + $this->validData())));
+
+        $duplicate = $this->Merchants->newEntity($this->validData());
+        $this->assertFalse($this->Merchants->checkRules($duplicate));
+        $this->assertArrayHasKey('_isUnique', $duplicate->getError('email'));
     }
 }

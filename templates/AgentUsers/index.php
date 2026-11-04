@@ -6,10 +6,18 @@
       <thead>
         <tr>
           <?php // index() is not paginated (PaginatorHelper throws without paging data in 5.x); same links Paginator->sort() rendered in 3.x ?>
-          <th scope="col"><?= $this->Html->link(__('Name'), ['?' => ['sort' => 'name', 'direction' => 'asc']]) ?></th>
-          <th scope="col"><?= $this->Html->link(__('Email'), ['?' => ['sort' => 'email', 'direction' => 'asc']]) ?></th>
-          <th scope="col"><?= $this->Html->link(__('Role'), ['?' => ['sort' => 'role', 'direction' => 'asc']]) ?></th>
-          <th scope="col"><?= $this->Html->link(__('Status'), ['?' => ['sort' => 'status', 'direction' => 'asc']]) ?></th>
+          <?php
+            $current_sort = $this->getRequest()->getQuery('sort');
+            $current_direction = strtolower((string)$this->getRequest()->getQuery('direction')) === 'desc' ? 'desc' : 'asc';
+            $sort_link = function (string $label, string $field) use ($current_sort, $current_direction) {
+              $direction = $current_sort === $field && $current_direction === 'asc' ? 'desc' : 'asc';
+              return $this->Html->link($label, ['?' => ['sort' => $field, 'direction' => $direction]], ['class' => $current_sort === $field ? $current_direction : null]);
+            };
+          ?>
+          <th scope="col"><?= $sort_link(__('Name'), 'name') ?></th>
+          <th scope="col"><?= $sort_link(__('Email'), 'email') ?></th>
+          <th scope="col"><?= $sort_link(__('Role'), 'role') ?></th>
+          <th scope="col"><?= $sort_link(__('Status'), 'status') ?></th>
           <th scope="col"><?= __('Actions') ?></th>
         </tr>
       </thead>

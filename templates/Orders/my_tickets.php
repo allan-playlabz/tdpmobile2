@@ -42,7 +42,7 @@ $hide_before_date = new \Cake\I18n\DateTime('-6 months');
             <?php echo $this->Form->control('from', ['class' => 'datepicker form-control', 'value' => $from, 'label' => ['class' => 'pr-1', 'text' => __('From')]]) ?>
             <?php echo $this->Form->control('to', ['class' => 'datepicker form-control', 'value' => $to, 'label' => ['class' => 'ml-4 pr-1', 'text' => __('To')]]) ?>
             <div class="form-group"><?php echo $this->Form->submit(__('Filter'), ['class' => 'btn btn-primary ml-1']) ?></div>
-            <div class="form-group"><?php echo $this->Html->link(__('Show All'), ['action' => 'index'], ['class' => 'btn btn-primary ml-1','style'=>'min-width:80px']) ?></div>
+            <div class="form-group"><?php echo $this->Html->link(__('Show All'), ['action' => 'myTickets'], ['class' => 'btn btn-primary ml-1','style'=>'min-width:80px']) ?></div>
         </div>
         <?php echo $this->Form->end() ?>
     </div>
