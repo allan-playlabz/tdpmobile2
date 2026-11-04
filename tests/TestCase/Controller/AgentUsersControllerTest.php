@@ -273,6 +273,32 @@ class AgentUsersControllerTest extends TestCase
         $this->assertSame($before, $this->user(self::NORMAL_A)['password']);
     }
 
+    public function testChangePasswordWithMismatchedConfirmationKeepsPassword(): void
+    {
+        $before = $this->user(self::NORMAL_A)['password'];
+        $this->loginAs(self::NORMAL_A);
+        $this->enableCsrfToken();
+        $this->post('/agent-users/change-password', [
+            'old_password' => self::PASSWORD, 'password' => 'NewSecret#123', 'confirm_password' => 'Different#123',
+        ]);
+
+        $this->assertResponseOk();
+        $this->assertFlashMessage('Wrong confirm password. Please check and try again.');
+        $this->assertSame($before, $this->user(self::NORMAL_A)['password']);
+    }
+
+    public function testChangePasswordWithMatchingConfirmation(): void
+    {
+        $this->loginAs(self::NORMAL_A);
+        $this->enableCsrfToken();
+        $this->post('/agent-users/change-password', [
+            'old_password' => self::PASSWORD, 'password' => 'NewSecret#123', 'confirm_password' => 'NewSecret#123',
+        ]);
+
+        $this->assertRedirect();
+        $this->assertTrue((new DefaultPasswordHasher())->check('NewSecret#123', $this->user(self::NORMAL_A)['password']));
+    }
+
     public function testViewerCannotChangePassword(): void
     {
         $before = $this->user(self::VIEWER_A)['password'];
@@ -300,6 +326,33 @@ class AgentUsersControllerTest extends TestCase
         }
         sort($ids);
         $this->assertSame([self::NORMAL_A, self::VIEWER_A], $ids);
+    }
+
+    public function testIndexSortsByWhitelistedColumn(): void
+    {
+        $this->loginAs(self::MASTER_A);
+        $names = function (): array {
+            $names = [];
+            foreach ($this->viewVariable('agents') as $agentUser) {
+                $names[] = $agentUser->name;
+            }
+
+            return $names;
+        };
+
+        $this->get('/agent-users?sort=name&direction=asc');
+        $this->assertResponseOk();
+        $this->assertSame(['Normal User', 'Viewer User'], $names());
+        // The column sorted ascending now links to descending.
+        $this->assertResponseContains('sort=name&amp;direction=desc');
+
+        $this->get('/agent-users?sort=name&direction=desc');
+        $this->assertSame(['Viewer User', 'Normal User'], $names());
+
+        // Anything outside the whitelist falls back to the default order instead of reaching SQL.
+        $this->get('/agent-users?sort=password&direction=asc');
+        $this->assertResponseOk();
+        $this->assertCount(2, $names());
     }
 
     public function testNonMastersCannotManageUsers(): void

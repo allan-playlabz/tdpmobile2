@@ -228,6 +228,42 @@ class OrdersControllerTest extends TestCase
         $this->assertSame('2', $sent['item_quantity_1']);
         $this->assertSame('50.00', $sent['total_amount']);
         $this->assertSame('John Doe', $sent['customer_name']);
+        // Kept for the confirmation's Back link, without the CSRF token and the (already used) tracking number.
+        $this->assertSession(md5((string)json_encode([self::TICKET => [self::VISIT_DATE => 2]])), 'Checkout.cart');
+        $this->assertSession('John', 'Checkout.data.first_name');
+        $this->assertSessionNotHasKey('Checkout.data.tracking_no');
+        $this->assertSessionNotHasKey('Checkout.data._csrfToken');
+    }
+
+    public function testCheckoutRefillsSavedDetailsForTheSameCart(): void
+    {
+        $this->settlementTicket();
+        $this->mockAttractionDetails();
+        $cart = [self::TICKET => [self::VISIT_DATE => 2]];
+        $this->loginWithCart(self::NORMAL_A, $cart, ['Checkout' => [
+            'cart' => md5((string)json_encode($cart)),
+            'data' => ['first_name' => 'Typedfirst', 'last_name' => 'Typedlast', 'mobile' => '+6599998888'],
+        ]]);
+        $this->get('/orders/checkout');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('value="Typedfirst"');
+        $this->assertResponseContains('value="Typedlast"');
+        $this->assertResponseContains('value="+6599998888"');
+    }
+
+    public function testCheckoutIgnoresSavedDetailsOfAnotherCart(): void
+    {
+        $this->settlementTicket();
+        $this->mockAttractionDetails();
+        $this->loginWithCart(self::NORMAL_A, [self::TICKET => [self::VISIT_DATE => 2]], ['Checkout' => [
+            'cart' => md5((string)json_encode([self::TICKET => [self::VISIT_DATE => 5]])),
+            'data' => ['first_name' => 'Typedfirst'],
+        ]]);
+        $this->get('/orders/checkout');
+
+        $this->assertResponseOk();
+        $this->assertResponseNotContains('Typedfirst');
     }
 
     // ---------------------------------------------------------------- confirmation / status / thank you
@@ -353,22 +389,53 @@ class OrdersControllerTest extends TestCase
         $this->assertResponseNotContains('REFNORMALB1');
     }
 
+    public function testIndexVisitDateFilterUsesBothBounds(): void
+    {
+        $this->settlementTicket();
+        $orders = [
+            'REFVISITPAST' => '-20 days',
+            'REFVISITIN' => '+2 days',
+            'REFVISITLATE' => '+20 days',
+        ];
+        $n = 0;
+        foreach ($orders as $ref => $visit) {
+            $n++;
+            $orderId = sprintf('00000000-0000-4000-8000-0000000e10%02d', $n);
+            $this->createOrder($orderId, self::NORMAL_A, self::AGENT_A, ['order_ref_id' => $ref]);
+            $this->createOrderItem(sprintf('00000000-0000-4000-8000-0000000f10%02d', $n), $orderId, self::TICKET, [
+                'date_of_visit' => (new DateTime($visit))->format('Y-m-d'),
+            ]);
+        }
+        $this->loginAs(self::NORMAL_A);
+        $this->get('/orders?' . http_build_query([
+            'date_type' => 'visit_date',
+            'from' => (new DateTime('-10 days'))->format('d M Y'),
+            'to' => (new DateTime('+10 days'))->format('d M Y'),
+        ]));
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('REFVISITIN');
+        $this->assertResponseNotContains('REFVISITPAST');
+        $this->assertResponseNotContains('REFVISITLATE');
+    }
+
     public function testMyTicketsRenders(): void
     {
         $this->loginAs(self::NORMAL_A);
         $this->get('/orders/my-tickets');
 
         $this->assertResponseOk();
+        // Show All resets My Tickets, not My Orders.
+        $this->assertResponseRegExp('#href="/orders/my-tickets"[^>]*>Show All#');
     }
 
-    public function testMyTicketsWithBadFromDateIsIgnored(): void
+    public function testMyTicketsWithBadDatesIsIgnored(): void
     {
         $this->loginAs(self::NORMAL_A);
         $this->get('/orders/my-tickets?from=not-a-date');
+        $this->assertResponseOk();
 
-        if ($this->_response->getStatusCode() === 500) {
-            $this->markTestSkipped('BUG: myTickets with an unparsable ?from throws from DateTime::createFromFormat (500).');
-        }
+        $this->get('/orders/my-tickets?' . http_build_query(['from' => (new DateTime('-5 days'))->format('d M Y'), 'to' => 'garbage']));
         $this->assertResponseOk();
     }
 

@@ -82,6 +82,16 @@ class ShoppingCartComponentTest extends TestCase
         $this->assertNull($this->session->read('ShoppingCartReturnDates'));
     }
 
+    public function testClearAlsoDropsSavedCheckoutDetails(): void
+    {
+        $this->cart->add(self::T1, 1, '01 Jan 2027');
+        $this->session->write('Checkout', ['cart' => 'hash', 'data' => ['first_name' => 'John']]);
+
+        $this->cart->clear();
+
+        $this->assertNull($this->session->read('Checkout'));
+    }
+
     public function testReturnDateNeedsDepartureAndIsNotOverwritten(): void
     {
         $this->cart->addReturnDatetime(self::T1, '01 Jan 2027 09:00', '05 Jan 2027 18:00');

@@ -19,6 +19,10 @@ class CreditLogsController extends AppController
 {
     public function index()
     {
+      if ($this->getAuthUser('role') != 'master') {
+        $this->Flash->error(__('You are not authorized to access that location.'));
+        return $this->redirect('/');
+      }
       // filter by date
       // max 30 days only
       $agent_id = $this->getAuthUser('agent_id');

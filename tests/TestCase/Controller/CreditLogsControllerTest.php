@@ -71,6 +71,18 @@ class CreditLogsControllerTest extends TestCase
         $this->assertRedirect('/');
     }
 
+    public function testNonMastersAreRefused(): void
+    {
+        foreach ([self::NORMAL_A, self::VIEWER_A] as $userId) {
+            $this->loginAs($userId);
+            $this->enableRetainFlashMessages();
+            $this->get('/credit-logs');
+
+            $this->assertRedirect('/', $userId);
+            $this->assertFlashMessage('You are not authorized to access that location.');
+        }
+    }
+
     public function testListsOnlyOwnAgentsLogs(): void
     {
         $this->loginAs(self::MASTER_A);
