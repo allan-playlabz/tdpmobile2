@@ -9,13 +9,13 @@ $to = $this->request->getQuery('to') ?: '';
       *Only the last 100 days records will be shown 
     </div>
     <?php echo $this->Form->create(null, ['type' => 'get', 'class' => 'form-inline mb-4 card-header order-search']) ?>
-        <?php echo $this->Form->control('from', ['class' => 'datepicker form-control', 'value' => $from, 'label' => ['class' => 'pr-1', 'text' => __('From')]]) ?>
-        <?php echo $this->Form->control('to', ['class' => 'datepicker form-control', 'value' => $to, 'label' => ['class' => 'ml-4 pr-1', 'text' => __('To')]]) ?>
+        <?php echo $this->Form->control('from', ['class' => 'datepicker form-control', 'value' => $from, 'label' => ['class' => 'pe-1', 'text' => __('From')]]) ?>
+        <?php echo $this->Form->control('to', ['class' => 'datepicker form-control', 'value' => $to, 'label' => ['class' => 'ms-4 pe-1', 'text' => __('To')]]) ?>
         <div class="btn-toolbar mb-2 mb-md-0">
-          <div class="btn-group mr-2">
-          <?php echo $this->Form->button(__('Filter'), ['class' => 'btn btn-primary ml-1']) ?>
-          <?php echo $this->Html->link(__('Show All'), ['action' => 'index'], ['class' => 'btn btn-primary ml-1','style'=>'min-width:80px']) ?>
-          <?php echo  $this->Form->postLink(__('Download'), ['action'=>'index', '?' => $this->request->getQuery()],['class'=>'btn btn-primary ml-1', 'block' => 'postLink']) ?>
+          <div class="btn-group me-2">
+          <?php echo $this->Form->button(__('Filter'), ['class' => 'btn btn-primary ms-1']) ?>
+          <?php echo $this->Html->link(__('Show All'), ['action' => 'index'], ['class' => 'btn btn-primary ms-1','style'=>'min-width:80px']) ?>
+          <?php echo  $this->Form->postLink(__('Download'), ['action'=>'index', '?' => $this->request->getQuery()],['class'=>'btn btn-primary ms-1', 'block' => 'postLink']) ?>
           </div>
         </div>
     <?php echo $this->Form->end() ?>
@@ -26,8 +26,8 @@ $to = $this->request->getQuery('to') ?: '';
               <tr>
                 <th scope="col"><?= __('Date') ?></th>
                 <th scope="col"><?= __('Type') ?></th>
-                <th scope="col" class="text-right pr-4">SGD <?= __('Amount') . '(' . __('SGD') . ')' ?></th>
-                <th scope="col" class="text-right pr-4">SGD <?= __('Balance') . '(' . __('SGD') . ')' ?></th>
+                <th scope="col" class="text-end pe-4">SGD <?= __('Amount') . '(' . __('SGD') . ')' ?></th>
+                <th scope="col" class="text-end pe-4">SGD <?= __('Balance') . '(' . __('SGD') . ')' ?></th>
               </tr>
           </thead>
           <tbody>
@@ -49,8 +49,8 @@ $to = $this->request->getQuery('to') ?: '';
                 ?>
                 <td><?= $creditLog->created->format('d M Y h:ia') ?></td>
                 <td><?= $type ?></td>
-                <td class="text-right pr-4"><?= $amount ?></td>
-                <td class="text-right pr-4"><?= $credits ?></td>
+                <td class="text-end pe-4"><?= $amount ?></td>
+                <td class="text-end pe-4"><?= $credits ?></td>
               </tr>
               <?php endforeach; ?>
           </tbody>

@@ -20,7 +20,7 @@ use App\Lib\PricingType;
         <?php
         if ($attraction->pricing_type == 'settlement') {
           if (!empty($attraction->ticket) && !empty($attraction->ticket->settlement_agents) && !empty($attraction->ticket->settlement_agents[0]->settlement)) {
-              echo '<div class="rate"><del class="text-muted old-price">RP '.$this->Number->currency($attraction->ticket->price).'</del> <div class="font-weight-bold">'.$this->Number->currency($attraction->ticket->settlement_agents[0]->settlement->rate).'</div></div>';
+              echo '<div class="rate"><del class="text-muted old-price">RP '.$this->Number->currency($attraction->ticket->price).'</del> <div class="fw-bold">'.$this->Number->currency($attraction->ticket->settlement_agents[0]->settlement->rate).'</div></div>';
           }
         }
         else {

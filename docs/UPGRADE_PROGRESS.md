@@ -126,6 +126,15 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 - Results: **OK (202 tests: 8 passing, 194 incomplete)**. The incomplete ones are 3.x baked stubs (`markTestIncomplete`) — not written tests.
 - Also fixed: `templates/layout/default.php` used `null` as an array key when no language is selected (PHP 8.5 deprecation).
 - 2026-11-04: PHPUnit 11.5.57 → **12.5.43** (`^12.5`; CakePHP 5.4 allows `^11.5.3 || ^12.1.3 || ^13.0`, 13 would need PHP 8.4). Only the schema URL in `phpunit.xml.dist` changed; the tests use no annotations or mocks, so no test code changed.
+
+## Bootstrap 4 → 5.3.8 (2026-11-05)
+- Was 4.3.1 CSS + 4.0.0 JS + Popper 1 (default layout only). Now `bootstrap.min.css` 5.3.8 + `bootstrap.bundle.min.js` (Popper 2) in the default/login/signup layouts; `bootstrap.min.js` and `popper.min.js` removed.
+- Scripted renames in `templates/` and `src/View` (not email/PDF templates, which have their own CSS): `ml/mr/pl/pr` → `ms/me/ps/pe`, `float-/text-left|right` → `start|end`, `font-weight-*` → `fw-*`, `badge-*` → `text-bg-*`, `sr-only` → `visually-hidden`, `dropdown-menu-right` → `-end`, `data-*` → `data-bs-*`, `btn-block` → `w-100`, `form-row` → `row g-2`.
+- By hand: `input-group-prepend/append` wrappers removed, so the +/- handlers use `closest('.input-group')`; modal close → `btn-close`; jumbotron; announcement popover styles → BS5 CSS variables; navbar has an inner `container-fluid`.
+- `webroot/css/bootstrap4-compat.css` keeps `.form-group` spacing, `.form-inline`, label spacing and non-underlined links, so form markup didn't need rewriting.
+- Behaviour change: BS5 sanitizes popover HTML (4.0.0 JS didn't), so announcement messages lose tags/attributes outside Bootstrap's allow-list (e.g. `style`, tables).
+- e2e: `.font-weight-bold` selectors → `.fw-bold`.
+
 ## Follow-ups (not part of the upgrade)
 - Consider `HostHeaderMiddleware` with `APP_FULL_BASE_URL` set per environment (Host header injection protection).
 - firebase/php-jwt < 7 advisory (CVE-2025-45769, low).

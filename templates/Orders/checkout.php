@@ -74,7 +74,7 @@ if (!empty($agent)) {
                   <?php if (($ticket->require_travellers_info || ($ticket->multiple_redemption && $ticket->type == 'normal')) && !empty($ticket_list[$ticket->id])): ?>
                     <div class="my-2 p-4 border bg-eee">
                     <?php foreach ($ticket_list[$ticket->id] as $date => $qty): ?>
-                      <h5><div class="font-weight-bold"><?= $ticket->attraction->title ?></div>
+                      <h5><div class="fw-bold"><?= $ticket->attraction->title ?></div>
                       <div class="text-muted"><?= $ticket->name ?><?= $ticket->attraction->type =='transfer' ? ' - '.Configure::read('Default.transfer_subtypes.'.$ticket->attraction->subtype) : '' ?> <?= $ticket->attraction->pricing_type != 'settlement' ? '('.$date.')' : '' ?></div></h5>
                       <?php if ($ticket->multiple_redemption && $ticket->type == 'normal'){ ?>
                         <div class="row">
@@ -82,7 +82,7 @@ if (!empty($agent)) {
                             <div class="d-none">
                             <?= $this->Form->control('multiple_redemption.'.$ticket->id.'.'.$date,['label'=>__('Redeem as single code'),'type'=>'checkbox', 'checked' => true]); ?>
                             </div>
-                            <div class="pl-3">Redeem as single code</div>
+                            <div class="ps-3">Redeem as single code</div>
                           <?php } else { ?>
                             <?= $this->Form->control('multiple_redemption.'.$ticket->id.'.'.$date,['label'=>__('Redeem as single code'),'type'=>'checkbox']); ?>
                           <?php } ?>
@@ -132,11 +132,11 @@ if (!empty($agent)) {
                       $no = 0;
                       if (!empty($extra_fields) && is_array($extra_fields)) { ?>
                         <div class="my-2 p-4 border bg-eee">
-                        <h5><div class="font-weight-bold"><?= $ticket->attraction->title ?></div>
+                        <h5><div class="fw-bold"><?= $ticket->attraction->title ?></div>
                             <div class="text-muted"><?= $ticket->name ?><?= $ticket->attraction->type =='transfer' ? ' - '.Configure::read('Default.transfer_subtypes.'.$ticket->attraction->subtype) : '' ?> <?= $ticket->attraction->pricing_type != 'settlement' ? '('.(!empty($date) ? $date :'').')' : '' ?><br>
                                   <del>RP <?= $this->Number->currency($ticket->retail_price) ?></del></div>
                           </h5>
-                          <h6 class="border-top py-2 mt-2 font-weight-bold">Transfer Details</h6>
+                          <h6 class="border-top py-2 mt-2 fw-bold">Transfer Details</h6>
                         <?php
                         foreach ($extra_fields as $extra_field_name => $extra_field) {
                           if ($no%2 == 0) {
@@ -165,7 +165,7 @@ if (!empty($agent)) {
                         $no = 0;
                         if ($ticket->attraction->subtype == Configure::read('Default.transfer_subtypes.2')) {
                         ?>
-                          <h6 class="border-top py-2 mt-2 font-weight-bold">Return Trip</h6>
+                          <h6 class="border-top py-2 mt-2 fw-bold">Return Trip</h6>
                           <?php
                           foreach ($extra_fields as $extra_field_name => $extra_field) {
                             if ($no%2 == 0) {

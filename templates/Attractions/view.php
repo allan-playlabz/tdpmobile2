@@ -18,7 +18,7 @@ $now = Cake\I18n\DateTime::now();
 <div class="col-md-8">
     <div><?php echo $this->Html->image($base.$attraction->featured_image,['class'=>'img-fluid','style'=>'width:100%']) ?></div>
     <h1 class="mt-4">
-      <?= h($attraction->title) ?> <?php if ($auth_user['role'] != 'viewer'): ?><i class="float-right fa <?= $attraction->is_favorite ? 'fa-bookmark text-green' : 'fa-bookmark-o' ?> btn-favorite" title="<?= $attraction->is_favorite ? __('Click to remove from favorites') : __('Click to add to favorites') ?>"></i><?php endif ?>
+      <?= h($attraction->title) ?> <?php if ($auth_user['role'] != 'viewer'): ?><i class="float-end fa <?= $attraction->is_favorite ? 'fa-bookmark text-green' : 'fa-bookmark-o' ?> btn-favorite" title="<?= $attraction->is_favorite ? __('Click to remove from favorites') : __('Click to add to favorites') ?>"></i><?php endif ?>
       <?php if (Configure::read('Default.show_attraction_sku')) { 
         echo '<br><small style="font-size: 12px" class="text-muted">'. $attraction->sku_id . '</small>';
       } ?>
@@ -31,12 +31,12 @@ $now = Cake\I18n\DateTime::now();
     <div class="card">
       <div class="card-header p-4" id="headingTwo">
         <h5 class="mb-0">
-          <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" style="height:49px;">
+          <button class="btn btn-link collapsed" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" style="height:49px;">
             <?= __('Terms And Conditions') ?>
           </button>
         </h5>
       </div>
-      <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+      <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-bs-parent="#accordion">
         <div class="card-body">
         <?= $attraction->terms_and_conditions; ?>
         </div>
@@ -97,7 +97,7 @@ $now = Cake\I18n\DateTime::now();
 
 
                            ?>
-                          <div class="card my-2 collapse <?= $ap_key ==0 ? 'show' : '' ?>" id="collapse-<?= $attraction_product->id ?>" aria-labelledby="heading<?= $attraction_product->id ?>" data-parent="#attraction-group">
+                          <div class="card my-2 collapse <?= $ap_key ==0 ? 'show' : '' ?>" id="collapse-<?= $attraction_product->id ?>" aria-labelledby="heading<?= $attraction_product->id ?>" data-bs-parent="#attraction-group">
                           <div class="card-body">
                             <div class="card-text">
                               <div class="row">
@@ -106,11 +106,11 @@ $now = Cake\I18n\DateTime::now();
                                 <div class="col-lg-4">
                                   <?php if (!isset($not_allowed_to_add)): ?>
                                   <?php $slot = $tickets_slots[$ticket->id] ?? null; ?>
-                                  <div class="input-group"><div class="input-group-prepend"><button class="btn btn-outline-secondary btn-subtract" type="button"><i class="fa fa-minus"></i></button></div><?= $this->Form->text('quantity.'.$ticket->id,['value'=>0,'class'=>'form-control p-1 text-center','data-price'=>$ticket->price,'min'=>($ticket->min_quantity ? $ticket->min_quantity : '0'),'max'=> ($tickets_max_quantity[$ticket->id] ?? null),'data-slot-id'=>$slot['slot_id'] ?? null,'data-slot-pool'=>$slot ? $slot['pool'] : null,'data-max-qty'=>($slot && $ticket->max_quantity) ? $ticket->max_quantity : null]) ?>
-                                  <div class="input-group-append"><button class="btn btn-outline-secondary btn-add" type="button"><i class="fa fa-plus"></i></button></div>
+                                  <div class="input-group"><button class="btn btn-outline-secondary btn-subtract" type="button"><i class="fa fa-minus"></i></button><?= $this->Form->text('quantity.'.$ticket->id,['value'=>0,'class'=>'form-control p-1 text-center','data-price'=>$ticket->price,'min'=>($ticket->min_quantity ? $ticket->min_quantity : '0'),'max'=> ($tickets_max_quantity[$ticket->id] ?? null),'data-slot-id'=>$slot['slot_id'] ?? null,'data-slot-pool'=>$slot ? $slot['pool'] : null,'data-max-qty'=>($slot && $ticket->max_quantity) ? $ticket->max_quantity : null]) ?>
+                                  <button class="btn btn-outline-secondary btn-add" type="button"><i class="fa fa-plus"></i></button>
                                   </div>
                                   <?php if (empty($tickets_max_quantity[$ticket->id])) {
-                                    echo '<div class="text-danger font-weight-bold text-center">'. __('Sold out') .'</div>';
+                                    echo '<div class="text-danger fw-bold text-center">'. __('Sold out') .'</div>';
                                    } ?>
                                   <?php endif ?>
                                   <?php if ($ticket->show_stock): ?>
@@ -181,11 +181,11 @@ $now = Cake\I18n\DateTime::now();
                                   }
                                   $slot = $tickets_slots[$ticket->id] ?? null;
                                   ?>
-                                  <div class="input-group"><div class="input-group-prepend"><button class="btn btn-outline-secondary btn-subtract" type="button"><i class="fa fa-minus"></i></button></div><?= $this->Form->text('quantity.'.$ticket->id,['value'=>0,'class'=>'form-control p-1 text-center','data-price'=>$ticket->price,'min'=>($ticket->min_quantity ? $ticket->min_quantity : '0'),'max'=> ($tickets_max_quantity[$ticket->id] ?? null),'data-slot-id'=>$slot['slot_id'] ?? null,'data-slot-pool'=>$slot ? $slot['pool'] : null,'data-max-qty'=>($slot && $ticket->max_quantity) ? $ticket->max_quantity : null]) ?>
-                                  <div class="input-group-append"><button class="btn btn-outline-secondary btn-add" type="button"><i class="fa fa-plus"></i></button></div>
+                                  <div class="input-group"><button class="btn btn-outline-secondary btn-subtract" type="button"><i class="fa fa-minus"></i></button><?= $this->Form->text('quantity.'.$ticket->id,['value'=>0,'class'=>'form-control p-1 text-center','data-price'=>$ticket->price,'min'=>($ticket->min_quantity ? $ticket->min_quantity : '0'),'max'=> ($tickets_max_quantity[$ticket->id] ?? null),'data-slot-id'=>$slot['slot_id'] ?? null,'data-slot-pool'=>$slot ? $slot['pool'] : null,'data-max-qty'=>($slot && $ticket->max_quantity) ? $ticket->max_quantity : null]) ?>
+                                  <button class="btn btn-outline-secondary btn-add" type="button"><i class="fa fa-plus"></i></button>
                                   </div>
                                   <?php if (empty($tickets_max_quantity[$ticket->id])) {
-                                    echo '<div class="text-danger font-weight-bold text-center">'. __('Sold out') .'</div>';
+                                    echo '<div class="text-danger fw-bold text-center">'. __('Sold out') .'</div>';
                                    } ?>
                                   <?php endif ?>
                                   <?php if ($ticket->show_stock): ?>
@@ -290,10 +290,10 @@ var checkTickets = function() {
             }
           }
           if (typeof tickets_max_quantity[ticket.id] == 'undefined' || tickets_max_quantity[ticket.id] == 0) {
-            ticket_string += '<div class="col-lg-4"><div class="input-group"><div class="input-group-prepend"><button class="btn btn-outline-secondary btn-subtract" type="button"><i class="fa fa-minus"></i></button></div><input type="text" class="form-control text-center" name="quantity['+ticket.id+']" value="0" data-price="'+ticket.price+'" max="0" min="'+ ticket.min_quantity +'"'+ slotAttrs +'><div class="input-group-append"><button class="btn btn-outline-secondary btn-add" type="button"><i class="fa fa-plus"></i></button></div></div>';
-            ticket_string += '<div class="text-danger font-weight-bold text-center">Sold out</div>';
+            ticket_string += '<div class="col-lg-4"><div class="input-group"><button class="btn btn-outline-secondary btn-subtract" type="button"><i class="fa fa-minus"></i></button><input type="text" class="form-control text-center" name="quantity['+ticket.id+']" value="0" data-price="'+ticket.price+'" max="0" min="'+ ticket.min_quantity +'"'+ slotAttrs +'><button class="btn btn-outline-secondary btn-add" type="button"><i class="fa fa-plus"></i></button></div>';
+            ticket_string += '<div class="text-danger fw-bold text-center">Sold out</div>';
           } else {
-            ticket_string += '<div class="col-lg-4"><div class="input-group"><div class="input-group-prepend"><button class="btn btn-outline-secondary btn-subtract" type="button"><i class="fa fa-minus"></i></button></div><input type="text" class="form-control text-center" name="quantity['+ticket.id+']" value="0" data-price="'+ticket.price+'" max="'+ ticket_max_quantity +'" min="'+ ticket.min_quantity +'"'+ slotAttrs +'><div class="input-group-append"><button class="btn btn-outline-secondary btn-add" type="button"><i class="fa fa-plus"></i></button></div></div>';
+            ticket_string += '<div class="col-lg-4"><div class="input-group"><button class="btn btn-outline-secondary btn-subtract" type="button"><i class="fa fa-minus"></i></button><input type="text" class="form-control text-center" name="quantity['+ticket.id+']" value="0" data-price="'+ticket.price+'" max="'+ ticket_max_quantity +'" min="'+ ticket.min_quantity +'"'+ slotAttrs +'><button class="btn btn-outline-secondary btn-add" type="button"><i class="fa fa-plus"></i></button></div>';
             if (ticket.show_stock) {
               ticket_string += '<div class="text-center remaining-count">Remaining: ' + tickets_max_quantity[ticket.id] + '</div>';
             }
@@ -308,7 +308,7 @@ var checkTickets = function() {
         ticket_string += '</div>';
         var $ticket_element = $(ticket_string);
         $ticket_element.find('.btn-add').on('click',function() {
-          var input = $(this).parent().parent().find('input');
+          var input = $(this).closest('.input-group').find('input');
           var qty = parseInt(input.val());
           if (qty >= parseInt(input.attr('max'))) {
             return;
@@ -331,7 +331,7 @@ var checkTickets = function() {
           }
         });
         $ticket_element.find('.btn-subtract').on('click',function() {
-          var input = $(this).parent().parent().find('input');
+          var input = $(this).closest('.input-group').find('input');
           var qty = parseInt(input.val());
           var min = parseInt(input.attr('min')) > 1 ? parseInt(input.attr('min')) : 0;
           if (qty > 0) {
@@ -577,7 +577,7 @@ $(document).ready(function() {
     <?php endif ?>
 
     $('.btn-add').on('click',function() {
-      var input = $(this).parent().parent().find('input');
+      var input = $(this).closest('.input-group').find('input');
       var qty = parseInt(input.val());
       if (qty >= parseInt(input.attr('max'))) {
         return;
@@ -597,7 +597,7 @@ $(document).ready(function() {
       }
     });
     $('.btn-subtract').on('click',function() {
-      var input = $(this).parent().parent().find('input');
+      var input = $(this).closest('.input-group').find('input');
       var qty = parseInt(input.val());
       var min = parseInt(input.attr('min')) > 1 ? parseInt(input.attr('min')) : 0;
       if (qty > 0) {

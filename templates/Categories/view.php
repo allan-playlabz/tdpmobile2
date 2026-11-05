@@ -14,7 +14,7 @@ $sCategories = $selected_categories;
         <?php echo $this->Form->create(null,['type'=>'post','class'=>'form-inline']) ?>
         <?php echo $this->Form->control('search',['class'=>'form-control','default'=>$this->request->getQuery('search'),'label'=>false,'placeholder'=>'Name of Attractions']) ?>
         <?php echo $this->Form->submit('Search',['class'=>'btn btn-primary form-group']) ?>
-        <?php echo $this->Html->link('Show All',['action'=>'index'],['class'=>'btn btn-primary ml-1 form-group']) ?>
+        <?php echo $this->Html->link('Show All',['action'=>'index'],['class'=>'btn btn-primary ms-1 form-group']) ?>
         <br />
         <div class="search-categories w-100 py-4">
           <h4>Categories</h4>
@@ -24,13 +24,13 @@ $sCategories = $selected_categories;
             <div class="card">
               <div class="card-header" id="heading-<?=$cardCount?>">
                 <h6 class="p-2 mb-0">
-                  <input class="headclass headclass<?=$cardCount?> ml-2" data-headclass-id="<?=$cardCount?>" type="checkbox" /> <?=$value['name']?>
-                  <button class="btn btn-link float-right collapsed" type="button" data-toggle="collapse" data-target="#collapse<?=$cardCount?>" aria-expanded="true" aria-controls="collapse<?=$cardCount?>"><i class="fa fa-angle-down" aria-hidden="true"></i>
+                  <input class="headclass headclass<?=$cardCount?> ms-2" data-headclass-id="<?=$cardCount?>" type="checkbox" /> <?=$value['name']?>
+                  <button class="btn btn-link float-end collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?=$cardCount?>" aria-expanded="true" aria-controls="collapse<?=$cardCount?>"><i class="fa fa-angle-down" aria-hidden="true"></i>
                   </button>
                 </h6>
               </div>
 
-              <div id="collapse<?=$cardCount?>" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+              <div id="collapse<?=$cardCount?>" class="collapse" aria-labelledby="headingOne" data-bs-parent="#accordion">
                 <div class="card-body">
                 <ul>
                   <?php foreach ($value['child_categories'] as $ckey => $cvalue) {
@@ -69,7 +69,7 @@ $sCategories = $selected_categories;
                       <?php
                       if ($attraction->pricing_type == 'settlement') {
                         if (!empty($attraction->tickets) && !empty($attraction->tickets[0]->settlement_agents) && !empty($attraction->tickets[0]->settlement_agents[0]->settlement)) {
-                            echo '<div class="rate"><del class="text-muted old-price">S'.$this->Number->currency($attraction->tickets[0]->price).'</del> <div class="font-weight-bold">S'.$this->Number->currency($attraction->tickets[0]->settlement_agents[0]->settlement->rate).'</div></div>';
+                            echo '<div class="rate"><del class="text-muted old-price">S'.$this->Number->currency($attraction->tickets[0]->price).'</del> <div class="fw-bold">S'.$this->Number->currency($attraction->tickets[0]->settlement_agents[0]->settlement->rate).'</div></div>';
                         }
                       }
                       else {

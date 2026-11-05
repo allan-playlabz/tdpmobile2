@@ -237,7 +237,7 @@ $payment_methods = array_merge($payment_methods, $other_payment_methods);
           <?php foreach ($order->order_items as $order_item): ?>
             <div class="card">
               <div class="card-body">
-                <div><?php echo $this->Html->link('<div class="font-weight-bold">'.$order_item->ticket->attraction->title .'</div> <div class="text-muted">'. $order_item->ticket->name.'<br><del>RP '.$this->Number->currency($order_item->ticket->price) .'</del></div>',['action'=>'view',$order_item->ticket->attraction_id],['escape'=>false]) ?></div>
+                <div><?php echo $this->Html->link('<div class="fw-bold">'.$order_item->ticket->attraction->title .'</div> <div class="text-muted">'. $order_item->ticket->name.'<br><del>RP '.$this->Number->currency($order_item->ticket->price) .'</del></div>',['action'=>'view',$order_item->ticket->attraction_id],['escape'=>false]) ?></div>
                 <div><?php echo $this->Number->currency($order_item->price) ?></div>
 
                   <?php $subtotal += ($order_item->price * $order_item->qty) ?>
@@ -250,20 +250,20 @@ $payment_methods = array_merge($payment_methods, $other_payment_methods);
                           <div><?php echo $order_item->time_of_visit->format('H:i') ?></div>
                       <?php endif ?>
                     </div>
-                    <div class="col-md-2 text-right p-0">
+                    <div class="col-md-2 text-end p-0">
                       <span class="py-1"> &times; <?php echo $order_item->qty ?> </span>
                     </div>
-                    <div class="col-md-4 text-right"><?php echo $this->Number->currency($order_item->price * $order_item->qty) ?></div>
+                    <div class="col-md-4 text-end"><?php echo $this->Number->currency($order_item->price * $order_item->qty) ?></div>
                   </div>
               </div>
             </div>
           <?php endforeach; ?>
           <div class="py-4 px-4 footer-total">
             <div class="row">
-              <div class="col"><?= __('Subtotal') ?></div><div class="col text-right"><?= $this->Number->currency($subtotal) ?></div>
+              <div class="col"><?= __('Subtotal') ?></div><div class="col text-end"><?= $this->Number->currency($subtotal) ?></div>
             </div>
             <div class="row grandtotal-row">
-              <div class="col"><?= __('Grand Total') ?></div><div class="col text-right"><?= $this->Number->currency($subtotal + $other_fees) ?></div>
+              <div class="col"><?= __('Grand Total') ?></div><div class="col text-end"><?= $this->Number->currency($subtotal + $other_fees) ?></div>
             </div>
           </div>
         <?php endif ?>
@@ -294,7 +294,7 @@ $payment_methods = array_merge($payment_methods, $other_payment_methods);
     var LONG_WAITING = 5;
     var MAX_CHECK = 120; /* check every 5 secs in 10 minutes */
     function showProcessing(el) {
-      $(el).after('<div class="spinner-border" role="status"><span class="sr-only"><?= __('Processing') ?>...</span></div>');
+      $(el).after('<div class="spinner-border" role="status"><span class="visually-hidden"><?= __('Processing') ?>...</span></div>');
       $(el).hide();
     }
 
@@ -319,7 +319,7 @@ $payment_methods = array_merge($payment_methods, $other_payment_methods);
           var markup_type = markups[$(this).val()]['type'];
           var provider = payment_providers[$(this).val()] || null;
           $('.convenience-fee-row').remove();
-          $('.grandtotal-row .col.text-right').html('$'+subtotal.toFixed(2));
+          $('.grandtotal-row .col.text-end').html('$'+subtotal.toFixed(2));
           var convenience_fee = 0;
           var total = subtotal + convenience_fee;
           if (markup_type === 'percentage') {
@@ -340,13 +340,13 @@ $payment_methods = array_merge($payment_methods, $other_payment_methods);
           $('.grandtotal-row').before(
             '<div class="row convenience-fee-row">' +
               '<div class="col">Convenience Fee</div>' +
-              '<div class="col convenience-fee text-right">$' + convenience_fee.toFixed(2) + '</div>' +
+              '<div class="col convenience-fee text-end">$' + convenience_fee.toFixed(2) + '</div>' +
             '</div>');
-          $('.grandtotal-row .col.text-right').html('$'+total.toFixed(2));
+          $('.grandtotal-row .col.text-end').html('$'+total.toFixed(2));
         }
         else {
           $('.convenience-fee-row').remove();
-          $('.grandtotal-row .col.text-right').html('$'+subtotal.toFixed(2));
+          $('.grandtotal-row .col.text-end').html('$'+subtotal.toFixed(2));
         }
       }
     });

@@ -44,7 +44,7 @@ $sCategories = $selected_categories;
         ?>
         <?php echo $this->Form->control('search',['class'=>'form-control','default'=>$this->request->getQuery('search'),'label'=>false,'placeholder'=>__('Name of Attractions')]) ?>
         <?php echo $this->Form->submit(__('Search'),['class'=>'btn btn-primary form-group']) ?>
-        <?php echo $this->Html->link(__('Show All'),['action'=>'index'],['class'=>'btn btn-primary ml-1 form-group']) ?>
+        <?php echo $this->Html->link(__('Show All'),['action'=>'index'],['class'=>'btn btn-primary ms-1 form-group']) ?>
         <br />
         <div class="search-categories w-100 py-4">
           <h4><?= __('Categories') ?></h4>
@@ -54,13 +54,13 @@ $sCategories = $selected_categories;
             <div class="card">
               <div class="card-header" id="heading-<?=$cardCount?>">
                 <h6 class="p-2 mb-0">
-                  <input class="headclass headclass<?=$cardCount?> ml-2" data-headclass-id="<?=$cardCount?>" name="categories[]" value="<?= $value['id'] ?>" type="checkbox" <?= in_array($value['id'], $sCategories) ? 'checked' : '' ?> /> <?=$value['name']?>
-                  <button class="btn btn-link float-right collapsed" type="button" data-toggle="collapse" data-target="#collapse<?=$cardCount?>" aria-expanded="true" aria-controls="collapse<?=$cardCount?>"><i class="fa fa-angle-down" aria-hidden="true"></i>
+                  <input class="headclass headclass<?=$cardCount?> ms-2" data-headclass-id="<?=$cardCount?>" name="categories[]" value="<?= $value['id'] ?>" type="checkbox" <?= in_array($value['id'], $sCategories) ? 'checked' : '' ?> /> <?=$value['name']?>
+                  <button class="btn btn-link float-end collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?=$cardCount?>" aria-expanded="true" aria-controls="collapse<?=$cardCount?>"><i class="fa fa-angle-down" aria-hidden="true"></i>
                   </button>
                 </h6>
               </div>
 
-              <div id="collapse<?=$cardCount?>" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+              <div id="collapse<?=$cardCount?>" class="collapse" aria-labelledby="headingOne" data-bs-parent="#accordion">
                 <div class="card-body">
                 <ul>
                   <?php foreach ($value['child_categories'] as $ckey => $cvalue) {
@@ -94,11 +94,11 @@ $sCategories = $selected_categories;
                     <div class="d-flex align-items-center py-1" id="country-heading-<?= $countryIndex ?>">
                       <input class="country-check" type="checkbox"
                              data-country-id="<?= $countryIndex ?>" id="country-<?= $countryIndex ?>" />
-                      <label class="font-weight-bold mb-0 ml-2" for="country-<?= $countryIndex ?>"><?= h($countryName) ?></label>
-                      <button class="btn btn-link collapsed ml-auto p-0" type="button" data-toggle="collapse" data-target="#country-collapse-<?= $countryIndex ?>" aria-expanded="false" aria-controls="country-collapse-<?= $countryIndex ?>"><i class="fa fa-angle-down" aria-hidden="true"></i></button>
+                      <label class="fw-bold mb-0 ms-2" for="country-<?= $countryIndex ?>"><?= h($countryName) ?></label>
+                      <button class="btn btn-link collapsed ms-auto p-0" type="button" data-bs-toggle="collapse" data-bs-target="#country-collapse-<?= $countryIndex ?>" aria-expanded="false" aria-controls="country-collapse-<?= $countryIndex ?>"><i class="fa fa-angle-down" aria-hidden="true"></i></button>
                     </div>
-                    <div id="country-collapse-<?= $countryIndex ?>" class="collapse" aria-labelledby="country-heading-<?= $countryIndex ?>" data-parent="#country-accordion">
-                      <div class="pl-3 pb-2">
+                    <div id="country-collapse-<?= $countryIndex ?>" class="collapse" aria-labelledby="country-heading-<?= $countryIndex ?>" data-bs-parent="#country-accordion">
+                      <div class="ps-3 pb-2">
                         <?php foreach ($countryCities as $city): ?>
                           <div class="d-flex align-items-center pt-1">
                             <input class="city-check city-check-<?= $countryIndex ?>" type="checkbox"
@@ -106,7 +106,7 @@ $sCategories = $selected_categories;
                                    name="cities[]" value="<?= h($city->id) ?>"
                                    id="city-<?= $countryIndex ?>-<?= h($city->id) ?>"
                                    <?= in_array((string)$city->id, $selected_city_strings, true) ? 'checked' : '' ?> />
-                            <label class="mb-0 ml-2" for="city-<?= $countryIndex ?>-<?= h($city->id) ?>"><?= h($city->name) ?></label>
+                            <label class="mb-0 ms-2" for="city-<?= $countryIndex ?>-<?= h($city->id) ?>"><?= h($city->name) ?></label>
                           </div>
                         <?php endforeach; ?>
                       </div>

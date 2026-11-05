@@ -18,7 +18,7 @@ $now = Cake\I18n\DateTime::now();
 <div class="col-md-8">
     <div><?php echo $this->Html->image($base.$attraction->featured_image,['class'=>'img-fluid','style'=>'width:100%']) ?></div>
     <h1 class="mt-4">
-      <?= h($attraction->title) ?> <?php if ($auth_user['role'] != 'viewer'): ?><i class="float-right fa <?= $attraction->is_favorite ? 'fa-bookmark text-green' : 'fa-bookmark-o' ?> btn-favorite" title="<?= $attraction->is_favorite ? __('Click to remove from favorites') : __('Click to add to favorites') ?>"></i><?php endif ?>
+      <?= h($attraction->title) ?> <?php if ($auth_user['role'] != 'viewer'): ?><i class="float-end fa <?= $attraction->is_favorite ? 'fa-bookmark text-green' : 'fa-bookmark-o' ?> btn-favorite" title="<?= $attraction->is_favorite ? __('Click to remove from favorites') : __('Click to add to favorites') ?>"></i><?php endif ?>
       <?php if (Configure::read('Default.show_attraction_sku')) { 
         echo '<br><small style="font-size: 12px" class="text-muted">'. $attraction->sku_id . '</small>';
       } ?>
@@ -31,12 +31,12 @@ $now = Cake\I18n\DateTime::now();
     <div class="card">
       <div class="card-header p-4" id="headingTwo">
         <h5 class="mb-0">
-          <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" style="height:49px;">
+          <button class="btn btn-link collapsed" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" style="height:49px;">
             <?= __('Terms And Conditions') ?>
           </button>
         </h5>
       </div>
-      <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+      <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-bs-parent="#accordion">
         <div class="card-body">
         <?= $attraction->terms_and_conditions; ?>
         </div>
@@ -161,11 +161,11 @@ var checkTickets = function() {
         ticket_string += '<div class="col-lg-3">$' + ticket.price.toFixed(2) + '</div>';
         if (!not_allowed_to_add) {
           var disabled = typeof(return_ticket_ids[ticket.id]) === 'undefined' ? 'disabled' : '';
-          var minus_button_group = '<div class="input-group-prepend"><button ' + disabled + ' class="btn btn-outline-secondary btn-subtract" type="button"><i class="fa fa-minus"></i></button></div>';
-          var add_button_group = '<div class="input-group-append"><button ' + disabled + '  class="btn btn-outline-secondary btn-add" type="button"><i class="fa fa-plus"></i></button></div>';
+          var minus_button_group = '<button ' + disabled + ' class="btn btn-outline-secondary btn-subtract" type="button"><i class="fa fa-minus"></i></button>';
+          var add_button_group = '<button ' + disabled + '  class="btn btn-outline-secondary btn-add" type="button"><i class="fa fa-plus"></i></button>';
           ticket_string += '<div class="col-lg-4"><div class="input-group">' + minus_button_group + '<input ' + (disabled !== '' ? 'readonly' :  '') + ' id="qty-' + ticket.id + '" type="text" class="form-control text-center" name="quantity['+ticket.id+']" value="0" data-price="'+ticket.price+'" data-return-ticket-id="' + return_ticket_ids[ticket.id] + '" max="'+ ticket_max_quantity +'" min="'+ ticket.min_quantity +'">' + add_button_group + '</div>';
           if (typeof tickets_max_quantity[ticket.id] == 'undefined' || tickets_max_quantity[ticket.id] == 0) {
-            ticket_string += '<div class="text-danger font-weight-bold text-center">Sold out</div>';
+            ticket_string += '<div class="text-danger fw-bold text-center">Sold out</div>';
           }
           ticket_string += '</div>';
         }
@@ -177,7 +177,7 @@ var checkTickets = function() {
         ticket_string += '</div>';
         var $ticket_element = $(ticket_string);
         $ticket_element.find('.btn-add').on('click',function() {
-          var input = $(this).parent().parent().find('input');
+          var input = $(this).closest('.input-group').find('input');
           var qty = parseInt(input.val());
           if (qty >= parseInt(input.attr('max'))) {
             return;
@@ -199,7 +199,7 @@ var checkTickets = function() {
           }
         });
         $ticket_element.find('.btn-subtract').on('click',function() {
-          var input = $(this).parent().parent().find('input');
+          var input = $(this).closest('.input-group').find('input');
           var qty = parseInt(input.val());
           var min = parseInt(input.attr('min')) > 1 ? parseInt(input.attr('min')) : 0;
           if (qty > 0) {
@@ -409,7 +409,7 @@ $(document).ready(function() {
     var cart_total = 0;
 
     $('.btn-add').on('click',function() {
-      var input = $(this).parent().parent().find('input');
+      var input = $(this).closest('.input-group').find('input');
       var qty = parseInt(input.val());
       if (qty >= parseInt(input.attr('max'))) {
         return;
@@ -429,7 +429,7 @@ $(document).ready(function() {
       }
     });
     $('.btn-subtract').on('click',function() {
-      var input = $(this).parent().parent().find('input');
+      var input = $(this).closest('.input-group').find('input');
       var qty = parseInt(input.val());
       var min = parseInt(input.attr('min')) > 1 ? parseInt(input.attr('min')) : 0;
       if (qty > 0) {

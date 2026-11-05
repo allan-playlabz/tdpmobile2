@@ -214,14 +214,14 @@ function getBadgeInfo($voucher)
                   if ($voucher_merging->status == 'done') {
                     $voucher_merging_done = true;
                   } else {
-                    echo '<span id="voucher-merging-msg" class="float-right d-flex voucher-merging-in-progress"><span class="align-self-center mr-2">Download as Single PDF (Processing) ' . $voucher_merging_created . '</span>  <span class="voucher-merging-loading"><span>Please wait</span><i class="fa fa-hourglass-start align-self-center"></i></span></span>';
+                    echo '<span id="voucher-merging-msg" class="float-end d-flex voucher-merging-in-progress"><span class="align-self-center me-2">Download as Single PDF (Processing) ' . $voucher_merging_created . '</span>  <span class="voucher-merging-loading"><span>Please wait</span><i class="fa fa-hourglass-start align-self-center"></i></span></span>';
                   }
                 } elseif ($order['status'] == 'Paid') {
-                  echo $this->Html->link(__('Download as Single PDF (New Request)') . ' <i class="fa fa-file"></i>', ['controller' => 'Vouchers', 'action' => 'downloadAll', $order['id']], ['class' => $voucher_merging ? 'd-none float-right' : 'float-right', 'id' => 'merge-all', 'escape' => false]);
+                  echo $this->Html->link(__('Download as Single PDF (New Request)') . ' <i class="fa fa-file"></i>', ['controller' => 'Vouchers', 'action' => 'downloadAll', $order['id']], ['class' => $voucher_merging ? 'd-none float-end' : 'float-end', 'id' => 'merge-all', 'escape' => false]);
                 } elseif ($order['status'] == 'Waiting' || $order['status'] == 'In Progress') {
-                  echo '<span class="float-right d-flex"><span class="align-self-center mr-2">Download as Single PDF </span> <span class="voucher-merging-loading"><span>Order Processing</span></span></span>';
+                  echo '<span class="float-end d-flex"><span class="align-self-center me-2">Download as Single PDF </span> <span class="voucher-merging-loading"><span>Order Processing</span></span></span>';
                 }
-                echo $this->Html->link(__('Download as Single PDF (Ready)') . ($voucher_merging ? $voucher_merging_created : '') . ' <i class="fa fa-download"></i>', ['controller' => 'Vouchers', 'action' => 'downloadAll', $order['id']], ['class' => $voucher_merging_done ? 'float-right' : 'd-none float-right', 'id' => 'download-all', 'escape' => false]);
+                echo $this->Html->link(__('Download as Single PDF (Ready)') . ($voucher_merging ? $voucher_merging_created : '') . ' <i class="fa fa-download"></i>', ['controller' => 'Vouchers', 'action' => 'downloadAll', $order['id']], ['class' => $voucher_merging_done ? 'float-end' : 'd-none float-end', 'id' => 'download-all', 'escape' => false]);
 
                 ?>
             </div>
@@ -258,7 +258,7 @@ function getBadgeInfo($voucher)
                         <!-- <?php foreach ($order_item->vouchers as $voucher) : ?>
                         <?php if ($voucher->order_qty_idx !== null && !in_array($voucher->order_qty_idx, $added_group)) : ?>
                           <div>
-                            <?= $this->Html->link(__('Download Merged') . ' ' . ($voucher->order_qty_idx + 1), ['controller' => 'Vouchers', 'action' => 'sview', $order_item->id . '_' . $voucher->order_qty_idx], ['class' => 'font-weight-bold']) ?>
+                            <?= $this->Html->link(__('Download Merged') . ' ' . ($voucher->order_qty_idx + 1), ['controller' => 'Vouchers', 'action' => 'sview', $order_item->id . '_' . $voucher->order_qty_idx], ['class' => 'fw-bold']) ?>
                           </div>
                           <?php $added_group[] = $voucher->order_qty_idx ?>
                         <?php endif ?>
@@ -282,7 +282,7 @@ function getBadgeInfo($voucher)
                               $bg_color = $badge['bg_color'];
                               $status_to_show = $badge['status_to_show'];
                               ?>
-                              <small class="badge badge-<?= $bg_color ?>"><?= $status_to_show ?></small>
+                              <small class="badge text-bg-<?= $bg_color ?>"><?= $status_to_show ?></small>
                             </td>
                           <?php } elseif ($order_created < $hide_before_date) { ?>
                             <td>&nbsp;</td>
@@ -305,7 +305,7 @@ function getBadgeInfo($voucher)
                             $bg_color = $badge['bg_color'];
                             $status_to_show = $badge['status_to_show'];
                         ?>
-                        <small class="badge badge-<?= $bg_color ?>"><?= $status_to_show ?></small>
+                        <small class="badge text-bg-<?= $bg_color ?>"><?= $status_to_show ?></small>
                       </td>
                     <?php } elseif ($order_created < $hide_before_date) { ?>
                       <td>&nbsp;</td>
@@ -334,7 +334,7 @@ function getBadgeInfo($voucher)
           <?php foreach ($order['order_items'] as $order_item) : ?>
             <div class="card mb-3">
               <div class="card-body">
-                <div><?php echo '<div class="font-weight-bold">' . $order_item['attraction_title'] . '</div> <div class="text-muted">' . $order_item['ticket_name'] . '</div>' ?></div>
+                <div><?php echo '<div class="fw-bold">' . $order_item['attraction_title'] . '</div> <div class="text-muted">' . $order_item['ticket_name'] . '</div>' ?></div>
                 <div><?php echo $this->Number->currency($order_item['price']) ?></div>
                 <div class="row py-2">
                   <div class="col-md-6">
@@ -345,10 +345,10 @@ function getBadgeInfo($voucher)
                       <div><?php echo $order_item['time_of_visit'] ?></div>
                     <?php endif ?>
                   </div>
-                  <div class="col-md-2 text-right p-0">
+                  <div class="col-md-2 text-end p-0">
                     <span class="py-1"> &times; <?php echo $order_item['quantity'] ?> </span>
                   </div>
-                  <div class="col-md-4 text-right"><?php echo $this->Number->currency($order_item['total']) ?></div>
+                  <div class="col-md-4 text-end"><?php echo $this->Number->currency($order_item['total']) ?></div>
                 </div>
 
               </div>
@@ -357,22 +357,22 @@ function getBadgeInfo($voucher)
           <div class="py-4 px-4 footer-total">
             <div class="row">
               <div class="col"><?= __('Subtotal') ?></div>
-              <div class="col text-right"><?= $this->Number->currency($order['subtotal']) ?></div>
+              <div class="col text-end"><?= $this->Number->currency($order['subtotal']) ?></div>
             </div>
             <div class="row">
               <div class="col"><?= __('Convenience Fee') ?></div>
-              <div class="col text-right"><?= $this->Number->currency($order['convenience_fee']) ?></div>
+              <div class="col text-end"><?= $this->Number->currency($order['convenience_fee']) ?></div>
             </div>
             <div class="row grandtotal-row">
               <div class="col"><?= __('Grand Total') ?></div>
-              <div class="col text-right"><?= $this->Number->currency($order['total']) ?></div>
+              <div class="col text-end"><?= $this->Number->currency($order['total']) ?></div>
             </div>
           </div>
           <div class="py-4">
             <div class="clearfix">
               <?php
               if (Configure::read('Features.invoice')) {
-                echo $this->Html->link('<i class="fa fa-download"></i> ' . __('Download Invoice'), ['controller' => 'Orders', 'action' => 'downloadInvoice', $order['order_ref_id']], ['class' => 'float-right', 'escape' => false]);
+                echo $this->Html->link('<i class="fa fa-download"></i> ' . __('Download Invoice'), ['controller' => 'Orders', 'action' => 'downloadInvoice', $order['order_ref_id']], ['class' => 'float-end', 'escape' => false]);
               }
               ?>
             </div>

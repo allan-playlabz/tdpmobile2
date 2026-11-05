@@ -140,9 +140,9 @@ class QuestionGroupHelper extends Helper
                     break;
                 case 'time':
                     $templates = [
-                        'inputContainer' => '<div class="form-row mb-3">{{content}}</div>',
+                        'inputContainer' => '<div class="row g-2 mb-3">{{content}}</div>',
                         'label' => '<label class="col-12" {{attrs}}>{{text}}</label>',
-                        'select' => '<div class="col-auto"><select name="{{name}}" {{attrs}} class="form-control mr-1">{{content}}</select></div> ',
+                        'select' => '<div class="col-auto"><select name="{{name}}" {{attrs}} class="form-control me-1">{{content}}</select></div> ',
                     ];
                     break;
                 case 'checkbox':

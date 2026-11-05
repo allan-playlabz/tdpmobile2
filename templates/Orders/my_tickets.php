@@ -31,18 +31,18 @@ $hide_before_date = new \Cake\I18n\DateTime('-6 months');
     <div class="col">
         <?php echo $this->Form->create(null, ['type' => 'get', 'class' => 'form-inline mb-4 card-header order-search']) ?>
         <div class="card-left-header d-flex my-2">
-            <?php echo $this->Form->control('code', ['type' => 'text', 'class' => 'form-control', 'default' => $this->request->getQuery('code'), 'label' => ['class' => 'pr-1', 'text' => __('Code'), 'autocomplete' => 'off']]) ?>
+            <?php echo $this->Form->control('code', ['type' => 'text', 'class' => 'form-control', 'default' => $this->request->getQuery('code'), 'label' => ['class' => 'pe-1', 'text' => __('Code'), 'autocomplete' => 'off']]) ?>
             <!-- <?php echo $this->Form->control('status', ['class' => 'form-control', 'options' => ['all' => 'All','done' => 'Completed', 
     'cancelled' => 'Cancelled', 
     'waiting' => 'Waiting',
     'refunded'=>'Refunded',
-    'rejected'=>'Failed'], 'default' => $this->request->getQuery('status'), 'label' => ['class' => 'ml-4 pr-1', 'text' => __('Status')]]) ?> -->
+    'rejected'=>'Failed'], 'default' => $this->request->getQuery('status'), 'label' => ['class' => 'ms-4 pe-1', 'text' => __('Status')]]) ?> -->
         </div>
         <div class="card-right-header d-flex my-2" style="align-items: flex-end">
-            <?php echo $this->Form->control('from', ['class' => 'datepicker form-control', 'value' => $from, 'label' => ['class' => 'pr-1', 'text' => __('From')]]) ?>
-            <?php echo $this->Form->control('to', ['class' => 'datepicker form-control', 'value' => $to, 'label' => ['class' => 'ml-4 pr-1', 'text' => __('To')]]) ?>
-            <div class="form-group"><?php echo $this->Form->submit(__('Filter'), ['class' => 'btn btn-primary ml-1']) ?></div>
-            <div class="form-group"><?php echo $this->Html->link(__('Show All'), ['action' => 'myTickets'], ['class' => 'btn btn-primary ml-1','style'=>'min-width:80px']) ?></div>
+            <?php echo $this->Form->control('from', ['class' => 'datepicker form-control', 'value' => $from, 'label' => ['class' => 'pe-1', 'text' => __('From')]]) ?>
+            <?php echo $this->Form->control('to', ['class' => 'datepicker form-control', 'value' => $to, 'label' => ['class' => 'ms-4 pe-1', 'text' => __('To')]]) ?>
+            <div class="form-group"><?php echo $this->Form->submit(__('Filter'), ['class' => 'btn btn-primary ms-1']) ?></div>
+            <div class="form-group"><?php echo $this->Html->link(__('Show All'), ['action' => 'myTickets'], ['class' => 'btn btn-primary ms-1','style'=>'min-width:80px']) ?></div>
         </div>
         <?php echo $this->Form->end() ?>
     </div>
@@ -84,7 +84,7 @@ $hide_before_date = new \Cake\I18n\DateTime('-6 months');
                             <td><?= h($voucher->created->format('d M Y H:ia')) ?></td>
                             <?php if ($auth_user['agent']['hide_voucher_status'] === false && $voucher->created >= $hide_before_date) { ?>
                             <td>
-                                <span class="badge badge-<?= $color_map[$voucher->code_status] ?>"><?= $voucher->voucher_type != 'generated' && $voucher->code_status == 'purchased' ? 'Purchased' : $status_map[$voucher->code_status] ?></span>
+                                <span class="badge text-bg-<?= $color_map[$voucher->code_status] ?>"><?= $voucher->voucher_type != 'generated' && $voucher->code_status == 'purchased' ? 'Purchased' : $status_map[$voucher->code_status] ?></span>
                             </td>
                             <?php } elseif ($voucher->created < $hide_before_date) { ?>
                             <td>&nbsp;</td>

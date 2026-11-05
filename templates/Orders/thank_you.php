@@ -3,10 +3,10 @@ use Cake\Core\Configure; ?>
 
 <div class="container py-5">
 <div class="text-center">
-	<div class="badge badge-success m-auto"><i class="fa fa-check fa-5x"></i></div>
+	<div class="badge text-bg-success m-auto"><i class="fa fa-check fa-5x"></i></div>
 </div>
 
-<h2 style="font-size: 32px;text-align: center;" class="font-weight-bold mb-4"><?= __('Thank you for your purchase!') ?></h2>
+<h2 style="font-size: 32px;text-align: center;" class="fw-bold mb-4"><?= __('Thank you for your purchase!') ?></h2>
 <?php if (!empty($order) && $order->status == 'done'): ?>
 	<div class="text-center">Click <a href="<?= $this->Url->build(['controller' => 'Orders', 'action' => 'view', $order->order_ref_id]) ?>">here</a> to view order details and download vouchers or <a href="/">create</a> another order.</div>
 <?php elseif (!empty($order)): ?>

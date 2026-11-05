@@ -7,7 +7,7 @@
     </title>
     <?= $this->Html->meta('icon') ?>
     <meta name="robots" content="noindex, nofollow" />
-    <?= $this->Html->css(['bootstrap.min.css',
+    <?= $this->Html->css(['bootstrap.min.css', 'bootstrap4-compat.css',
                           'font-awesome.min.css',
                           'simple-sidebar.css',
                           'jsgrid.min.css',
@@ -30,7 +30,7 @@
     </div>
     <footer>
     </footer>
-    <?= $this->Html->script(['jquery.min.js', 'bootstrap.min.js', '/plugins/slimScroll/jquery.slimscroll.min.js']); ?>
+    <?= $this->Html->script(['jquery.min.js', 'bootstrap.bundle.min.js', '/plugins/slimScroll/jquery.slimscroll.min.js']); ?>
   <?= $this->fetch('scriptBottom') ?>
   <?= $this->fetch('script') ?>
 </body>

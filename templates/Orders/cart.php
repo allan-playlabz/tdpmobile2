@@ -23,7 +23,7 @@ $base = \Cake\Core\Configure::read('AWSPublic.public_host');
               <?php echo $this->Html->link($this->Html->image($base.$ticket->attraction->featured_image,['class'=>'img-thumbnail']),['controller'=>'attractions','action'=>'view',$ticket->attraction_id],['escape'=>false]) ?>
             </div>
             <div class="col-7 col-md-3">
-              <?php echo $this->Html->link('<div class="font-weight-bold">'.$ticket->attraction->title .'</div> <div class="text-muted">'. $ticket->name.'<br><del>RP '.$this->Number->currency($ticket->retail_price) .'</del></div>',['controller'=>'attractions','action'=>'view',$ticket->attraction_id],['escape'=>false]) ?> <?= $ticket->attraction->type =='transfer' ? ' - '.Configure::read('Default.transfer_subtypes.'.$ticket->attraction->subtype) : '' ?>
+              <?php echo $this->Html->link('<div class="fw-bold">'.$ticket->attraction->title .'</div> <div class="text-muted">'. $ticket->name.'<br><del>RP '.$this->Number->currency($ticket->retail_price) .'</del></div>',['controller'=>'attractions','action'=>'view',$ticket->attraction_id],['escape'=>false]) ?> <?= $ticket->attraction->type =='transfer' ? ' - '.Configure::read('Default.transfer_subtypes.'.$ticket->attraction->subtype) : '' ?>
               <div><?php echo $this->Number->currency($ticket->price) ?></div>
             </div>
           </div>
@@ -38,7 +38,7 @@ $base = \Cake\Core\Configure::read('AWSPublic.public_host');
               </div>
               <div class="col-4 col-md-5">
                 <div class="input-group">
-                  <div class="input-group-prepend"><button class="btn btn-outline-secondary btn-sm btn-subtract" type="button"><i class="fa fa-minus"></i></button></div>
+                  <button class="btn btn-outline-secondary btn-sm btn-subtract" type="button"><i class="fa fa-minus"></i></button>
                   <?php 
                   if ($ticket->max_quantity && !empty($tickets_max_quantity[$ticket->id])) {
                     if ($ticket->max_quantity < ($tickets_max_quantity[$ticket->id] ?? null)) {
@@ -47,11 +47,11 @@ $base = \Cake\Core\Configure::read('AWSPublic.public_host');
                   } ?>
                   <?= $this->Form->text('quantity.'.$ticket->id.'.'.$date,['value'=>$qty,'class'=>'form-control p-1 text-center','data-price'=>$ticket->price,'max'=> !empty($tickets_max_quantity[$ticket->id]) ? ($tickets_max_quantity[$ticket->id] ?? null) : '','min'=> $ticket->min_quantity]) ?>
 
-                  <div class="input-group-append"><button class="btn btn-outline-secondary btn-sm btn-add" type="button"><i class="fa fa-plus"></i></button></div>
+                  <button class="btn btn-outline-secondary btn-sm btn-add" type="button"><i class="fa fa-plus"></i></button>
                 </div>
 
               </div>
-              <div class="col-3 col-md-2 row-total text-right">
+              <div class="col-3 col-md-2 row-total text-end">
                 <?php echo $this->Number->currency($ticket->price * $qty) ?>
               </div>
               <div class="col-1 col-md-1"><?= $this->Form->postLink('<i class="fa fa-times"></i>',['action'=>'removeTicket',$ticket->id,$date],['escape'=>false,'confirm'=>__('Remove {0} from cart?', $ticket->name),'class'=>'btn btn-danger btn-sm tr-10','block'=>'postLink']) ?></div>
@@ -64,7 +64,7 @@ $base = \Cake\Core\Configure::read('AWSPublic.public_host');
     <?php endforeach; ?>
     <hr>
     <div class="row mt-3">
-      <div class="col text-right pr-5">
+      <div class="col text-end pe-5">
         <span class="total"><strong><?= __('Total') ?></strong>: <?= $this->Number->currency($total) ?></span>
       </div>
     </div>
@@ -130,7 +130,7 @@ $base = \Cake\Core\Configure::read('AWSPublic.public_host');
 
     $(document).ready(function() {
       $('.btn-add').on('click',function() {
-      var input = $(this).parent().parent().find('input');
+      var input = $(this).closest('.input-group').find('input');
       var qty = parseInt(input.val());
       if (qty >= parseInt(input.attr('max'))) {
         return;
@@ -153,7 +153,7 @@ $base = \Cake\Core\Configure::read('AWSPublic.public_host');
       }
     });
     $('.btn-subtract').on('click',function() {
-      var input = $(this).parent().parent().find('input');
+      var input = $(this).closest('.input-group').find('input');
       var qty = parseInt(input.val());
       var min = parseInt(input.attr('min')) > 1 ? parseInt(input.attr('min')) : 0;
       if (qty > 1) {

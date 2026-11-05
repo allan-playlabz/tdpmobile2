@@ -1,5 +1,5 @@
 <div class="row">
-  <div class="col px-4 text-right">
+  <div class="col px-4 text-end">
     <?= $this->Html->link('Download Generated Reports', ['controller' => 'Reports', 'action' => 'reports']) ?>
   </div>
 </div>

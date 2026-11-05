@@ -53,7 +53,7 @@ $color_map = [
                 <?php echo $this->Form->control('to', ['class' => 'datepicker form-control', 'value' => $to, 'label' => ['text' => __('To')]]) ?>
             </div>
             <div class="col-lg-6 col-12 d-flex justify-content-end align-items-end mb-2">
-                <div class="form-group mb-0"><?php echo $this->Form->submit(__('Filter'), ['class' => 'btn btn-primary mr-2']) ?></div>
+                <div class="form-group mb-0"><?php echo $this->Form->submit(__('Filter'), ['class' => 'btn btn-primary me-2']) ?></div>
                 <div class="form-group mb-0"><?php echo $this->Html->link(__('Show All'), ['action' => 'index'], ['class' => 'btn btn-primary']) ?></div>
             </div>
         </div>
@@ -82,11 +82,11 @@ $color_map = [
                             <td><div style="max-width:140px; white-space: nowrap; overflow: hidden; text-overflow:ellipsis"><?= h($order->tracking_no) ?></div></td>
                             <td>
                                 <?php foreach ($order->order_items as $order_item) : ?>
-                                    <div><?= $order_item->ticket->name ?> <span class="badge badge-info"><?= $order_item->qty ?></span></div>
+                                    <div><?= $order_item->ticket->name ?> <span class="badge text-bg-info"><?= $order_item->qty ?></span></div>
                                 <?php endforeach; ?>
                             </td>
                             <td>
-                                <span class="badge badge-<?= $color_map[$order->status] ?>"><?= $status_map[$order->status] ?></span>
+                                <span class="badge text-bg-<?= $color_map[$order->status] ?>"><?= $status_map[$order->status] ?></span>
                             </td>
                             <td><?= $this->Number->currency($order->total) ?></td>
 

@@ -69,5 +69,5 @@ Tests: schema comes from `tests/schema/app.sql` + `tests/schema/log.sql` (schema
 
 ## Repo notes
 
-- The UI uses Bootstrap, jQuery plugins and jsGrid from `webroot/`.
+- The UI uses Bootstrap 5.3 (`webroot/css/bootstrap.min.css` + `js/bootstrap.bundle.min.js`, local files), plus `css/bootstrap4-compat.css` for the BS4 behaviour templates still rely on (`.form-group` spacing, `.form-inline`, label spacing, no link underline). jQuery stays for app.js, bootstrap-datepicker and jsGrid. Use BS5 classes/attributes (`ms-/me-`, `text-end`, `fw-bold`, `text-bg-*`, `data-bs-*`). Email and PDF templates don't load Bootstrap (they define their own `.text-right` etc.) — leave their class names alone.
 - `.claude/skills/cake5-*` are the upgrade skills used for the migration (audit/scan can be re-run to catch leftovers).

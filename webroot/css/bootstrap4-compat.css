@@ -1,0 +1,62 @@
+/*
+ * Bootstrap 4 behaviour the templates still rely on, on top of Bootstrap 5.
+ * Load right after bootstrap.min.css.
+ */
+
+/* BS5 dropped .form-group; FormHelper's inputContainer and the templates still use it. */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+/* BS5 labels have no spacing without .form-label. */
+label {
+  display: inline-block;
+  margin-bottom: .5rem;
+}
+
+/* BS4 links were not underlined until hover. */
+a {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+.btn:hover,
+.nav-link:hover,
+.navbar-brand:hover,
+.dropdown-item:hover,
+.page-link:hover,
+.list-group-item:hover {
+  text-decoration: none;
+}
+
+/* BS5 dropped .form-inline (search / filter bars). */
+.form-inline {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+}
+.form-inline label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0;
+}
+@media (min-width: 576px) {
+  .form-inline .form-group {
+    display: flex;
+    flex: 0 0 auto;
+    flex-flow: row wrap;
+    align-items: center;
+    margin-bottom: 0;
+  }
+  .form-inline .form-control,
+  .form-inline .form-select {
+    display: inline-block;
+    width: auto;
+    vertical-align: middle;
+  }
+  .form-inline .input-group {
+    width: auto;
+  }
+}

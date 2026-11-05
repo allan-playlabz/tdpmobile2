@@ -4,7 +4,7 @@ $no = 1;
 <div class="row mb-2">
   <div class="col">
     <div class="btn-group" role="group">
-      <button id="credit-history" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <button id="credit-history" type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       <?= __('Usage History') ?>
       </button>
       <div class="dropdown-menu" aria-labelledby="credit-history">
@@ -17,7 +17,7 @@ $no = 1;
 </div>
 <div class="row">
   <div class="col">
-    <h3 class="d-inline-block"><?= __('Usage History') ?></h3><?php echo  $this->Form->postLink('Export to CSV',[],['class'=>'btn btn-default float-right']) ?>
+    <h3 class="d-inline-block"><?= __('Usage History') ?></h3><?php echo  $this->Form->postLink('Export to CSV',[],['class'=>'btn btn-default float-end']) ?>
   </div>
 </div>
 <div class="index large-9 medium-8 columns content">
