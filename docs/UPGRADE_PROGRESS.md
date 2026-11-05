@@ -125,6 +125,7 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 - New `tests/TestCase/Controller/AuthenticationTest.php`: logged-out redirect with `?redirect=`, public login/signup, 3.x `Auth.User` session layout accepted, wrong password shows the error and doesn't log in.
 - Results: **OK (202 tests: 8 passing, 194 incomplete)**. The incomplete ones are 3.x baked stubs (`markTestIncomplete`) — not written tests.
 - Also fixed: `templates/layout/default.php` used `null` as an array key when no language is selected (PHP 8.5 deprecation).
+- 2026-11-04: PHPUnit 11.5.57 → **12.5.43** (`^12.5`; CakePHP 5.4 allows `^11.5.3 || ^12.1.3 || ^13.0`, 13 would need PHP 8.4). Only the schema URL in `phpunit.xml.dist` changed; the tests use no annotations or mocks, so no test code changed.
 ## Follow-ups (not part of the upgrade)
 - Consider `HostHeaderMiddleware` with `APP_FULL_BASE_URL` set per environment (Host header injection protection).
 - firebase/php-jwt < 7 advisory (CVE-2025-45769, low).

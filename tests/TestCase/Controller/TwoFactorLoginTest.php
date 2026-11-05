@@ -206,6 +206,24 @@ class TwoFactorLoginTest extends TestCase
         $this->assertSame(9, TwoFactor::backupCodesLeft($this->user(self::MASTER_A)));
     }
 
+    public function testOtpPageWithoutPendingLoginGoesToLogin(): void
+    {
+        $this->get('/agent-users/otp');
+        $this->assertRedirectContains('/agent-users/login');
+
+        $this->session(['agent_id' => '00000000-0000-4000-8000-00000000dead']);
+        $this->get('/agent-users/otp');
+        $this->assertRedirectContains('/agent-users/login');
+    }
+
+    public function testOtpPageShowsForPendingLogin(): void
+    {
+        $this->session(['agent_id' => self::MASTER_A]);
+        $this->get('/agent-users/otp');
+
+        $this->assertResponseOk();
+    }
+
     public function testResendOtpRefusedForAuthenticatorUsers(): void
     {
         $this->linkAuthenticator(self::MASTER_A);
