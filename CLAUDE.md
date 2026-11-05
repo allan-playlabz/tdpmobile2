@@ -13,7 +13,7 @@ Runs locally under Laragon (`C:\laragon\www\tdpmobile2`). The app was upgraded f
 ```bash
 composer install
 bin/cake server -p 8765                 # dev server; browse http://tpp.localhost:8765 (session cookie domain, see below)
-composer test                           # phpunit 11 (tests/TestCase)
+composer test                           # phpunit 12 (tests/TestCase)
 vendor/bin/phpunit tests/TestCase/Controller/AuthenticationTest.php                    # single file
 vendor/bin/phpunit --filter testProtectedPageRedirectsToLogin tests/TestCase/Controller/AuthenticationTest.php  # single test
 composer cs-check                       # phpcs (CakePHP standard, phpcs.xml)

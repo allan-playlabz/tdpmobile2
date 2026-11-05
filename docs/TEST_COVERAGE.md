@@ -1,6 +1,6 @@
 # Test coverage
 
-Generated 2026-11-03 from the PHPUnit suite in `tests/TestCase` (CakePHP 5.4, PHPUnit 11, PHP 8.5).
+Generated 2026-11-03 from the PHPUnit suite in `tests/TestCase` (CakePHP 5.4, PHPUnit 12, PHP 8.5).
 
 > **What this measures.** No coverage driver (PCOV/Xdebug) is installed for the Laragon PHP 8.5 build, so this is not line coverage.
 > It maps each class in `src/` to the test files that exercise it, and each public method or controller action to whether a test calls it

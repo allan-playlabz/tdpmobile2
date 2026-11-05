@@ -225,6 +225,10 @@ class AgentUsersController extends AppController
                   ->first() : null;
       // The method comes from the user's record, never from the session.
       $use_app = $agent && TwoFactor::usesAuthenticator($agent) && TwoFactor::isSetUp($agent);
+      // No login waiting for its second factor: nothing to verify here.
+      if (!$agent && !$this->request->is('post')) {
+        return $this->redirect(['action'=>'login']);
+      }
       if ($this->request->is('post')) {
         $data = $this->request->getData();
         if ($this->_otpAttemptsExceeded()) {
