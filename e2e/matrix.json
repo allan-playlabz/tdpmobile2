@@ -1,0 +1,45 @@
+{
+    "_comment": "pricing_type/type/voucher_type → a ticket the e2e account can book. null = none found; edit by hand or rebuild with scripts/build-matrix.php.",
+    "cells": {
+        "settlement/normal/generated": {
+            "attraction": "26874762-ff25-4ef4-aef4-c02143e9244e",
+            "ticket": "0ec9235b-a9d1-4cbe-a737-85f7e47bea30",
+            "note": "Singapore Duck tour — Adult"
+        },
+        "settlement/normal/barcode": null,
+        "settlement/normal/pdf": null,
+        "settlement/normal/api": null,
+        "settlement/complex/generated": {
+            "attraction": "6c4ae52b-4cc4-4d41-a636-90682220e3ae",
+            "ticket": "ac68c839-5e70-4d83-9fed-2f12f219f3fd",
+            "note": "A1 FLexi — Flexi 1 Adult"
+        },
+        "settlement/complex/barcode": null,
+        "settlement/complex/pdf": null,
+        "settlement/complex/api": null,
+        "fdate/normal/generated": null,
+        "fdate/normal/barcode": null,
+        "fdate/normal/pdf": null,
+        "fdate/normal/api": null,
+        "fdate/complex/generated": null,
+        "fdate/complex/barcode": null,
+        "fdate/complex/pdf": null,
+        "fdate/complex/api": null,
+        "fdatetime/normal/generated": null,
+        "fdatetime/normal/barcode": null,
+        "fdatetime/normal/pdf": null,
+        "fdatetime/normal/api": null,
+        "fdatetime/complex/generated": null,
+        "fdatetime/complex/barcode": null,
+        "fdatetime/complex/pdf": null,
+        "fdatetime/complex/api": null,
+        "two_way_fdatetime/normal/generated": null,
+        "two_way_fdatetime/normal/barcode": null,
+        "two_way_fdatetime/normal/pdf": null,
+        "two_way_fdatetime/normal/api": null,
+        "two_way_fdatetime/complex/generated": null,
+        "two_way_fdatetime/complex/barcode": null,
+        "two_way_fdatetime/complex/pdf": null,
+        "two_way_fdatetime/complex/api": null
+    }
+}

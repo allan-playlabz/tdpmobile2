@@ -159,7 +159,7 @@ test.describe('Two-factor settings page', () => {
   test('shows one state and only the forms that state allows', async ({ page }) => {
     await openHealthy(page, '/agent-users/two-factor');
     await expect(page.getByRole('heading', { name: 'Two-factor sign-in' })).toBeVisible();
-    const state = page.locator('.card-body .font-weight-bold').first();
+    const state = page.locator('.card-body .fw-bold').first();
     await expect(state).toHaveText(new RegExp(`^(${STATES.join('|')})$`));
     const text = ((await state.textContent()) ?? '').trim();
     const buttons = page.locator('button[name="do"]');

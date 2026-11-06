@@ -118,7 +118,7 @@ export async function readSidebar(page: Page): Promise<{ lines: SidebarLine[]; s
       const children = Array.from(body.children);
       const muted = card.querySelector('.text-muted') as HTMLElement | null;
       return {
-        title: text(card.querySelector('.font-weight-bold')),
+        title: text(card.querySelector('.fw-bold')),
         name: (muted?.innerText ?? '').split('\n')[0].trim(),
         unitPrice: text(children[1]),
         rows: Array.from(card.querySelectorAll('.row.py-2')).map((row) => ({
@@ -400,9 +400,13 @@ export class AttractionPage {
     return { departDate, departTime, returnDate, returnTime };
   }
 
-  /** First quantity group whose + can raise it (not sold out, not a synced/readonly return leg). */
-  private async firstAddableGroup(scope: Locator): Promise<Locator | null> {
-    const groups = scope.locator('.input-group').filter({ has: this.page.locator('.btn-add:not([disabled])') });
+  /**
+   * First quantity group whose + can raise it (not sold out, not a synced/readonly return leg);
+   * only the group of `ticketId` when one is given.
+   */
+  private async firstAddableGroup(scope: Locator, ticketId?: string): Promise<Locator | null> {
+    let groups = scope.locator('.input-group').filter({ has: this.page.locator('.btn-add:not([disabled])') });
+    if (ticketId) groups = groups.filter({ has: this.page.locator(`input[name^="quantity[${ticketId}]"]`) });
     const count = await groups.count();
     for (let i = 0; i < count; i++) {
       const group = groups.nth(i);
@@ -415,12 +419,12 @@ export class AttractionPage {
   }
 
   /**
-   * Raises the first addable ticket in `scope` to `qty` with its + button (stops at its max).
-   * Returns what was selected, or null when no ticket can be added.
+   * Raises the first addable ticket in `scope` (or ticket `ticketId`) to `qty` with its + button
+   * (stops at its max). Returns what was selected, or null when no ticket can be added.
    */
-  async selectTicket(qty = 1, scope: Locator = this.form): Promise<SelectedTicket | null> {
+  async selectTicket(qty = 1, scope: Locator = this.form, ticketId?: string): Promise<SelectedTicket | null> {
     await expect(scope.locator('input[name^="quantity["]').or(this.noTickets).first(), 'ticket list did not load').toBeVisible({ timeout: 60_000 });
-    const group = await this.firstAddableGroup(scope);
+    const group = await this.firstAddableGroup(scope, ticketId);
     if (!group) return null;
     const input = group.locator('input[name^="quantity["]');
     for (let i = 0; i < qty; i++) {
@@ -590,7 +594,7 @@ export class CartPage {
         return {
           ticketId: m[1],
           cartKey: m[2],
-          title: text(card?.querySelector('.font-weight-bold')),
+          title: text(card?.querySelector('.fw-bold')),
           name: (muted?.innerText ?? '').split('\n')[0].trim(),
           shownDate: text(row?.querySelector('.col-4')),
           price: Number(input.dataset.price),

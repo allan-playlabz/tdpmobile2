@@ -147,14 +147,14 @@ export async function clearCart(page: Page, opts: { viewer?: boolean } = {}): Pr
 
 /**
  * Opens a (non two-way) attraction, picks the date/slot by index when it has one, raises the
- * first available ticket to `qty` and submits Add to Cart (or Buy Now). Skips the test when the
+ * first available ticket (or `ticketId`) to `qty` and submits Add to Cart (or Buy Now). Skips the test when the
  * attraction has no bookable date/ticket or the app refuses the ticket (supplier mix, stock),
  * unless `skipIfUnavailable` is false (then it throws).
  */
 export async function addTicket(
   page: Page,
   attractionId: string,
-  opts: { qty?: number; dateIndex?: number; timeIndex?: number; via?: 'add' | 'buy'; skipIfUnavailable?: boolean } = {},
+  opts: { qty?: number; dateIndex?: number; timeIndex?: number; via?: 'add' | 'buy'; skipIfUnavailable?: boolean; ticketId?: string } = {},
 ): Promise<AddedTicket> {
   const unavailable = (reason: string): never => {
     if (opts.skipIfUnavailable ?? true) test.skip(true, reason);
@@ -170,8 +170,11 @@ export async function addTicket(
   const type = await attraction.pricingType();
   const when = await attraction.chooseDateAndTime(opts.dateIndex ?? 0, opts.timeIndex ?? 0);
   if (!when) unavailable(`attraction ${attractionId} has no bookable date/slot #${(opts.dateIndex ?? 0) + 1}`);
-  const selected = await attraction.selectTicket(opts.qty ?? 1);
-  if (!selected) unavailable(`attraction ${attractionId} lists no ticket that can be added${when!.date ? ` on ${when!.date}` : ''}`);
+  const selected = await attraction.selectTicket(opts.qty ?? 1, undefined, opts.ticketId);
+  if (!selected) {
+    const what = opts.ticketId ? `ticket ${opts.ticketId} can't be added` : 'lists no ticket that can be added';
+    unavailable(`attraction ${attractionId} ${what}${when!.date ? ` on ${when!.date}` : ''}`);
+  }
 
   const final = await attraction.submit(opts.via === 'buy' ? 'buy' : 'add');
   if (attraction.lastAlerts.length) throw new Error(`the page blocked the submit: ${attraction.lastAlerts.join(' / ')}`);
@@ -203,7 +206,7 @@ export async function addTicket(
 export async function bookTwoWay(
   page: Page,
   attractionId: string,
-  opts: { qty?: number; departIndex?: number; returnIndex?: number; departTimeIndex?: number; returnTimeIndex?: number } = {},
+  opts: { qty?: number; departIndex?: number; returnIndex?: number; departTimeIndex?: number; returnTimeIndex?: number; ticketId?: string } = {},
 ) {
   const attraction = new AttractionPage(page);
   const response = await attraction.gotoTwoWay(attractionId);
@@ -211,8 +214,8 @@ export async function bookTwoWay(
   test.skip(!(await attraction.departureDate.count()), `attraction ${attractionId} is not a two-way attraction`);
   const when = await attraction.chooseTwoWay(opts);
   test.skip(!when, 'no departure/return date + slot to pick');
-  const depart = await attraction.selectTicket(opts.qty ?? 1, attraction.departTickets);
-  test.skip(!depart, 'no depart ticket can be added for the picked trip');
+  const depart = await attraction.selectTicket(opts.qty ?? 1, attraction.departTickets, opts.ticketId);
+  test.skip(!depart, opts.ticketId ? `depart ticket ${opts.ticketId} can't be added for the picked trip` : 'no depart ticket can be added for the picked trip');
   // The return leg's input is readonly and mirrors the depart quantity (setInputValue in view_two_way.php).
   const ret =await attraction.returnTickets.locator('input[name^="quantity["]').evaluateAll((els) =>
     els

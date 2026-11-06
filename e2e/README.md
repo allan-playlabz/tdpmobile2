@@ -8,7 +8,7 @@ authenticator secrets), `.auth/`, `node_modules/`, test results and `placed-orde
 ## Setup
 
 ```bash
-cd C:\laragon\www\tdpmobile2\e2e
+cd C:\laragon\www\tdpmobile2-e2e
 npm install
 npx playwright install chromium
 copy .env.example .env      # then fill it in
@@ -59,7 +59,7 @@ even without `E2E_ALLOW_PURCHASE`. All orders a run creates are listed in the HT
 
 ## Running
 
-Run all commands from `C:\laragon\www\tdpmobile2\e2e`. Tests that need data or credentials you
+Run all commands from `C:\laragon\www\tdpmobile2-e2e`. Tests that need data or credentials you
 haven't configured are **skipped** with a reason, not failed.
 
 ### Everything, or one project
@@ -95,6 +95,7 @@ npx playwright test --project=ordering tests/ordering/checkout.spec.ts
 npx playwright test --project=ordering tests/ordering/pay-online.spec.ts      # stops at the gateway, never pays
 npx playwright test --project=ordering tests/ordering/pay-credits.spec.ts     # 1 real credits order
 npx playwright test --project=ordering tests/ordering/purchase.spec.ts        # 8 real credits orders (see below)
+npx playwright test --project=ordering tests/ordering/purchase-matrix.spec.ts # up to 32 real credits orders (see below)
 npx playwright test --project=app tests/app/booking.spec.ts
 ```
 
@@ -135,6 +136,32 @@ when the agent doesn't have enough credits, or when the app refuses a mixed cart
 attraction with tickets from an outside supplier can't be in the same cart as another merchant's
 tickets; the skip reason shows the app's message.
 
+### Purchase matrix (`tests/ordering/purchase-matrix.spec.ts`)
+
+One test per **pricing_type × ticket type × voucher_type** combination: `settlement`, `fdate`,
+`fdatetime`, `two_way_fdatetime` × `normal`, `complex` × `generated`, `barcode`, `pdf`, `api`
+(32; `ctc` is left out because agents never buy those package components directly). Each test adds
+that combination's ticket, goes through cart, checkout and confirmation, and pays with credits up to
+the thank-you page: **one real paid order per combination**. The voucher itself is not checked.
+`barcode`/`pdf` combinations use up a code or PDF from the pool, and `api` ones book with the supplier.
+
+The tickets come from `matrix.json` (or the file in `E2E_MATRIX_FILE`): one attraction id + ticket id
+per combination, `null` when there is none. A combination without a ticket skips. `complex` packages
+have no voucher type of their own, so they are matched on their child tickets' voucher type.
+
+Build it from the database **of the site `BASE_URL` points at** (ids, the agent's prices and stock come from it):
+
+```bash
+php scripts/build-matrix.php                                  # the app (parent folder or ../tdpmobile2), its default datasource, E2E_USER_EMAIL from .env
+php scripts/build-matrix.php --db-url="mysql://user:pass@host/db"   # when the site uses another DB (or set E2E_MATRIX_DB_URL)
+php scripts/build-matrix.php --refresh                        # re-pick every cell (default keeps cells already set)
+```
+
+It picks, per combination, a live ticket of a published attraction that the e2e account's agent has a
+price for, with stock (≥ 2 unused barcodes/PDFs, generated stock unset or ≥ 2) and, for fixed dates, a
+date from tomorrow on, preferring tickets without traveller details. Edit the file by hand to pin a
+particular ticket; rebuilds keep it. Needs `E2E_ALLOW_PURCHASE=true`.
+
 ### Watching and debugging
 
 ```bash
@@ -165,6 +192,7 @@ npm run typecheck                                             # TypeScript check
 | | `tests/ordering/pay-online.spec.ts` | Per `E2E_PAYMENT_METHODS`: fee and grand total, Pay Now lands on the gateway host (2C2P / Stripe / PayPal), Back → order unpaid and credits unchanged; Pay Now without a method. **Never pays.** |
 | | `tests/ordering/post-order.spec.ts` | The credits order from pay-credits: detail items/totals, invoice is a PDF (`INVOICE_<ref>.pdf`), voucher PDFs, download-all, My Tickets codes, cancel (`E2E_ALLOW_CANCEL`), no cancel on a closed voucher |
 | | `tests/ordering/purchase.spec.ts` | Full credits purchases, one real order each (`E2E_ALLOW_PURCHASE`): 1 settlement, 1 fdate, 1 fdatetime, 1 two-way, settlement + fdate, settlement + fdatetime, fdate + fdatetime, quantity 2. Checks cart total, confirmation total, thank-you ref, order detail (Credits, ticket lines, quantity, Grand Total) and an empty cart |
+| | `tests/ordering/purchase-matrix.spec.ts` | One real credits order per pricing_type × type × voucher_type (32, `E2E_ALLOW_PURCHASE`), tickets from `matrix.json`: cart line, confirmation total, thank-you |
 | | `tests/ordering/roles.spec.ts` | Normal user sees only own orders vs master sees the agent's (`E2E_NORMAL_*`), viewer kept out of cart/checkout |
 | `pages` | `tests/pages/my-orders.spec.ts` | This run's orders listed (date/status/total), ref/date/status filters, empty result, newest first + pagination, row → detail, unknown ref refused |
 | | `tests/pages/my-tickets.spec.ts` | This run's voucher codes listed, code/date filters, voucher link is a PDF, a garbage `?from=` is ignored, Show All goes back to My Tickets |
@@ -187,7 +215,7 @@ the cart, a favourite toggled and restored, and login logs.
 Opt-in only:
 
 - `E2E_ALLOW_PURCHASE=true` – places real orders paid with agent credits: 1 in `pay-credits.spec.ts`
-  and up to 8 in `purchase.spec.ts` on every full `ordering` run.
+  up to 8 in `purchase.spec.ts` and up to 32 in `purchase-matrix.spec.ts` on every full `ordering` run.
 - `E2E_ALLOW_CANCEL=true` – cancels a voucher of the order this run paid for.
 - `E2E_ALLOW_EMAIL=true` – sends a Contact Us email.
 - `E2E_2FA_BACKUP_CODE` – uses up that backup code; replace it before the next run.
