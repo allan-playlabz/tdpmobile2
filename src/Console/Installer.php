@@ -16,15 +16,11 @@ declare(strict_types=1);
  */
 namespace App\Console;
 
-if (!defined('STDIN')) {
-    define('STDIN', fopen('php://stdin', 'r'));
-}
-
 use Cake\Codeception\Console\Installer as CodeceptionInstaller;
 use Cake\Utility\Security;
 use Composer\IO\IOInterface;
 use Composer\Script\Event;
-use Exception;
+use InvalidArgumentException;
 
 /**
  * Provides installation hooks for when this application is installed through
@@ -52,7 +48,7 @@ class Installer
      * Does some routine installation tasks so people don't have to.
      *
      * @param \Composer\Script\Event $event The composer event object.
-     * @throws \Exception Exception raised by validator.
+     * @throws \InvalidArgumentException Exception raised by validator.
      * @return void
      */
     public static function postInstall(Event $event): void
@@ -61,7 +57,9 @@ class Installer
 
         $rootDir = dirname(__DIR__, 2);
 
-        // Local overrides live in config/app_config.php (see app_config.example.php), not app_local.php.
+        // Project deviation from the 5.x skeleton: no createAppLocalConfig() / setSecuritySalt().
+        // Local overrides live in config/app_config.php (template: app_config.example.php) and the
+        // salt comes from the SECURITY_SALT environment variable, so there is no app_local.php.
         static::createWritableDirectories($rootDir, $io);
 
         static::setFolderPermissions($rootDir, $io);
@@ -123,7 +121,7 @@ class Installer
                 if (in_array($arg, ['Y', 'y', 'N', 'n'])) {
                     return $arg;
                 }
-                throw new Exception('This is not a valid answer. Please choose Y or n.');
+                throw new InvalidArgumentException('This is not a valid answer. Please choose Y or n.');
             };
             $setFolderPermissions = $io->askAndValidate(
                 '<info>Set Folder Permissions ? (Default to Y)</info> [<comment>Y,n</comment>]? ',
@@ -138,18 +136,35 @@ class Installer
         }
 
         // Change the permissions on a path and output the results.
+        // Project deviation: only the owner (or root) may chmod, so folders created at runtime by the
+        // web server user (tmp/cache/*, tmp/sessions) are skipped. Composer turns the chmod() warning
+        // into an exception, which used to abort `composer install` in deploy.sh (it fixes permissions
+        // itself with sudo afterwards).
         $changePerms = function (string $path) use ($io): void {
-            $currentPerms = fileperms($path) & 0777;
+            $perms = fileperms($path);
+            if ($perms === false) {
+                // `false & 0777` would be 0 and chmod() would strip owner and group permissions.
+                $io->writeError('Failed to read permissions on ' . $path);
+
+                return;
+            }
+
+            $currentPerms = $perms & 0777;
             $worldWritable = $currentPerms | 0007;
             if ($worldWritable == $currentPerms) {
                 return;
             }
+            if (function_exists('posix_geteuid') && posix_geteuid() !== 0 && fileowner($path) !== posix_geteuid()) {
+                $io->write('Skipped permissions on ' . $path . ' (not owned by the current user)');
 
-            $res = chmod($path, $worldWritable);
+                return;
+            }
+
+            $res = @chmod($path, $worldWritable); // phpcs:ignore Generic.PHP.NoSilencedErrors
             if ($res) {
                 $io->write('Permissions set on ' . $path);
             } else {
-                $io->write('Failed to set permissions on ' . $path);
+                $io->writeError('Failed to set permissions on ' . $path);
             }
         };
 
