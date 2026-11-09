@@ -1,92 +1,111 @@
 <?php
-use Cake\Utility\Inflector;
+/**
+ * Confirmation (step 3): read-only review + payment method + Pay Now.
+ * CSS: theme.css (.page-orders-confirmation). JS: pages/orders-confirmation.js (fees, Pay Now).
+ *
+ * @var \App\View\AppView $this
+ * @var \App\Model\Entity\Order $order
+ * @var array $auth_user
+ * @var bool $is_credits_enabled
+ * @var array $other_payment_methods
+ * @var array $markups
+ * @var array $payment_providers
+ * @var array|null $tickets_with_question_group
+ */
 use Cake\Core\Configure;
+use Cake\Utility\Inflector;
+
 $subtotal = 0;
 $other_fees = 0;
 if ($this->request->getSession()->check('language') && !empty($other_payment_methods)) {
-  foreach ($other_payment_methods as $other_payment_method_key => $other_payment_method_name) {
-    $other_payment_methods[$other_payment_method_key] = __($other_payment_method_name);
-  }
+    foreach ($other_payment_methods as $key => $name) {
+        $other_payment_methods[$key] = __($name);
+    }
 }
-$payment_methods = $is_credits_enabled ? ['credits'=>__('Credits (Balance: {0})', $this->Number->currency($auth_user['credits'])).$this->Html->link(__('Topup'),['controller'=>'AgentTopups','action'=>'add','?'=>['redirect'=>'orders/confirmation']])] : [];
-$payment_methods = array_merge($payment_methods, $other_payment_methods);
- ?>
-  <div class="row">
-    <div class="col">
-      <?= $this->Html->link('<i class="fa fa-chevron-left"></i> '.__('Back'),['action'=>'checkout'],['escape'=>false]); ?>
-    </div>
-  </div>
-  <h3><?= __('Confirmation') ?></h3>
-  <br>
-  <div class="row">
-    <div class="col-md-6 col-lg-8">
-    <?php
-      if (!empty($order->checkout_info) && !is_array($order->checkout_info)) {
-        $checkout_info = json_decode($order->checkout_info);
-        if (!empty($checkout_info)) {
-    ?>
-      <div class="card mb-2">
-        <div class="card-header bg-primary text-white">
-          <div><?= __('Customer Information') ?></div>
+$other_payment_methods = (array)$other_payment_methods;
+$creditsShort = $is_credits_enabled && $auth_user['credits'] < $order->total;
+$providerIcons = ['Stripe' => 'fa-cc-stripe', 'Paypal' => 'fa-paypal', '2C2P' => 'fa-credit-card'];
+foreach ((array)$order->order_items as $order_item) {
+    $subtotal += $order_item->price * $order_item->qty;
+}
+$checkout_info = null;
+if (!empty($order->checkout_info) && !is_array($order->checkout_info)) {
+    $checkout_info = json_decode($order->checkout_info);
+}
+
+$this->set('pageData', [
+    'subtotal' => (float)$subtotal,
+    'otherFees' => (float)$other_fees,
+    'otherPaymentMethods' => array_keys($other_payment_methods),
+    'markups' => $markups ?: new stdClass(),
+    'providers' => $payment_providers ?: new stdClass(),
+    'i18n' => [
+        'convenienceFee' => __('Convenience Fee'),
+        'chooseMethod' => __('Please choose a payment method!'),
+        'processing' => __('We are processing your order. Please do not navigate away from this page'),
+        'redirecting' => __('Taking you to the payment page…'),
+        'fee' => __('+ {0} fee', '{fee}'),
+        'noFee' => __('No fee'),
+    ],
+]);
+$this->Html->script('pages/orders-confirmation.js?v=20261106', ['block' => 'script']);
+?>
+<?= $this->element('checkout_steps', ['current' => 3]) ?>
+
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <h1 class="mb-0"><?= __('Confirmation') ?></h1>
+  <?= $this->Html->link('<i class="fa fa-chevron-left" aria-hidden="true"></i> ' . __('Back'), ['action' => 'checkout'], ['escape' => false, 'class' => 'btn btn-link px-0']); ?>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <?php if (!empty($checkout_info)): ?>
+      <div class="card sg-card mb-4 customer-summary">
+        <div class="card-header">
+          <i class="fa fa-user-o text-navy" aria-hidden="true"></i><?= __('Customer Information') ?>
+          <?= $this->Html->link('<i class="fa fa-pencil me-1" aria-hidden="true"></i>' . __('Edit'), ['action' => 'checkout'], ['escape' => false, 'class' => 'btn btn-sm btn-outline-primary ms-auto']) ?>
         </div>
         <div class="card-body">
-          <div class="row">
-            <div class="col-md-4">
-              <?php echo $this->Form->control('tracking_no',['class'=>'form-control','label'=>__('Order Tracking Number'),'type'=>'text','value'=>$checkout_info->tracking_no,'disabled'=>'disabled']) ?>
-            </div>
-            <div class="col-md-4">
-              <?php echo $this->Form->control('first_name',['class'=>'form-control','required'=>'required','label'=>__('First Name (English only)*'),'value'=>$checkout_info->first_name,'disabled'=>'disabled']) ?>
-            </div>
-            <div class="col-md-4">
-              <?php echo $this->Form->control('last_name',['class'=>'form-control','required'=>'required','label'=>__('Last Name (English only)*'),'value'=>$checkout_info->last_name,'disabled'=>'disabled']) ?>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-4">
-              <?php echo $this->Form->control('email',['class'=>'form-control','required'=>'required','label'=>__('Email*'),'value'=>$checkout_info->email,'disabled'=>'disabled']) ?>
-            </div>
-            <div class="col-md-4">
-              <?php echo $this->Form->control('mobile',['class'=>'form-control','required'=>'required','label'=>__('Mobile*'),'value'=>$checkout_info->mobile,'disabled'=>'disabled']) ?>
-            </div>
-          </div>
+          <dl class="sg-dl">
+            <div><dt><?= __('First Name') ?></dt><dd data-field="first_name"><?= h($checkout_info->first_name ?? '') ?></dd></div>
+            <div><dt><?= __('Last Name') ?></dt><dd data-field="last_name"><?= h($checkout_info->last_name ?? '') ?></dd></div>
+            <div><dt><?= __('Email') ?></dt><dd data-field="email"><?= h($checkout_info->email ?? '') ?></dd></div>
+            <div><dt><?= __('Mobile') ?></dt><dd data-field="mobile"><?= h($checkout_info->mobile ?? '') ?></dd></div>
+            <div><dt><?= __('Order Tracking Number') ?></dt><dd data-field="tracking_no"><?= ($checkout_info->tracking_no ?? '') !== '' ? h($checkout_info->tracking_no) : '<span class="text-muted">—</span>' ?></dd></div>
+          </dl>
         </div>
       </div>
-    <?php
-        }
-      }
-    ?>
-      <?php if (!empty($order->order_items)) { ?>
-        <?php
-        $required_info = [];
-        $transfer_details = [];
-        $return_transfer_details = [];
-        foreach ($order->order_items as $key => $order_item) {
+    <?php endif ?>
+
+    <?php if (!empty($order->order_items)): ?>
+      <?php
+      $required_info = [];
+      $transfer_details = [];
+      $return_transfer_details = [];
+      foreach ($order->order_items as $order_item) {
           $order_item_data = json_decode($order_item->order_data);
           if (!empty($order_item_data)) {
-            if (!empty($order_item_data->required_info)) {
-              $required_info = array_merge($required_info, (array)$order_item_data->required_info);
-            }
-            if (!empty($order_item_data->transfer_details)) {
-              $transfer_details = $order_item_data->transfer_details;
-            }
-            if (!empty($order_item_data->return_transfer_details)) {
-              $return_transfer_details = $order_item_data->return_transfer_details;
-            }
+              if (!empty($order_item_data->required_info)) {
+                  $required_info = array_merge($required_info, (array)$order_item_data->required_info);
+              }
+              if (!empty($order_item_data->transfer_details)) {
+                  $transfer_details = $order_item_data->transfer_details;
+              }
+              if (!empty($order_item_data->return_transfer_details)) {
+                  $return_transfer_details = $order_item_data->return_transfer_details;
+              }
           }
-        }
-
-        ?>
-        <?php if (!empty($required_info) || !empty($transfer_details) || !empty($return_transfer_details)) { ?>
-          <div class="card mb-2">
-            <div class="card-header bg-primary text-white">
-              Order Information
-            </div>
-            <div class="card-body">
+      }
+      ?>
+      <?php if (!empty($required_info) || !empty($transfer_details) || !empty($return_transfer_details)): ?>
+        <div class="card sg-card mb-4">
+          <div class="card-header"><i class="fa fa-id-card-o text-navy" aria-hidden="true"></i><?= __('Order Information') ?></div>
+          <div class="card-body">
+            <?php if (!empty($required_info)): ?>
+              <h2 class="sg-section-title"><?= __('Travellers') ?></h2>
               <div class="table-responsive">
-                <?php if (!empty($required_info)) { ?>
-                  <h6>Travellers</h6>
-                  
-                  <table class="table">
+                <table class="table table-sm align-middle">
+                  <thead>
                     <tr>
                       <th><?= __('Passport Number') ?></th>
                       <th><?= __('Passport Expiry') ?></th>
@@ -95,170 +114,166 @@ $payment_methods = array_merge($payment_methods, $other_payment_methods);
                       <th><?= __('Date of Birth') ?></th>
                       <th><?= __('Nationality') ?></th>
                     </tr>
-                  <?php foreach ($required_info as $key => $td) { ?>
+                  </thead>
+                  <tbody>
+                  <?php foreach ($required_info as $td): ?>
                     <tr>
-                      <td><?= $td->passport_number ?></td>
-                      <td><?= !empty($td->passport_expiry) ? $td->passport_expiry : '' ?></td>
-                      <td><?= $td->passport_first_name ?></td>
-                      <td><?= $td->passport_last_name ?></td>
-                      <td><?= $td->date_of_birth ?></td>
-                      <td><?= $td->nationality ?></td>
+                      <td><?= h($td->passport_number ?? '') ?></td>
+                      <td><?= h($td->passport_expiry ?? '') ?></td>
+                      <td><?= h($td->passport_first_name ?? '') ?></td>
+                      <td><?= h($td->passport_last_name ?? '') ?></td>
+                      <td><?= h($td->date_of_birth ?? '') ?></td>
+                      <td><?= h($td->nationality ?? '') ?></td>
                     </tr>
                     <?php if (!empty($td->remarks)): ?>
-                      <tr><td colspan="6"><i><?= $td->remarks ?></i></td></tr>
+                      <tr><td colspan="6" class="fst-italic text-muted"><?= h($td->remarks) ?></td></tr>
                     <?php endif ?>
-                  <?php } ?>
-                  </table>
-                <?php } ?>
-                <?php if (!empty($transfer_details)): ?>
-                    <h6><?= __('Transfer Details') ?></h6>
-                    <table class="table">
-                    <?php foreach ($transfer_details as $key => $value): ?>
-                      <tr>
-                        <td><?= Inflector::humanize($key) ?></td>
-                        <td><?= $value ?></td>
-                      </tr>
-                    <?php endforeach ?>
-                    </table>
-                <?php endif ?>
-                <?php if (!empty($return_transfer_details)): ?>
-                    <h6><?= __('Return Transfer Details') ?></h6>
-                    <table class="table">
-                    <?php foreach ($return_transfer_details as $key => $value): ?>
-                      <tr>
-                        <td><?= Inflector::humanize($key) ?></td>
-                        <td><?= $value ?></td>
-                      </tr>
-                    <?php endforeach ?>
-                    </table>
-                <?php endif ?>
+                  <?php endforeach ?>
+                  </tbody>
+                </table>
               </div>
-            </div>
-          </div>
-        <?php } ?>
-        <?php if (!empty($tickets_with_question_group)) { ?>
-        <div class="card card-primary my-3">
-          <div class="card-header bg-primary text-white">
-              Ticket Information
-          </div>
-          <div class="card-body ticket-details-container">
-          <?php 
-          foreach ($order->order_items as $key => $order_item) {
-            $order_item_data = json_decode($order_item->order_data);
-            if (!empty($order_item_data)) {
-              if (!empty($order_item_data->question_group)) {
-                $question_group_answers = (array)$order_item_data->question_group;
-                $question_group_keys = (array)$question_group_answers[0];
-                $order_data_titles = array_keys($question_group_keys);
-                $order_data_titles = array_map(function ($t) {
-                  return Inflector::humanize($t);
-                }, $order_data_titles);
-                $order_data_titles = array_combine(array_keys($question_group_keys), $order_data_titles);
-                $attraction_ticket_name = $order_item->ticket->attraction->title . '<br>' . $order_item->ticket->name;
-                if (!empty($order_item->date_of_visit)) {
-                    $attraction_ticket_name .= '<br>' . $order_item->date_of_visit->format('d M Y');
-                }
-                if (!empty($order_item->time_of_visit)) {
-                    $attraction_ticket_name .= '<br>' . $order_item->time_of_visit->format('H:i');
-                }
-                $question_group_title = '';
-                if (!empty($tickets_with_question_group) && !empty($tickets_with_question_group[$order_item->ticket->id])) {
-                    $question_group_title = $tickets_with_question_group[$order_item->ticket->id]['title'];
-                }
-                ?>
-                <div class="border-bottom pb-3 mb-3">
-                  <div class="form_title>">
-                      <h5><?= $attraction_ticket_name ?> </h5>
-                      <p><?= $question_group_title ?></p>
-                  </div>
-                  <?php foreach ($question_group_answers as $row) { ?>
-                    <div class="table-responsive mb-1">
-                      <table class="table table-sm">
-                        <tbody>
-                          <?php foreach ($row as $title => $value) { ?>
-                            <tr>
-                              <th class="question-group-th"><?= $order_data_titles[$title] ?></th>
-                              <td><?= is_array($value) ? implode(', ', $value) : $value ?></td>
-                            </tr>
-                          <?php } ?>
-                      
-                        </tbody>
-                      </table>
-                    
-                    </div> 
-                  <?php
-                  }
-                  ?>
-                </div>
-              <?php
-              }
-            }
-          }
-          ?>
+            <?php endif ?>
+            <?php foreach (['Transfer Details' => $transfer_details, 'Return Transfer Details' => $return_transfer_details] as $title => $details): ?>
+              <?php if (!empty($details)): ?>
+                <h2 class="sg-section-title"><?= __($title) ?></h2>
+                <dl class="sg-dl">
+                  <?php foreach ($details as $key => $value): ?>
+                    <div><dt><?= h(Inflector::humanize($key)) ?></dt><dd><?= h(is_scalar($value) ? (string)$value : json_encode($value)) ?></dd></div>
+                  <?php endforeach ?>
+                </dl>
+              <?php endif ?>
+            <?php endforeach ?>
           </div>
         </div>
-        <?php } ?>
-      <?php } ?>
-        <div class="card mb-2">
-          <div class="card-header bg-primary text-white">
-            <div><?= __('Payment Information') ?></div>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-md-12">
-                <?= $this->Form->create($order,['id'=>'confirmation-form','class'=>'form-deferred']) ?>
-                <div class="form-group">
-                  <?php echo $this->Form->control('pay_by',[
-                    'options'=>$payment_methods,
-                    'type'=>'radio',
-                    'disabled'=>$auth_user['credits'] < $order->total ? ['credits'] : null,
-                    'label'=>__('Pay By *'),
-                    'escape'=>false,
-                    'templates'=>[
-                      'inputContainer'=>'<div class="radio">{{content}}</div>',
-                      'radio' => '<input type="radio" name="{{name}}" value="{{value}}" {{attrs}} class="form-check-input">',
-                      'radioFormGroup' => '<div class="form-group">{{label}}{{input}}</div>',
-                      'radioWrapper' => '<div class="form-check">{{label}}</div>',
-                      ]
-                    ]) ?>
-                </div>
+      <?php endif ?>
 
-                <div> <?= $this->Form->button(__('Pay Now'),['class'=>'btn btn-primary','id'=>'btn-pay-now','type'=>'button','disabled'=> $order->payment_method == null ? true : false]); ?></div>
-                <?= $this->Form->end() ?>
-                <div class="spinner-border text-primary form-loader"></div>
+      <?php if (!empty($tickets_with_question_group)): ?>
+      <div class="card sg-card mb-4">
+        <div class="card-header"><i class="fa fa-list-alt text-navy" aria-hidden="true"></i>Ticket Information</div>
+        <div class="card-body ticket-details-container">
+        <?php foreach ($order->order_items as $order_item):
+            $order_item_data = json_decode($order_item->order_data);
+            if (empty($order_item_data) || empty($order_item_data->question_group)) {
+                continue;
+            }
+            $question_group_answers = (array)$order_item_data->question_group;
+            $question_group_keys = (array)$question_group_answers[0];
+            $order_data_titles = array_combine(
+                array_keys($question_group_keys),
+                array_map(fn($k) => Inflector::humanize($k), array_keys($question_group_keys))
+            );
+            $question_group_title = $tickets_with_question_group[$order_item->ticket->id]['title'] ?? '';
+        ?>
+          <div class="traveller-group">
+            <div class="form_title">
+              <div class="fw-bold"><?= h($order_item->ticket->attraction->title, false) ?></div>
+              <div class="text-muted">
+                <?= h($order_item->ticket->name, false) ?>
+                <?php if (!empty($order_item->date_of_visit)): ?><span class="badge badge-soft ms-1"><?= $order_item->date_of_visit->format('d M Y') ?><?= !empty($order_item->time_of_visit) ? ' ' . $order_item->time_of_visit->format('H:i') : '' ?></span><?php endif ?>
+              </div>
+              <?php if ($question_group_title): ?><p class="small text-muted mb-2"><?= h($question_group_title) ?></p><?php endif ?>
             </div>
+            <?php foreach ($question_group_answers as $row): ?>
+              <div class="table-responsive mb-1">
+                <table class="table table-sm mb-2">
+                  <tbody>
+                    <?php foreach ($row as $title => $value): ?>
+                      <tr>
+                        <th class="question-group-th"><?= h($order_data_titles[$title] ?? Inflector::humanize($title)) ?></th>
+                        <td><?= h(is_array($value) ? implode(', ', $value) : (is_object($value) ? implode(', ', (array)$value) : (string)$value)) ?></td>
+                      </tr>
+                    <?php endforeach ?>
+                  </tbody>
+                </table>
+              </div>
+            <?php endforeach ?>
           </div>
+        <?php endforeach ?>
         </div>
       </div>
-    </div>
-    <div class="col-md-6 col-lg-4">
-      <div id="tickets-sidebar">
-        <?php if (!empty($order->order_items)): ?>
-          <?php foreach ($order->order_items as $order_item): ?>
-            <div class="card">
-              <div class="card-body">
-                <div><?php echo $this->Html->link('<div class="fw-bold">'.$order_item->ticket->attraction->title .'</div> <div class="text-muted">'. $order_item->ticket->name.'<br><del>RP '.$this->Number->currency($order_item->ticket->price) .'</del></div>',['action'=>'view',$order_item->ticket->attraction_id],['escape'=>false]) ?></div>
-                <div><?php echo $this->Number->currency($order_item->price) ?></div>
+      <?php endif ?>
+    <?php endif ?>
 
-                  <?php $subtotal += ($order_item->price * $order_item->qty) ?>
-                  <div class="row py-2">
-                    <div class="col-md-6">
-                      <?php if ($order_item->ticket->attraction->pricing_type =='fdate'): ?>
-                          <div><?php echo $order_item->date_of_visit->format('d M Y') ?></div>
-                      <?php endif ?>
-                      <?php if ($order_item->ticket->attraction->pricing_type =='fdatetime'): ?>
-                          <div><?php echo $order_item->time_of_visit->format('H:i') ?></div>
-                      <?php endif ?>
-                    </div>
-                    <div class="col-md-2 text-end p-0">
-                      <span class="py-1"> &times; <?php echo $order_item->qty ?> </span>
-                    </div>
-                    <div class="col-md-4 text-end"><?php echo $this->Number->currency($order_item->price * $order_item->qty) ?></div>
+    <div class="card sg-card mb-4 payment-card">
+      <div class="card-header"><i class="fa fa-lock text-navy" aria-hidden="true"></i><?= __('Payment Information') ?></div>
+      <div class="card-body">
+        <?= $this->Form->create($order, ['id' => 'confirmation-form', 'class' => 'form-deferred']) ?>
+          <fieldset>
+            <legend class="booking-step-label mb-2"><?= __('Pay By *') ?></legend>
+            <input type="hidden" name="pay_by" value="">
+            <div class="pay-methods">
+              <?php if ($is_credits_enabled): ?>
+                <div class="pay-method<?= $creditsShort ? ' is-disabled' : '' ?>">
+                  <input class="form-check-input" type="radio" name="pay_by" id="pay-by-credits" value="credits"<?= $creditsShort ? ' disabled' : '' ?><?= !$creditsShort && $order->payment_method === 'credits' ? ' checked' : '' ?>>
+                  <label class="pay-method-label" for="pay-by-credits">
+                    <span class="pay-method-icon"><i class="fa fa-money" aria-hidden="true"></i></span>
+                    <span class="pay-method-text">
+                      <span class="pay-method-name"><?= __('Credits') ?></span>
+                      <span class="pay-method-sub"><?= __('Balance: {0}', $this->Number->currency($auth_user['credits'])) ?></span>
+                    </span>
+                    <span class="pay-method-fee" data-method="credits"></span>
+                  </label>
+                  <div class="pay-method-extra">
+                    <?php if ($creditsShort): ?>
+                      <span class="text-danger small"><i class="fa fa-exclamation-circle me-1" aria-hidden="true"></i><?= __('Insufficient credits — short by {0}.', $this->Number->currency($order->total - $auth_user['credits'])) ?></span>
+                    <?php endif ?>
+                    <?= $this->Html->link('<i class="fa fa-plus-circle me-1" aria-hidden="true"></i>' . __('Topup'), ['controller' => 'AgentTopups', 'action' => 'add', '?' => ['redirect' => 'orders/confirmation']], ['escape' => false, 'class' => 'btn btn-sm ' . ($creditsShort ? 'btn-outline-primary' : 'btn-link px-0')]) ?>
                   </div>
+                </div>
+              <?php endif ?>
+              <?php foreach ($other_payment_methods as $key => $name): ?>
+                <?php $provider = $payment_providers[$key] ?? null; ?>
+                <div class="pay-method">
+                  <input class="form-check-input" type="radio" name="pay_by" id="pay-by-<?= h($key) ?>" value="<?= h($key) ?>"<?= $order->payment_method === $key ? ' checked' : '' ?>>
+                  <label class="pay-method-label" for="pay-by-<?= h($key) ?>">
+                    <span class="pay-method-icon"><i class="fa <?= $providerIcons[$provider] ?? 'fa-credit-card' ?>" aria-hidden="true"></i></span>
+                    <span class="pay-method-text">
+                      <span class="pay-method-name"><?= $name ?></span>
+                      <span class="pay-method-sub"><?= __('Online payment') ?></span>
+                    </span>
+                    <span class="pay-method-fee" data-method="<?= h($key) ?>"></span>
+                  </label>
+                </div>
+              <?php endforeach ?>
+            </div>
+          </fieldset>
+        <?= $this->Form->end() ?>
+        <div class="form-loader"><div class="spinner-border" role="status"><span class="visually-hidden"><?= __('Loading') ?></span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="sg-sticky-summary">
+      <div id="tickets-sidebar" class="sg-summary">
+        <?php if (!empty($order->order_items)): ?>
+          <div class="sg-summary-header"><i class="fa fa-ticket me-2" aria-hidden="true"></i><?= __('Order summary') ?></div>
+          <?php foreach ($order->order_items as $order_item): ?>
+            <div class="card sg-summary-item">
+              <div class="card-body">
+                <div><?= $this->Html->link(
+                    '<div class="fw-bold">' . h($order_item->ticket->attraction->title, false) . '</div>'
+                    . '<div class="text-muted">' . h($order_item->ticket->name, false) . '<br><del class="price-ref">RP ' . $this->Number->currency($order_item->ticket->retail_price ?? $order_item->ticket->price) . '</del></div>',
+                    ['controller' => 'Attractions', 'action' => 'view', $order_item->ticket->attraction_id],
+                    ['escape' => false, 'class' => 'sg-summary-link']
+                ) ?></div>
+                <div class="sg-summary-unit"><?= $this->Number->currency($order_item->price) ?></div>
+                <div class="row py-2 g-0 sg-summary-row">
+                  <div class="col-md-6 col-6">
+                    <?php if ($order_item->ticket->attraction->pricing_type == 'fdate' && $order_item->date_of_visit): ?>
+                      <div><?= $order_item->date_of_visit->format('d M Y') ?></div>
+                    <?php endif ?>
+                    <?php if ($order_item->ticket->attraction->pricing_type == 'fdatetime' && $order_item->time_of_visit): ?>
+                      <div><?= $order_item->time_of_visit->format('H:i') ?></div>
+                    <?php endif ?>
+                  </div>
+                  <div class="col-md-2 col-2 text-end"><span>&times; <?= $order_item->qty ?></span></div>
+                  <div class="col-md-4 col-4 text-end fw-semibold"><?= $this->Number->currency($order_item->price * $order_item->qty) ?></div>
+                </div>
               </div>
             </div>
           <?php endforeach; ?>
-          <div class="py-4 px-4 footer-total">
+          <div class="footer-total">
             <div class="row">
               <div class="col"><?= __('Subtotal') ?></div><div class="col text-end"><?= $this->Number->currency($subtotal) ?></div>
             </div>
@@ -267,158 +282,12 @@ $payment_methods = array_merge($payment_methods, $other_payment_methods);
             </div>
           </div>
         <?php endif ?>
+        <div class="sg-summary-pay">
+          <?= $this->Form->button('<i class="fa fa-lock me-2" aria-hidden="true"></i>' . __('Pay Now'), ['class' => 'btn btn-cta btn-lg w-100', 'id' => 'btn-pay-now', 'type' => 'button', 'form' => 'confirmation-form', 'escapeTitle' => false, 'disabled' => $order->payment_method == null]); ?>
+          <div class="pay-now-hint small text-muted text-center mt-2"><?= __('Choose a payment method to continue.') ?></div>
+          <div class="pay-status" aria-live="polite"></div>
         </div>
-        <?php $this->Html->scriptStart(['block' => true]) ?>
-            $(window).on('scroll', function (event) {
-              var scrollValue = $(window).scrollTop();
-              if (scrollValue > 120) {
-                  if (!$('#tickets-sidebar').hasClass('sticky-top')) {
-                    $('#tickets-sidebar').addClass('sticky-top');
-                  }
-              } else{
-                  $('#tickets-sidebar').removeClass('sticky-top');
-              }
-            });
-        <?php $this->Html->scriptEnd() ?>
+      </div>
     </div>
   </div>
-<?= $this->Html->css(['bootstrap-datepicker3.standalone.min','checkout-style'],['block'=>'internal_css']); ?>
-<?= $this->Html->script(['bootstrap-datepicker.min'],['block'=>'scriptBottom']) ?>
-<?php $this->Html->scriptStart(['block' => true]) ?>
-    var subtotal = <?= $subtotal ?>;
-    var other_fees = <?= $other_fees ?>;
-    var other_payment_methods = <?= json_encode(array_keys($other_payment_methods)) ?>;
-    var markups = <?= json_encode($markups) ?>;
-    var payment_providers = <?= json_encode($payment_providers) ?>;
-    var check_status_count = 0;
-    var LONG_WAITING = 5;
-    var MAX_CHECK = 120; /* check every 5 secs in 10 minutes */
-    function showProcessing(el) {
-      $(el).after('<div class="spinner-border" role="status"><span class="visually-hidden"><?= __('Processing') ?>...</span></div>');
-      $(el).hide();
-    }
-
-    function roundUp(value, precision) {
-      var pow = Math.pow(10, precision);
-        return Math.ceil(pow * value) / pow;
-    }
-
-    function hideProcessing(el) {
-      $(".spinner-border").remove();
-      $(el).show();
-    }
-
-    $('.datepicker').datepicker({format:'d M yyyy'});
-
-    $('input[name="pay_by"]').on('change',function() {
-      if ($(this).is(':checked')) {
-        $('#btn-pay-now').prop('disabled',false);
-        if (markups[$(this).val()]) {
-          var markup_value = markups[$(this).val()]['value'];
-          var markup_add = markups[$(this).val()]['add'];
-          var markup_type = markups[$(this).val()]['type'];
-          var provider = payment_providers[$(this).val()] || null;
-          $('.convenience-fee-row').remove();
-          $('.grandtotal-row .col.text-end').html('$'+subtotal.toFixed(2));
-          var convenience_fee = 0;
-          var total = subtotal + convenience_fee;
-          if (markup_type === 'percentage') {
-            if (provider == '2C2P' || provider == 'Paypal') {
-              total = roundUp((subtotal + markup_add) * (100 / (100 - markup_value)), 2);
-              convenience_fee = roundUp(total - subtotal, 2);
-            } else {
-              convenience_fee = Math.ceil((subtotal * markup_value)) / 100 + markup_add;
-              total = subtotal + convenience_fee;
-            }
-            
-          }
-          else {
-            convenience_fee = markup_value + markup_add;
-            total = subtotal + convenience_fee;
-          }
-          
-          $('.grandtotal-row').before(
-            '<div class="row convenience-fee-row">' +
-              '<div class="col">Convenience Fee</div>' +
-              '<div class="col convenience-fee text-end">$' + convenience_fee.toFixed(2) + '</div>' +
-            '</div>');
-          $('.grandtotal-row .col.text-end').html('$'+total.toFixed(2));
-        }
-        else {
-          $('.convenience-fee-row').remove();
-          $('.grandtotal-row .col.text-end').html('$'+subtotal.toFixed(2));
-        }
-      }
-    });
-
-    function checkStatus() {
-      console.log('recheck status');
-
-      check_status_count++;
-
-      $.ajax({
-        url: "<?= $this->Url->build(['controller'=>'Orders','action'=>'getStatus']) ?>",
-        type: "GET",
-        dataType: "JSON"
-      }).always(function(res, status, xhr) {
-        /*console.log(xhr);*/
-        console.log(res);
-        if (xhr.status == 200 && res.status == "1000") {
-          if (res.data.order && res.data.order.status == 'done') {
-            window.location = '<?= $this->Url->build(['controller'=>'Orders','action'=>'thankYou']) ?>';
-          } else if (res.data.order && res.data.order.status == 'in_progress') {
-            setTimeout(function() {
-              checkStatus();
-            },5000);
-          } else {
-            /* 5 minutes */
-            if (check_status_count < 60) { 
-              setTimeout(function() {
-                checkStatus();
-              },5000);
-            } else {
-              $(this).prop('disabled',false);
-              $('.proccessing-message').after('<div class="alert alert-warning my-2">Your order is taking longer than expected. We will send you an email when it is ready. For more information, please contact <?= Configure::read('Default.company_contact_no') ?>. Ref: '+ res.data.order.order_ref_id+'</div>').remove();
-            }
-            
-          }
-        } else {
-          $(this).prop('disabled',false);
-          $('.proccessing-message').after('<div class="alert alert-warning my-2">Your order is taking longer than expected. We will send you an email when it is ready. For more information, please contact <?= Configure::read('Default.company_contact_no') ?>. Ref: '+ res.data.order.order_ref_id+'</div>').remove();
-        }
-      });
-    }
-
-    $('#btn-pay-now').one('click',function() {
-      var pay_by = $("input[name='pay_by']:checked"). val();
-      var main_form = $(this).closest('form');
-     
-      if (pay_by == 'credits') {
-        $(this).prop('disabled',true);
-        $(this).after('&nbsp;&nbsp;<div class="alert alert-info my-2 proccessing-message"><span class="spinner-border text-primary" style="width: 20px; height:20px"></span> &nbsp; <?= __('We are processing your order. Please do not navigate away from this page</div>') ?>');
-        main_form.submit();
-      }
-      else if(other_payment_methods.includes(pay_by)){
-        main_form.submit();
-        $(this).prop('disabled',true);
-        /*showProcessing($('#btn-pay-now').first());*/
-      }
-      else {
-        alert('<?= __('Please choose a payment method!') ?>');
-      }
-    });
-
-<?php $this->Html->scriptEnd() ?>
-<?php $this->start('css') ?>
-<style type="text/css">
-  .radio label {
-    display: block
-  }
-  .grandtotal-row {
-    font-size: 18px;
-  }
-  a:hover {
-    text-decoration: none;
-  }
-</style>
-<?php $this->end() ?>
+</div>

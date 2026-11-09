@@ -16,7 +16,7 @@ $no = 1;
 </div>
 <div class="row">
   <div class="col">
-    <h3 class="d-inline-block"><?= __('Credits History') ?></h3><?php echo  $this->Form->postLink('Export to CSV',[],['class'=>'btn btn-default float-end']) ?>
+    <h3 class="d-inline-block"><?= __('Credits History') ?></h3><a href="#" class="btn btn-default float-end" data-post-url="<?= $this->Url->build([]) ?>">Export to CSV</a>
   </div>
 </div>
 <div class="index large-9 medium-8 columns content">
@@ -32,20 +32,3 @@ $no = 1;
     <?php endforeach; ?>
   </div>
 </div>
-<?php $this->start('internal_css'); ?>
-  <style type = "text/css">
-    .topup {
-      background-color:#eee;
-      font-size: 12px;
-      padding: 10px;
-      border-radius: 10px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-    }
-    .topup-amount {
-      font-size: 14px;
-      font-weight: bold;
-
-    }
-  </style>
-<?php $this->end() ?>

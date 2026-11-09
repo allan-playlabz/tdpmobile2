@@ -289,7 +289,7 @@ function getBadgeInfo($voucher)
                           <?php } ?>
                           <?php if ($auth_user['agent']['allowed_api_cancel'] === true) { ?>
                             <td>
-                              <?= !empty($voucher['is_cancellable']) ? $this->Form->postLink(__('Cancel'), ['controller' => 'Orders', 'action' => 'cancelVoucher', $voucher['code']], ['class' => 'btn btn-outline-danger btn-sm', 'confirm' => 'Are you sure you want to cancel this voucher?']) : '' ?>
+                              <?= !empty($voucher['is_cancellable']) ? '<a href="#" class="btn btn-outline-danger btn-sm" data-post-url="' . $this->Url->build(['controller' => 'Orders', 'action' => 'cancelVoucher', $voucher['code']]) . '" data-confirm="Are you sure you want to cancel this voucher?">' . __('Cancel') . '</a>' : '' ?>
                             </td>
                           <?php } ?>
                         <?php } else { ?>
@@ -312,7 +312,7 @@ function getBadgeInfo($voucher)
                     <?php } ?>
                     <?php if ($auth_user['agent']['allowed_api_cancel'] === true) { ?>
                       <td>
-                        <?= !empty($voucher['is_cancellable']) ? $this->Form->postLink(__('Cancel'), ['controller' => 'Orders', 'action' => 'cancelVoucher', $voucher['code']], ['class' => 'btn btn-outline-danger btn-sm', 'confirm' => 'Are you sure you want to cancel this voucher?']) : '' ?>
+                        <?= !empty($voucher['is_cancellable']) ? '<a href="#" class="btn btn-outline-danger btn-sm" data-post-url="' . $this->Url->build(['controller' => 'Orders', 'action' => 'cancelVoucher', $voucher['code']]) . '" data-confirm="Are you sure you want to cancel this voucher?">' . __('Cancel') . '</a>' : '' ?>
                       </td>
                     <?php } ?>
                   </tr>
@@ -329,7 +329,7 @@ function getBadgeInfo($voucher)
       <?php endif ?>
     </div>
     <div class="col-md-6 col-lg-4">
-      <div id="tickets-sidebar">
+      <div id="tickets-sidebar" class="sg-sticky-summary">
         <?php if (!empty($order['order_items'])) : ?>
           <?php foreach ($order['order_items'] as $order_item) : ?>
             <div class="card mb-3">
@@ -379,80 +379,14 @@ function getBadgeInfo($voucher)
           </div>
         <?php endif ?>
       </div>
-      <?php $this->Html->scriptStart(['block' => true]) ?>
-      $(window).on('scroll', function (event) {
-      var scrollValue = $(window).scrollTop();
-      if (scrollValue > 120) {
-      if (!$('#tickets-sidebar').hasClass('sticky-top')) {
-      $('#tickets-sidebar').addClass('sticky-top');
-      }
-      } else{
-      $('#tickets-sidebar').removeClass('sticky-top');
-      }
-      });
-
-      var isMergingDone = false;
-      function checkMergingStatus() {
-        if ($('.voucher-merging-in-progress').length == 0) {
-          return
-        }
-        $.ajax({
-          url: "<?= $this->Url->build(['controller' => 'VoucherMerging', 'action' => 'getStatus']) ?>",
-          data: {order_ref_id: "<?= $order['order_ref_id'] ?>"},
-          type: "GET",
-          dataType: "JSON"
-        }).always(function(res, status, xhr) {
-          if (xhr.status == 200) {
-            if (res.voucher_merging) {
-              if (res.voucher_merging.status === 'done') {
-                $('#download-all').removeClass('d-none');
-                $('#voucher-merging-msg').addClass('d-none').removeClass('d-flex');
-                $('.alert').remove();
-                isMergingDone = true;
-              }
-            }
-          }
-          if (!isMergingDone) {
-            setTimeout(checkMergingStatus, 4000);
-          }
-        });
-      }
-
-      checkMergingStatus();
-
-      <?php $this->Html->scriptEnd() ?>
+      <?php
+      $this->set('pageData', [
+          'orderRef' => $order['order_ref_id'],
+          'urls' => ['mergingStatus' => $this->Url->build(['controller' => 'VoucherMerging', 'action' => 'getStatus'])],
+      ]);
+      $this->Html->script('pages/orders-view.js?v=20261106', ['block' => 'script']);
+      ?>
     </div>
   </div>
 
 <?php } ?>
-
-
-<?php $this->start('css') ?>
-<style type="text/css">
-  .grandtotal-row {
-    font-size: 18px;
-  }
-  .fa-hourglass-start {
-      animation: clock 5s infinite;
-    }
-    @keyframes clock {
-      50% {transform: rotate(180deg);}
-      100% {transform: rotate(360deg);}
-    }
-  .voucher-merging-loading {
-    position:relative;
-    width: 30px;
-    height: 50px;
-    text-align: center;
-  }
-  .voucher-merging-loading i {
-    margin: auto;
-  }
-  .voucher-merging-loading span {
-    font-size: 8px;
-    position: absolute;
-    bottom: 8px;
-    left: 0;
-  }
-</style>
-<?php $this->end() ?>

@@ -14,12 +14,11 @@ $to = $this->request->getQuery('to') ?: '';
         <div class="btn-toolbar mb-2 mb-md-0">
           <div class="btn-group me-2">
           <?php echo $this->Form->button(__('Filter'), ['class' => 'btn btn-primary ms-1']) ?>
-          <?php echo $this->Html->link(__('Show All'), ['action' => 'index'], ['class' => 'btn btn-primary ms-1','style'=>'min-width:80px']) ?>
-          <?php echo  $this->Form->postLink(__('Download'), ['action'=>'index', '?' => $this->request->getQuery()],['class'=>'btn btn-primary ms-1', 'block' => 'postLink']) ?>
+          <?php echo $this->Html->link(__('Show All'), ['action' => 'index'], ['class' => 'btn btn-primary ms-1 min-w-80']) ?>
+          <a href="#" class="btn btn-primary ms-1" data-post-url="<?= $this->Url->build(['action' => 'index', '?' => $this->request->getQuery()]) ?>"><?= __('Download') ?></a>
           </div>
         </div>
     <?php echo $this->Form->end() ?>
-    <?= $this->fetch('postLink') ?>
     <div class="table-responsive">
       <table class="table table-bordered table-striped">
           <thead>
@@ -70,9 +69,5 @@ $to = $this->request->getQuery('to') ?: '';
 </div>
 <?= $this->Html->css(['bootstrap-datepicker3.standalone.min'],['block'=>'internal_css']); ?>
 <?= $this->Html->script(['bootstrap-datepicker.min'],['block'=>'scriptBottom']) ?>
-<?php $this->Html->scriptStart(['block' => true]) ?>
-$(document).ready(function() {
-
-  $('.datepicker').datepicker({format:'d M yyyy',endDate:'today'});
-});
-<?php $this->Html->scriptEnd() ?>
+<?php $this->set('pageData', ['datepicker' => ['endDate' => 'today']]) ?>
+<?php $this->Html->script('pages/date-filters.js?v=20261106', ['block' => 'script']) ?>

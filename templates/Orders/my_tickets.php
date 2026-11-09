@@ -38,7 +38,7 @@ $hide_before_date = new \Cake\I18n\DateTime('-6 months');
     'refunded'=>'Refunded',
     'rejected'=>'Failed'], 'default' => $this->request->getQuery('status'), 'label' => ['class' => 'ms-4 pe-1', 'text' => __('Status')]]) ?> -->
         </div>
-        <div class="card-right-header d-flex my-2" style="align-items: flex-end">
+        <div class="card-right-header d-flex align-items-end my-2">
             <?php echo $this->Form->control('from', ['class' => 'datepicker form-control', 'value' => $from, 'label' => ['class' => 'pe-1', 'text' => __('From')]]) ?>
             <?php echo $this->Form->control('to', ['class' => 'datepicker form-control', 'value' => $to, 'label' => ['class' => 'ms-4 pe-1', 'text' => __('To')]]) ?>
             <div class="form-group"><?php echo $this->Form->submit(__('Filter'), ['class' => 'btn btn-primary ms-1']) ?></div>
@@ -54,15 +54,15 @@ $hide_before_date = new \Cake\I18n\DateTime('-6 months');
                 <thead>
                     <tr>
                         
-                        <th scope="col" style="width: 20%;"><?= __('Order Ref') ?></th>
-                        <th scope="col" style="width: 20%;"><?= __('Code') ?></th>
+                        <th scope="col" class="col-w-20p"><?= __('Order Ref') ?></th>
+                        <th scope="col" class="col-w-20p"><?= __('Code') ?></th>
                         <th scope="col"><?= __('Ticket') ?></th>
-                        <th scope="col" style="width: 140px"><?= __('Date') ?></th>
+                        <th scope="col" class="col-w-140"><?= __('Date') ?></th>
                         <?php if ($auth_user['agent']['hide_voucher_status'] === false) { ?>
-                        <th scope="col" style="width: 70px"><?= __('Status') ?></th>
+                        <th scope="col" class="col-w-70"><?= __('Status') ?></th>
                         <?php } ?>
                         <?php if ($auth_user['agent']['allowed_api_cancel'] === true) { ?>
-                        <th scope="col" style="width: 90px"><?= __('Actions') ?></th>
+                        <th scope="col" class="col-w-90"><?= __('Actions') ?></th>
                         <?php } ?>
                     </tr>
                 </thead>
@@ -70,8 +70,8 @@ $hide_before_date = new \Cake\I18n\DateTime('-6 months');
                     <?php foreach ($vouchers as $voucher) : ?>
                         <tr>
                             
-                            <td style="white-space: nowrap; overflow: hidden; text-overflow:ellipsis"><?= $this->Html->link($voucher->order_item->order->order_ref_id, ['action' => 'view', $voucher->order_item->order->order_ref_id]) ?></td>
-                            <td style="white-space: nowrap; overflow: hidden; text-overflow:ellipsis"><?= $voucher->code_id ?></td>
+                            <td class="text-truncate"><?= $this->Html->link($voucher->order_item->order->order_ref_id, ['action' => 'view', $voucher->order_item->order->order_ref_id]) ?></td>
+                            <td class="text-truncate"><?= $voucher->code_id ?></td>
                             <td>
                                 <?php
                                     $ticket_info = json_decode($voucher->order_item->ticket_info);
@@ -91,7 +91,7 @@ $hide_before_date = new \Cake\I18n\DateTime('-6 months');
                             <?php } ?>
                             <?php if ($auth_user['agent']['allowed_api_cancel'] === true) { ?>
                             <td>
-                            <?= !empty($voucher->is_cancellable) ? $this->Form->postLink(__('Cancel'), ['controller' => 'Orders', 'action' => 'cancelVoucher', $voucher->code_id],['class'=>'btn btn-outline-danger btn-sm','confirm'=>'Are you sure you want to cancel this voucher?']) : '' ?>
+                            <?= !empty($voucher->is_cancellable) ? '<a href="#" class="btn btn-outline-danger btn-sm" data-post-url="' . $this->Url->build(['controller' => 'Orders', 'action' => 'cancelVoucher', $voucher->code_id]) . '" data-confirm="Are you sure you want to cancel this voucher?">' . __('Cancel') . '</a>' : '' ?>
                             </td>
                             <?php } ?>
                         </tr>
@@ -114,6 +114,4 @@ $hide_before_date = new \Cake\I18n\DateTime('-6 months');
 
 <?= $this->Html->css(['bootstrap-datepicker3.standalone.min'], ['block' => 'internal_css']); ?>
 <?= $this->Html->script(['bootstrap-datepicker.min'], ['block' => 'scriptBottom']) ?>
-<?php $this->Html->scriptStart(['block' => true]) ?>
-$('.datepicker').datepicker({format:'d M yyyy'});
-<?php $this->Html->scriptEnd() ?>
+<?php $this->Html->script('pages/date-filters.js?v=20261106', ['block' => 'script']) ?>

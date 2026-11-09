@@ -66,20 +66,20 @@ $color_map = [
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th scope="col" style="width: 140px"><?= __('Date') ?></th>
+                        <th scope="col" class="col-w-140"><?= __('Date') ?></th>
                         <th scope="col"><?= __('Order Ref') ?></th>
                         <th scope="col"><?= __('Tracking No') ?></th>
                         <th scope="col"><?= __('Items') ?></th>
-                        <th scope="col" style="width: 70px"><?= __('Status') ?></th>
-                        <th scope="col" style="width: 90px"><?= __('Total') ?></th>
+                        <th scope="col" class="col-w-70"><?= __('Status') ?></th>
+                        <th scope="col" class="col-w-90"><?= __('Total') ?></th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($orders as $order) : ?>
                         <tr>
                             <td><?= h($order->created->format('d M Y H:ia')) ?></td>
-                            <td style="white-space: nowrap; overflow: hidden; text-overflow:ellipsis"><?= $this->Html->link($order->order_ref_id, ['action' => 'view', $order->order_ref_id]) ?></td>
-                            <td><div style="max-width:140px; white-space: nowrap; overflow: hidden; text-overflow:ellipsis"><?= h($order->tracking_no) ?></div></td>
+                            <td class="text-truncate"><?= $this->Html->link($order->order_ref_id, ['action' => 'view', $order->order_ref_id]) ?></td>
+                            <td><div class="text-truncate maw-140"><?= h($order->tracking_no) ?></div></td>
                             <td>
                                 <?php foreach ($order->order_items as $order_item) : ?>
                                     <div><?= $order_item->ticket->name ?> <span class="badge text-bg-info"><?= $order_item->qty ?></span></div>
@@ -110,6 +110,4 @@ $color_map = [
 
 <?= $this->Html->css(['bootstrap-datepicker3.standalone.min'], ['block' => 'internal_css']); ?>
 <?= $this->Html->script(['bootstrap-datepicker.min'], ['block' => 'scriptBottom']) ?>
-<?php $this->Html->scriptStart(['block' => true]) ?>
-$('.datepicker').datepicker({format:'d M yyyy'});
-<?php $this->Html->scriptEnd() ?>
+<?php $this->Html->script('pages/date-filters.js?v=20261106', ['block' => 'script']) ?>

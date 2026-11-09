@@ -118,7 +118,7 @@ export async function readSidebar(page: Page): Promise<{ lines: SidebarLine[]; s
       const children = Array.from(body.children);
       const muted = card.querySelector('.text-muted') as HTMLElement | null;
       return {
-        title: text(card.querySelector('.font-weight-bold')),
+        title: text(card.querySelector('.fw-bold')),
         name: (muted?.innerText ?? '').split('\n')[0].trim(),
         unitPrice: text(children[1]),
         rows: Array.from(card.querySelectorAll('.row.py-2')).map((row) => ({
@@ -130,7 +130,7 @@ export async function readSidebar(page: Page): Promise<{ lines: SidebarLine[]; s
     });
     const footerRows = Array.from(root.querySelectorAll('.footer-total .row')).map((row) => ({
       label: text(row.querySelector('.col')),
-      value: text(row.querySelector('.col.text-right')),
+      value: text(row.querySelector('.col.text-end')),
     }));
     return { lines, footerRows };
   });
@@ -209,7 +209,7 @@ export class AttractionPage {
     this.quantities = this.form.locator('input[name^="quantity["]');
     this.addToCart = page.locator('#btn-add-to-cart');
     this.buyNow = page.locator('#btn-buy-now');
-    this.viewCart = this.form.locator('a.btn-info', { hasText: 'View Cart' });
+    this.viewCart = this.form.locator('a.view-cart', { hasText: 'View Cart' });
     this.formTotal = this.form.locator('.total').first();
     this.noTickets = this.form.locator('.tickets .alert-danger');
     this.departureDate = page.locator('#departure-date');
@@ -432,8 +432,9 @@ export class AttractionPage {
     if (selected <= 0) return null;
     const nameAttr = (await input.getAttribute('name')) ?? '';
     const name = await group.evaluate((el) => {
-      const row = el.closest('.row');
-      return (row?.querySelector('.col-lg-5 b, .col-lg-5')?.textContent ?? '').trim().split('\n')[0].trim();
+      // element/ticket_row.php + ticket-row.js: .ticket-option > .ticket-info > .ticket-name
+      const row = el.closest('.ticket-option');
+      return (row?.querySelector('.ticket-name')?.textContent ?? '').trim().split('\n')[0].trim();
     });
     return {
       ticketId: nameAttr.replace(/^quantity\[/, '').replace(/\].*$/, ''),
@@ -461,7 +462,7 @@ export class AttractionPage {
     throw new Error('Could not add any ticket (all sold out or disabled?)');
   }
 
-  /** Alerts shown by the last submit() ("Please select at least 1 to continue.", unequal two-way quantities). */
+  /** Native alerts shown by the last submit() (the page now uses toasts and disabled buttons, so normally none). */
   lastAlerts: string[] = [];
 
   /**
@@ -472,6 +473,8 @@ export class AttractionPage {
   async submit(button: 'add' | 'buy' = 'add'): Promise<Response | null> {
     const target = button === 'add' ? this.addToCart : this.buyNow;
     await expect(target).toBeVisible();
+    // The buttons are always shown but stay disabled until a quantity is picked.
+    await expect(target).toBeEnabled();
     this.lastAlerts = [];
     const timeout = 90_000;
     let markAlert = () => {};
@@ -590,7 +593,7 @@ export class CartPage {
         return {
           ticketId: m[1],
           cartKey: m[2],
-          title: text(card?.querySelector('.font-weight-bold')),
+          title: text(card?.querySelector('.fw-bold')),
           name: (muted?.innerText ?? '').split('\n')[0].trim(),
           shownDate: text(row?.querySelector('.col-4')),
           price: Number(input.dataset.price),
@@ -840,14 +843,14 @@ export class ConfirmationPage {
     await expect(this.payNow).toBeEnabled();
   }
 
-  /** Read-only customer field (first_name, last_name, email, mobile, tracking_no). */
+  /** Read-only customer value on the confirmation summary (first_name, last_name, email, mobile, tracking_no). */
   customerField(name: string): Locator {
-    return this.page.locator(`input[name="${name}"][disabled]`);
+    return this.page.locator(`.customer-summary [data-field="${name}"]`);
   }
 
   /** Grand Total as shown now (rewritten by the page JS when a method with a fee is picked). */
   async grandTotalValue(): Promise<number> {
-    return parseMoney(await this.page.locator('#tickets-sidebar .grandtotal-row .col.text-right').first().textContent());
+    return parseMoney(await this.page.locator('#tickets-sidebar .grandtotal-row .col.text-end').first().textContent());
   }
 
   async subtotalValue(): Promise<number> {

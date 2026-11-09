@@ -289,7 +289,7 @@ export class OrderDetailPage {
     this.info = page.locator('.card', { has: page.getByRole('heading', { name: 'Order Information' }) });
     this.products = page.locator('.card', { has: page.getByRole('heading', { name: 'Product(s)' }) });
     this.voucherLinks = this.products.locator('a[target="_blank"]');
-    this.grandTotal = page.locator('.grandtotal-row .col.text-right');
+    this.grandTotal = page.locator('.grandtotal-row .col.text-end');
   }
 
   async goto(ref: string): Promise<Response | null> {

@@ -37,7 +37,7 @@
         // General grouping container for control(). Defines input/label ordering.
         'formGroup' => '{{label}}{{input}}',
         // Wrapper content used to hide other content.
-        'hiddenBlock' => '<div style="display:none;">{{content}}</div>',
+        'hiddenBlock' => '<div class="d-none">{{content}}</div>',
         // Generic input element.
         'input' => '<input type="{{type}}" name="{{name}}" {{attrs}} class="form-control" placeholder="{{name}}"/>',
         // Submit input element.

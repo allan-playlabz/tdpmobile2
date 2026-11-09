@@ -113,8 +113,10 @@ test.describe('Contact Us', () => {
   test('form fields', async ({ page }) => {
     const contact = new ContactPage(page);
     await contact.goto();
-    await expect(page.locator('legend', { hasText: 'Contact Us' })).toBeVisible();
+    await expect(page.locator('h1', { hasText: 'Contact Us' })).toBeVisible();
     await expect(contact.subject).toBeVisible();
+    await expect(contact.subject).toHaveAttribute('required', '');
+    await expect(contact.message).toHaveAttribute('required', '');
     await expect(contact.message).toHaveAttribute('rows', '10');
     await expect(contact.send).toBeVisible();
   });
@@ -124,7 +126,8 @@ test.describe('Contact Us', () => {
     for (const [subject, message] of [['', ''], ['E2E subject only', ''], ['', 'E2E message only']]) {
       await test.step(`subject="${subject}" message="${message}"`, async () => {
         await contact.goto();
-        // The fields have no `required`, so the browser submits; the controller only mails when both are set.
+        // Drop the browser `required` check so the server-side check (mail only when both are set) is what is tested.
+        await page.locator('#contact-form [required]').evaluateAll((els) => els.forEach((el) => el.removeAttribute('required')));
         await contact.submit(subject, message);
         await expect(page).toHaveURL(/\/agent-users\/contact$/);
         await expect(flashSuccess(page)).toHaveCount(0);
@@ -159,7 +162,7 @@ test.describe('Two-factor settings page', () => {
   test('shows one state and only the forms that state allows', async ({ page }) => {
     await openHealthy(page, '/agent-users/two-factor');
     await expect(page.getByRole('heading', { name: 'Two-factor sign-in' })).toBeVisible();
-    const state = page.locator('.card-body .font-weight-bold').first();
+    const state = page.locator('.card-body .fw-bold').first();
     await expect(state).toHaveText(new RegExp(`^(${STATES.join('|')})$`));
     const text = ((await state.textContent()) ?? '').trim();
     const buttons = page.locator('button[name="do"]');

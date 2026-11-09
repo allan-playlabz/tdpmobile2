@@ -222,7 +222,7 @@ export async function bookTwoWay(
         ticketId: el.name.replace(/^quantity\[/, '').replace(/\].*$/, ''),
         price: Number(el.dataset.price),
         qty: Number(el.value),
-        name: (el.closest('.row')?.querySelector('.col-lg-5 b')?.textContent ?? '').trim(),
+        name: (el.closest('.ticket-option')?.querySelector('.ticket-name')?.textContent ?? '').trim(),
       })),
   );
   // Remembered so clearCart() can remove the legs if the trip ends up in the cart (Buy Now).

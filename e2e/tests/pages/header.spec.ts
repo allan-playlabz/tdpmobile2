@@ -68,7 +68,7 @@ test.describe('Header', () => {
       const header = new HeaderBar(session.page);
       await expect(header.lowCredit).toBeVisible();
       await expect(header.lowCredit).toHaveText('LOW');
-      await expect(header.lowCredit).toHaveClass(/badge-danger/);
+      await expect(header.lowCredit).toHaveClass(/text-bg-danger/);
       expect(session.errors).toEqual([]);
     } finally {
       await session.context.close();

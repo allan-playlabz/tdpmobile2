@@ -27,7 +27,7 @@ Downloadable Reports
                 <?= $report['created'] ?>
             </td>
             <td>
-                <?php echo $this->Form->postLink($report['name'], ['controller' => 'Reports', 'action' => 'download', $report['filename']]) ?>
+                <a href="#" data-post-url="<?= $this->Url->build(['controller' => 'Reports', 'action' => 'download', $report['filename']]) ?>"><?= h($report['name']) ?></a>
             </td>
 
         </tr>

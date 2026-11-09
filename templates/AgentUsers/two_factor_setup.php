@@ -8,7 +8,7 @@
  */
 $this->Html->css(['two-factor'], ['block' => true]);
 ?>
-<div class="tf-card text-start" style="margin-top:20px;">
+<div class="tf-card text-start mt-3">
     <?php if (!$loggedIn) : ?>
         <?= $this->Flash->render('flash', ['element' => 'flash/default']) ?>
     <?php endif; ?>

@@ -96,7 +96,7 @@
                 <td class="actions">
                     <?= $this->Html->link(__('View'), ['action' => 'view', $agent->id]) ?>
                     <?= $this->Html->link(__('Edit'), ['action' => 'edit', $agent->id]) ?>
-                    <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $agent->id], ['confirm' => __('Are you sure you want to delete # {0}?', $agent->id)]) ?>
+                    <a href="#" data-post-url="<?= $this->Url->build(['action' => 'delete', $agent->id]) ?>" data-confirm="<?= h(__('Are you sure you want to delete # {0}?', $agent->id)) ?>"><?= __('Delete') ?></a>
                 </td>
             </tr>
             <?php endforeach; ?>

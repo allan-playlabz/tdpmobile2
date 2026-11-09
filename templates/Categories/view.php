@@ -60,7 +60,7 @@ $sCategories = $selected_categories;
           <div class="col-md-4 mb-2">
             <div class="card attraction-card">
               <a href="/attractions/view/<?=$attraction->id?>" target="_blank">
-                <div class="card-img-top" style="background-image:<?= $attraction->featured_image ? 'url(\''.$base.$attraction->featured_image.'\')' : ''; ?>"></div>
+                <?php if ($attraction->featured_image): ?><img class="card-img-top object-fit-cover" src="<?= h($base . $attraction->featured_image) ?>" alt="" loading="lazy"><?php else: ?><div class="card-img-top"></div><?php endif ?>
 
                   <div class="card-body position-relative">
                     <div class="card-title">
@@ -126,60 +126,4 @@ $sCategories = $selected_categories;
     </div>
   </div>
 </div>
-<style>
-.attraction-card a {
-  color: #444;
-  text-decoration: none;
-}
-.attraction-card .card-title {
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
-  max-height: 40px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-.attraction-card .rate { font-size: 16px; position:absolute; bottom: 9px; }
-.attraction-card .fixed_date {}
-.attraction-card .instant_confirmation {}
-.attraction-card .card-body { height: 100px; }
-.attraction-card .card-body,.attraction-card .card-footer { padding: 9px; }
-.attraction-card .card-footer { display: flex; }
-.attraction-card .card-footer div { flex:auto; }
-.card-img-top { height: 154px; background-size: cover; background-position: center; }
-.search-categories ul { padding-inline-start: 0px; }
-.search-categories li { list-style-type: none; }
-.search-categories a { color: initial; }
-.rate .old-price {
-  font-size: 12px;
-  position: relative;
-  top: 8px;
-}
-</style>
-<?php $this->Html->scriptStart(['block' => true]) ?>
-$(document).ready(function(){
-  $('.headclass').click(function(){
-    if($(this).prop("checked") == true){
-      $('.subclass'+$(this).data('headclass-id')).prop("checked",true);
-    } else {
-      $('.subclass'+$(this).data('headclass-id')).prop("checked",false);
-    }
-  });
-  $('.headclass').each(function(){
-    var headclass_id = $(this).data('headclass-id');
-    var subclass_total = $('.subclass'+headclass_id).length;
-    var subclass_checked = $('.subclass'+headclass_id+':checked').length;
-    if(subclass_total==subclass_checked) {
-      $(this).prop("checked",true);
-    }
-  });
-  $('.subclass').click(function(){
-    if($(this).prop("checked") == false){
-      $('.headclass'+$(this).data('headclass-id')).prop("checked",false);
-    }
-  });
-});
-<?php $this->Html->scriptEnd() ?>
+<?php $this->Html->script('pages/categories-view.js?v=20261106', ['block' => 'script']) ?>

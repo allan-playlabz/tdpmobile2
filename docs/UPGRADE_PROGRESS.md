@@ -135,6 +135,15 @@ Current: cakephp/cakephp 3.10.5 (locked); local CLI PHP 8.5.2.
 - Behaviour change: BS5 sanitizes popover HTML (4.0.0 JS didn't), so announcement messages lose tags/attributes outside Bootstrap's allow-list (e.g. `style`, tables).
 - e2e: `.font-weight-bold` selectors → `.fw-bold`.
 
+## UI redesign + no inline JS/CSS (2026-11-06, branch `ui/redesign`)
+- Theme from the logo palette in `webroot/css/theme.css` (navy `#0A1A99` primary, yellow `#FFCC00` main CTA with navy text, green `#0B4D12` prices/success), mapped onto BS5 `--bs-*` variables; Barlow Condensed (self-hosted, `webroot/fonts/barlow`, OFL) for headings and prices. The `border-radius: 0` override in `admin.css` is gone.
+- Redesigned: layout/navbar, flash, attractions index (search bar, filters in a sticky sidebar / offcanvas below `lg`, filter chips, new cards), attraction view + two-way (gallery, sticky booking panel, always-visible but disabled CTAs, mobile bottom bar), cart, checkout, confirmation (summary lists, payment tiles with fees up front, retry-safe Pay Now), thank-you (order ref, summary, actions). Checkout steps element `element/checkout_steps.php`.
+- Shared pieces: `element/ticket_row.php` + `webroot/js/ticket-row.js` (same markup; delegated steppers), `element/attraction_detail.php`, `element/selected_tickets.php` (sticky by CSS).
+- CSP readiness: no `<script>`/`<style>` blocks, `on*=` handlers, `style=` attributes or `FormHelper::postLink` in web templates (email/PDF excepted). Page JS lives in `webroot/js/pages/<controller>-<action>.js`; server values come from `$this->set('pageData', …)` (rendered as `<script type="application/json" id="page-data">`, read with `sgUi.page` / `sgUi.t()`), `data-*` attributes and `<meta name="csrf-token">`. POST links use `data-post-url` (+ `data-confirm`, `data-post-data`), handled in `app.js`. Page CSS is scoped by `<body class="page-{controller}-{action}">`.
+- Fixes on the way: breadcrumb category link was a POST the listing ignored (now a GET filter); confirmation sidebar showed `ticket->price` as RP; traveller/question answers on confirmation are now escaped; currency formatting unified (`sgUi.money`).
+- e2e: CTAs are disabled instead of hidden (`toBeDisabled`), ticket name from `.ticket-option .ticket-name`, confirmation customer values from `.customer-summary [data-field]`, thank-you ref also from `data-order-ref`, `.col.text-right` → `.col.text-end`, LOW badge `text-bg-danger`.
+- `webroot/css/checkout-style.css` removed (steps/summary styles are in theme.css).
+
 ## Follow-ups (not part of the upgrade)
 - Consider `HostHeaderMiddleware` with `APP_FULL_BASE_URL` set per environment (Host header injection protection).
 - firebase/php-jwt < 7 advisory (CVE-2025-45769, low).
