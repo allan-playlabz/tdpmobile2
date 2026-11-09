@@ -1,23 +1,31 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
-   <body >
-   <?= $this->Html->script(['https://js.stripe.com/v3/']) ?>
-    <script type="text/javascript">
-       var stripe = Stripe('<?= \Cake\Core\Configure::read('Payment.Stripe.api_key') ?>');
-       
-      stripe.redirectToCheckout({
-        // Make the id field from the Checkout Session creation API response
-        // available to this file, so you can provide it as parameter here
-        // instead of the {{CHECKOUT_SESSION_ID}} placeholder.
-        sessionId: '<?= $session_id ?>'
-      }).then(function (result) {
-        // If `redirectToCheckout` fails due to a browser or network
-        // error, display the localized error message to your customer
-        // using `result.error.message`.
-        console.log(result);
-        alert(result.error.message);
-      });
-            
-
-    </script>
-   </body>
+<?php
+/**
+ * Redirects to Stripe Checkout (layout "empty": this template is the whole page).
+ * No inline script (CSP): webroot/js/pages/orders-execute-stripe.js reads the publishable key and
+ * session id from the data-* attributes below. The policy must allow https://js.stripe.com.
+ *
+ * @var \App\View\AppView $this
+ * @var string $session_id
+ */
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <?= $this->Html->charset() ?>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow" />
+    <title><?= __('Redirecting to payment') ?></title>
+    <?= $this->Html->css(['bootstrap.min.css', 'theme.css?v=20261109']) ?>
+</head>
+<body class="page-orders-execute-stripe">
+    <div id="stripe-redirect"
+         class="container py-5 text-center"
+         data-key="<?= h((string)\Cake\Core\Configure::read('Payment.Stripe.api_key')) ?>"
+         data-session-id="<?= h((string)$session_id) ?>">
+        <div class="spinner-border text-primary mb-3" role="status" aria-hidden="true"></div>
+        <p class="lead"><?= __('Taking you to the payment page…') ?></p>
+        <div id="stripe-error" class="alert alert-danger d-none" role="alert"></div>
+    </div>
+    <?= $this->Html->script(['https://js.stripe.com/v3/', 'pages/orders-execute-stripe.js?v=20261106']) ?>
+</body>
 </html>

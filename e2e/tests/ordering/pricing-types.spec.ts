@@ -94,7 +94,7 @@ test.describe('Pricing types', () => {
       test.skip(!label, 'every day of the next 3 months is bookable; no unavailable day to try');
       await expect(attraction.date, `clicking unavailable ${label} must not fill the date`).toHaveValue('');
       await expect(attraction.quantities).toHaveCount(0);
-      await expect(attraction.addToCart).toBeHidden();
+      await expect(attraction.addToCart).toBeDisabled();
       expect(errors).toEqual([]);
     });
   });
@@ -132,8 +132,8 @@ test.describe('Pricing types', () => {
       // Picking a date only loads the slots; the ticket list stays empty until a slot is chosen.
       await expect(attraction.time).toHaveValue('');
       await expect(attraction.quantities).toHaveCount(0);
-      await expect(attraction.addToCart).toBeHidden();
-      await expect(attraction.buyNow).toBeHidden();
+      await expect(attraction.addToCart).toBeDisabled();
+      await expect(attraction.buyNow).toBeDisabled();
 
       const time = await attraction.pickTime(attraction.time, 0, '/attractions/get-tickets/');
       test.skip(!time, `no slot on ${date}`);

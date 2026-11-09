@@ -88,11 +88,11 @@ test.describe('Checkout', () => {
       const customer = uniqueCustomer();
       await checkoutToConfirmation(page, { viaCart: false, tracking, customer, attraction: env.attractions.settlement });
       const confirmation = new ConfirmationPage(page);
-      await expect(confirmation.customerField('tracking_no')).toHaveValue(tracking);
-      await expect(confirmation.customerField('first_name')).toHaveValue(customer.firstName);
-      await expect(confirmation.customerField('last_name')).toHaveValue(customer.lastName);
-      await expect(confirmation.customerField('email')).toHaveValue(customer.email);
-      await expect(confirmation.customerField('mobile')).toHaveValue(customer.mobile);
+      await expect(confirmation.customerField('tracking_no')).toHaveText(tracking);
+      await expect(confirmation.customerField('first_name')).toHaveText(customer.firstName);
+      await expect(confirmation.customerField('last_name')).toHaveText(customer.lastName);
+      await expect(confirmation.customerField('email')).toHaveText(customer.email);
+      await expect(confirmation.customerField('mobile')).toHaveText(customer.mobile);
 
       // Same tracking number again: the API answers 5007 and checkout re-renders with the posted data.
       const checkout = await openCheckout(page);

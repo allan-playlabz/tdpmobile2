@@ -1,4 +1,4 @@
-<?php echo $this->Html->link('<i class="fa fa-plus-circle"></i> ' . __('Add User'),['controller'=>'AgentUsers','action'=>'add'],['class'=>'btn btn-primary btn-sm float-right mb-3','escape'=>false]) ?>
+<?php echo $this->Html->link('<i class="fa fa-plus-circle"></i> ' . __('Add User'),['controller'=>'AgentUsers','action'=>'add'],['class'=>'btn btn-primary btn-sm float-end mb-3','escape'=>false]) ?>
 
 <?php $no = 1 ?>
 <div class="table-responsive">
@@ -26,13 +26,13 @@
           <tr>
             <td><?= $agent_user->name ?></td>
                 <td><?= h($agent_user->email) ?></td>
-                <td><span class="badge <?= ($agent_user->role=='viewer')?'badge-secondary':'badge-info' ?>"><?= __(ucwords($agent_user->role)) ?></span></td>
-                <td><span class="badge <?= ($agent_user->status=='active')?'badge-primary':'badge-dark' ?>"><?= __(ucwords($agent_user->status)) ?></span></td>
+                <td><span class="badge <?= ($agent_user->role=='viewer')?'text-bg-secondary':'text-bg-info' ?>"><?= __(ucwords($agent_user->role)) ?></span></td>
+                <td><span class="badge <?= ($agent_user->status=='active')?'text-bg-primary':'text-bg-dark' ?>"><?= __(ucwords($agent_user->status)) ?></span></td>
                 <td>
                     <?php echo $this->Html->link('<i class="fa fa-pencil"></i>',['controller' => 'AgentUsers', 'action' => 'edit', $agent_user->id],['escape'=>false,'class'=>'btn btn-primary']) ?>
-                    <?php echo $this->Form->postLink(__('Reset Password'),['controller' => 'AgentUsers', 'action' => 'agentResetPassword', $agent_user->id],['escape'=>false,'class'=>'btn btn-primary','confirm'=>__('Are you sure you want to reset password of {0}', $agent_user->name)]) ?>
+                    <a href="#" class="btn btn-primary" data-post-url="<?= $this->Url->build(['controller' => 'AgentUsers', 'action' => 'agentResetPassword', $agent_user->id]) ?>" data-confirm="<?= h(__('Are you sure you want to reset password of {0}', $agent_user->name)) ?>"><?= __('Reset Password') ?></a>
                     <?php if ($agent_user->totp_enabled): ?>
-                    <?php echo $this->Form->postLink(__('Reset Authenticator'),['controller' => 'AgentUsers', 'action' => 'resetTwoFactor', $agent_user->id],['class'=>'btn btn-outline-primary','confirm'=>__('Reset the authenticator app of {0}? Only do this after confirming with them in person or by phone. They will set it up again at their next login.', $agent_user->name)]) ?>
+                    <a href="#" class="btn btn-outline-primary" data-post-url="<?= $this->Url->build(['controller' => 'AgentUsers', 'action' => 'resetTwoFactor', $agent_user->id]) ?>" data-confirm="<?= h(__('Reset the authenticator app of {0}? Only do this after confirming with them in person or by phone. They will set it up again at their next login.', $agent_user->name)) ?>"><?= __('Reset Authenticator') ?></a>
                     <?php endif ?>
                 </td>
           </tr>

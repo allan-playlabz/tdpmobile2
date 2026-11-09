@@ -5,7 +5,7 @@
  */
 $public_host = \Cake\Core\Configure::read('AWSPublic.public_host');
 ?>
-<div class="card m-auto" style="width: 18rem">
+<div class="card m-auto w-18rem">
   <?php 
     if(empty($agent->agent->image)){
       echo $this->Html->image('/img/user.jpg',['class'=>'card-img-top','alt'=>$agent->agent->first_name.' picture']);

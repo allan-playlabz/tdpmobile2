@@ -22,7 +22,12 @@ export class ThankYouPage {
    * processing page polls /orders/get-status and may navigate away on its own.
    */
   static refFromHtml(html: string): string | null {
-    return html.match(/\/orders\/view\/([^"'?#\s]+)/)?.[1] ?? html.match(/var order_ref_id = '([^']+)'/)?.[1] ?? null;
+    return (
+      html.match(/\/orders\/view\/([^"'?#\s]+)/)?.[1] ??
+      html.match(/data-order-ref="([^"]+)"/)?.[1] ??
+      html.match(/var order_ref_id = '([^']+)'/)?.[1] ??
+      null
+    );
   }
 }
 

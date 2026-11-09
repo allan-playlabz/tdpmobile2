@@ -16,21 +16,12 @@ input.form-control[type="file"] {
 .maw200 { max-width: 200px; }
 .mah100 { max-height: 100px; }
 .mah200 { max-height: 200px; }
-input, textarea, .btn, .form-control, input.datepicker { border-radius:  0px; }
 #accordion .card-header { padding: 0px; }
 #accordion .card-header .btn-link:hover { text-decoration: none; }
 #accordion input[type="radio"], #accordion input[type="checkbox"] { vertical-align: middle; }
 #accordion .btn-link { position: absolute; top: 0px; right: 0px; }
-.datepicker table tr td { font-weight: 600; }
-.datepicker table tr td.disabled { font-weight: normal; }
 .tr-10 { top: 10px; right: 10px; }
 .box-wrapper { max-width: 320px;margin:20px auto; }
-/* Login layout: content centred vertically; taller pages (signup) just grow and scroll. */
-.auth-body { margin: 0; padding: 0; }
-.auth-page { min-height: 100vh; display: flex; align-items: center; padding: 24px 0; }
-.auth-page > .container { width: 100%; }
-.auth-timestamp { margin-top: 12px; text-align: center; color: #6c757d; font-size: .85rem; }
-.auth-timestamp .fa { margin-right: 4px; }
 .order-search {
 	display: flex;
 	flex-direction: row;
@@ -53,13 +44,4 @@ input, textarea, .btn, .form-control, input.datepicker { border-radius:  0px; }
 	right: 10px;
 	z-index: 100;
 }
-.text-green {
-	color: #004406;
-}
-.low-credit {
-	font-size: small;
-}
-#top_line {
-	border-bottom: 1px solid #FAA;
-    border-top: 1px solid #FAA;
-}
+/* Colours, auth layout, #top_line, .low-credit and .text-green: see theme.css. */
