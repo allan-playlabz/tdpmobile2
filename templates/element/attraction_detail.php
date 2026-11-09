@@ -38,6 +38,10 @@ $favLabel = $isFavorite ? __('Click to remove from favorites') : __('Click to ad
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="<?= $this->Url->build('/') ?>"><?= __('Home') ?></a></li>
+    <?php $attractionCountry = trim((string)($attraction->city->country ?? '')); ?>
+    <?php if ($attractionCountry !== ''): ?>
+    <li class="breadcrumb-item"><?= $this->Html->link(\App\Lib\Destinations::label($attractionCountry), ['_name' => 'country', 'country' => \App\Lib\Destinations::slug($attractionCountry)]) ?></li>
+    <?php endif ?>
     <?php if ($attraction->has('category')): ?>
     <li class="breadcrumb-item"><?= $this->Html->link($attraction->category->name, ['controller' => 'Attractions', 'action' => 'index', '?' => ['categories' => [$attraction->category->id]]]) ?></li>
     <?php endif ?>

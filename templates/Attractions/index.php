@@ -10,6 +10,7 @@
  * @var array $citiesByCountry
  * @var array $selected_cities
  * @var array $auth_user
+ * @var array{name: string, slug: string, label: string}|null $currentCountry Set on /country/{slug}.
  */
 
 $base = \Cake\Core\Configure::read('AWSPublic.public_host');
@@ -17,6 +18,19 @@ $sCategories = $selected_categories;
 $selected_city_strings = array_map('strval', $selected_cities);
 $queryParams = $this->request->getQueryParams();
 $search = (string)$this->request->getQuery('search');
+$currentCountry = $currentCountry ?? null;
+// Every listing link (filters, chips, Show All) stays on /country/{slug} when browsing a country.
+$listUrl = function (array $query = []) use ($currentCountry): array {
+    return $currentCountry
+        ? ['_name' => 'country', 'country' => $currentCountry['slug'], '?' => $query]
+        : ['controller' => 'Attractions', 'action' => 'index', '?' => $query];
+};
+$countryCities = $currentCountry ? ($citiesByCountry[$currentCountry['name']] ?? []) : [];
+$searchLabel = __('Name of Attractions');
+if ($currentCountry) {
+    $this->assign('title', __('Attractions in {0}', $currentCountry['label']));
+    $searchLabel = __('Search attractions in {0}', $currentCountry['label']);
+}
 
 // Applied filters → chips (each links to the same listing without that filter).
 $withoutValue = function (string $key, $value) use ($queryParams): array {
@@ -61,6 +75,39 @@ $this->set('pageData', [
 ]);
 $this->Html->script('pages/attractions-index.js', ['block' => 'script']);
 ?>
+<?php if ($currentCountry): ?>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="<?= $this->Url->build('/') ?>"><?= __('Home') ?></a></li>
+    <li class="breadcrumb-item active" aria-current="page"><?= h($currentCountry['label']) ?></li>
+  </ol>
+</nav>
+
+<?php if ($countryCities): ?>
+<section class="sg-destinations mb-4" aria-labelledby="top-destinations-title">
+  <div class="d-flex align-items-baseline justify-content-between mb-3">
+    <h1 class="h4 mb-0" id="top-destinations-title"><?= __('Top Destinations in {0}', h($currentCountry['label'])) ?></h1>
+    <?php if ($selected_city_strings): ?>
+      <?= $this->Html->link(__('View all'), $listUrl(), ['class' => 'small']) ?>
+    <?php endif ?>
+  </div>
+  <div class="sg-dest-wrap">
+    <button type="button" class="rec-nav sg-dest-nav sg-dest-prev d-none" aria-label="<?= __('Previous') ?>"><i class="fa fa-chevron-left" aria-hidden="true"></i></button>
+    <div class="sg-dest-row">
+      <?php foreach (array_values($countryCities) as $cityIndex => $city): ?>
+        <?php $isSelected = in_array((string)$city->id, $selected_city_strings, true); ?>
+        <?php /* Light colour by position, so cities in one country never repeat a colour (12 colours). */ ?>
+        <a class="sg-dest-tile sg-dest-c<?= $cityIndex % 12 ?><?= $isSelected ? ' is-selected' : '' ?>"
+           href="<?= $this->Url->build($listUrl(['cities' => [$city->id]])) ?>"<?= $isSelected ? ' aria-current="true"' : '' ?>>
+          <span class="sg-dest-name"><?= h($city->name) ?></span>
+        </a>
+      <?php endforeach ?>
+    </div>
+    <button type="button" class="rec-nav sg-dest-nav sg-dest-next d-none" aria-label="<?= __('Next') ?>"><i class="fa fa-chevron-right" aria-hidden="true"></i></button>
+  </div>
+</section>
+<?php endif ?>
+<?php endif ?>
 <?php if (!empty($recommended_attractions)): ?>
 <section class="recommended-section" aria-label="<?= __('Recommend') ?>">
   <div class="d-flex align-items-center mb-2">
@@ -86,7 +133,7 @@ $this->Html->script('pages/attractions-index.js', ['block' => 'script']);
 </section>
 <?php endif ?>
 
-<?= $this->Form->create(null, ['type' => 'get', 'url' => ['controller' => 'Attractions', 'action' => 'index', '?' => $queryParams], 'id' => 'attraction-filters', 'class' => 'row g-4 py-2']) ?>
+<?= $this->Form->create(null, ['type' => 'get', 'url' => $listUrl(), 'id' => 'attraction-filters', 'class' => 'row g-4 py-2']) ?>
   <aside class="col-lg-3">
     <div class="offcanvas-lg offcanvas-start sg-filters" tabindex="-1" id="filtersPanel" aria-labelledby="filtersPanelLabel">
       <div class="offcanvas-header border-bottom">
@@ -126,7 +173,7 @@ $this->Html->script('pages/attractions-index.js', ['block' => 'script']);
         </div>
 
         <div class="search-countries w-100 pt-4">
-          <h2 class="sg-filter-title"><?= __('Country') ?></h2>
+          <h2 class="sg-filter-title"><?= $currentCountry ? __('Cities') : __('Country') ?></h2>
           <div class="sg-filter-group country-checkboxes" id="country-accordion">
             <?php $countryIndex = 1; ?>
             <?php foreach ($citiesByCountry as $countryName => $countryCities): ?>
@@ -135,9 +182,9 @@ $this->Html->script('pages/attractions-index.js', ['block' => 'script']);
                   <input class="form-check-input country-check" type="checkbox"
                          data-country-id="<?= $countryIndex ?>" id="country-<?= $countryIndex ?>" />
                   <label class="form-check-label fw-semibold" for="country-<?= $countryIndex ?>"><?= h($countryName) ?></label>
-                  <button class="btn btn-link sg-filter-toggle collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#country-collapse-<?= $countryIndex ?>" aria-expanded="false" aria-controls="country-collapse-<?= $countryIndex ?>" aria-label="<?= __('Show cities') ?>"><i class="fa fa-angle-down" aria-hidden="true"></i></button>
+                  <button class="btn btn-link sg-filter-toggle<?= $currentCountry ? '' : ' collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#country-collapse-<?= $countryIndex ?>" aria-expanded="<?= $currentCountry ? 'true' : 'false' ?>" aria-controls="country-collapse-<?= $countryIndex ?>" aria-label="<?= __('Show cities') ?>"><i class="fa fa-angle-down" aria-hidden="true"></i></button>
                 </div>
-                <div id="country-collapse-<?= $countryIndex ?>" class="collapse" aria-labelledby="country-heading-<?= $countryIndex ?>" data-bs-parent="#country-accordion">
+                <div id="country-collapse-<?= $countryIndex ?>" class="collapse<?= $currentCountry ? ' show' : '' ?>" aria-labelledby="country-heading-<?= $countryIndex ?>" data-bs-parent="#country-accordion">
                   <ul class="sg-filter-children">
                     <?php foreach ($countryCities as $city): ?>
                       <li>
@@ -160,7 +207,7 @@ $this->Html->script('pages/attractions-index.js', ['block' => 'script']);
         <div class="sg-filter-actions w-100 mt-auto">
           <button type="submit" class="btn btn-cta w-100" id="btn-apply-filters"><i class="fa fa-filter me-2" aria-hidden="true"></i><?= __('Apply filters') ?></button>
           <?php if ($filterCount): ?>
-            <?= $this->Html->link(__('Clear filters'), ['action' => 'index', '?' => array_filter(['search' => $search])], ['class' => 'btn btn-link btn-sm w-100 mt-1']) ?>
+            <?= $this->Html->link(__('Clear filters'), $listUrl(array_filter(['search' => $search])), ['class' => 'btn btn-link btn-sm w-100 mt-1']) ?>
           <?php endif ?>
         </div>
       </div>
@@ -171,7 +218,7 @@ $this->Html->script('pages/attractions-index.js', ['block' => 'script']);
     <div class="sg-searchbar mb-3">
       <div class="input-group input-group-lg">
         <span class="input-group-text bg-white"><i class="fa fa-search text-muted" aria-hidden="true"></i></span>
-        <?= $this->Form->text('search', ['class' => 'form-control', 'value' => $search, 'placeholder' => __('Name of Attractions'), 'aria-label' => __('Name of Attractions')]) ?>
+        <?= $this->Form->text('search', ['class' => 'form-control', 'value' => $search, 'placeholder' => $searchLabel, 'aria-label' => $searchLabel]) ?>
         <button type="submit" class="btn btn-primary px-4"><?= __('Search') ?></button>
       </div>
       <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
@@ -179,11 +226,11 @@ $this->Html->script('pages/attractions-index.js', ['block' => 'script']);
           <i class="fa fa-sliders me-1" aria-hidden="true"></i><?= __('Filters') ?><?= $filterCount ? ' (' . $filterCount . ')' : '' ?>
         </button>
         <?php foreach ($chips as $chip): ?>
-          <a class="sg-chip" href="<?= $this->Url->build(['action' => 'index', '?' => $chip['query']]) ?>" title="<?= __('Remove filter') ?>">
+          <a class="sg-chip" href="<?= $this->Url->build($listUrl($chip['query'])) ?>" title="<?= __('Remove filter') ?>">
             <?= h($chip['label']) ?> <i class="fa fa-times" aria-hidden="true"></i><span class="visually-hidden"><?= __('Remove filter') ?></span>
           </a>
         <?php endforeach; ?>
-        <?= $this->Html->link(__('Show All'), ['action' => 'index'], ['class' => 'btn btn-link btn-sm' . ($chips ? '' : ' text-muted')]) ?>
+        <?= $this->Html->link(__('Show All'), $listUrl(), ['class' => 'btn btn-link btn-sm' . ($chips ? '' : ' text-muted')]) ?>
         <?php if ($hasResults): ?>
           <span class="ms-auto small text-muted"><?= $this->Paginator->counter(__('{{count}} attractions')) ?></span>
         <?php endif ?>
@@ -215,7 +262,7 @@ $this->Html->script('pages/attractions-index.js', ['block' => 'script']);
         <i class="fa fa-map-signs" aria-hidden="true"></i>
         <p class="lead mb-1"><?= __('No attractions found.') ?></p>
         <p class="text-muted"><?= __('Try another name or remove some filters.') ?></p>
-        <?= $this->Html->link(__('Clear filters'), ['action' => 'index'], ['class' => 'btn btn-outline-primary']) ?>
+        <?= $this->Html->link(__('Clear filters'), $listUrl(), ['class' => 'btn btn-outline-primary']) ?>
       </div>
     <?php endif ?>
   </div>

@@ -18,14 +18,17 @@ class RedesignRenderTest extends TestCase
     protected array $fixtures = [
         'app.Agents',
         'app.AgentUsers',
+        'app.Cities',
     ];
 
     private const AGENT = '00000000-0000-4000-8000-0000000000c1';
     private const USER = '00000000-0000-4000-8000-0000000000c2';
+    private const CITY = '00000000-0000-4000-8000-0000000000c3';
 
     protected function setUp(): void
     {
         parent::setUp();
+        \App\Lib\Destinations::clearCache();
         /** @var Connection $db */
         $db = $this->getTableLocator()->get('Agents')->getConnection();
         $db->insert('agents', [
@@ -37,6 +40,7 @@ class RedesignRenderTest extends TestCase
             'id' => self::USER, 'agent_id' => self::AGENT, 'name' => 'Render User', 'email' => 'render.user@example.com',
             'password' => 'x', 'role' => 'master', 'status' => 'active', 'two_factor_method' => 'email_otp',
         ], ['id' => 'binaryuuid', 'agent_id' => 'binaryuuid']);
+        $db->insert('cities', ['id' => self::CITY, 'country' => 'Singapore', 'name' => 'Sentosa'], ['id' => 'binaryuuid']);
         $this->session(['Auth' => ['User' => [
             'id' => self::USER, 'agent_id' => self::AGENT, 'role' => 'master', 'email' => 'render.user@example.com',
             'name' => 'Render User', 'credits' => '100.00',
@@ -53,8 +57,28 @@ class RedesignRenderTest extends TestCase
             'attractions index' => ['/attractions', ['id="attraction-filters"', 'name="search"', 'No attractions found.', 'page-attractions-index']],
             'empty cart' => ['/orders/cart', ['Your Cart', 'No items on cart.', 'class="sg-steps"', 'page-orders-cart']],
             'thank you without order' => ['/orders/thank-you', ['Thank you for your purchase!', 'page-orders-thank-you']],
+            'country page' => ['/country/singapore', ['Top Destinations in Singapore', 'placeholder="Search attractions in Singapore"', '<li class="breadcrumb-item active" aria-current="page">Singapore</li>', 'Sentosa', 'cities%5B0%5D=' . self::CITY, 'action="/country/singapore"', 'Popular Destinations']],
             'contact us' => ['/agent-users/contact', ['Contact Us', 'id="contact-form"', 'name="subject"', 'page-agent-users-contact']],
         ];
+    }
+
+    protected function tearDown(): void
+    {
+        \App\Lib\Destinations::clearCache();
+        parent::tearDown();
+    }
+
+    public function testUnknownCountryIsNotFound(): void
+    {
+        $this->get('/country/nowhere');
+        $this->assertResponseCode(404);
+    }
+
+    public function testNavbarListsDestinations(): void
+    {
+        $this->get('/orders/cart');
+        $this->assertResponseContains('href="/country/singapore"');
+        $this->assertResponseContains('/plugins/flag-icons/4x3/sg.svg');
     }
 
     /**

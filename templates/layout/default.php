@@ -67,6 +67,31 @@ $cartCount = $this->getRequest()->getSession()->check('ShoppingCart') ? count((a
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+        <?php if (!empty($destinations)): ?>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle<?= !empty($currentCountry) ? ' active' : '' ?>" href="#" id="navbarDestinations" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+            <i class="fa fa-map-marker me-1" aria-hidden="true"></i><?= __('Popular Destinations') ?>
+          </a>
+          <div class="dropdown-menu dropdown-menu-end sg-destinations-menu" aria-labelledby="navbarDestinations">
+            <div class="sg-destinations-title"><?= __('Popular Destinations') ?></div>
+            <ul class="sg-destinations-grid list-unstyled mb-0">
+              <?php foreach ($destinations as $slug => $destination): ?>
+                <?php $isCurrent = ($currentCountry['slug'] ?? null) === $slug; ?>
+                <li>
+                  <a class="sg-destination<?= $isCurrent ? ' active' : '' ?>" href="<?= $this->Url->build(['_name' => 'country', 'country' => $slug]) ?>"<?= $isCurrent ? ' aria-current="page"' : '' ?>>
+                    <?php if ($destination['flag']): ?>
+                      <?= $this->Html->image($destination['flag'], ['alt' => '', 'class' => 'sg-flag', 'width' => 28, 'height' => 21, 'loading' => 'lazy']) ?>
+                    <?php else: ?>
+                      <span class="sg-flag sg-flag-empty" aria-hidden="true"><i class="fa fa-globe"></i></span>
+                    <?php endif ?>
+                    <span class="sg-destination-name"><?= h($destination['label']) ?></span>
+                  </a>
+                </li>
+              <?php endforeach ?>
+            </ul>
+          </div>
+        </li>
+        <?php endif ?>
         <?php if (Configure::read('Features.translation') && !empty($available_languages)) { ?>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarLanguageDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

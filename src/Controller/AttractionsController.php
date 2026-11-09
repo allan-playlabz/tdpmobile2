@@ -9,6 +9,7 @@ use Cake\Core\Configure;
 use Cake\Routing\Router;
 use App\Controller\AppController;
 use App\Lib\PricingType;
+use App\Lib\Destinations;
 use Cake\Http\Client;
 use Cake\Http\Response;
 use Cake\Http\Exception\NotFoundException;
@@ -33,11 +34,12 @@ class AttractionsController extends AppController
     } 
 
     /**
-     * Index method
+     * Index method. Also serves /country/{slug}: the listing limited to one country.
      *
+     * @param string|null $country Country slug (App\Lib\Destinations::slug()).
      * @return \Cake\Http\Response|null
      */
-    public function index()
+    public function index(?string $country = null)
     {
         $this->paginate = ['limit'=>20];
         $now = DateTime::now();
@@ -66,12 +68,33 @@ class AttractionsController extends AppController
           $selected_cities = (array)$this->request->getQuery('cities');
         }
         $this->Cities = $this->fetchTable('Cities');
+        // /country/{slug}: only this country's cities; a checked city can narrow it but not leave it.
+        $currentCountry = null;
+        if ($country !== null) {
+            $countryName = Destinations::findBySlug($country);
+            if ($countryName === null) {
+                throw new NotFoundException(__('Destination not found.'));
+            }
+            $currentCountry = ['name' => $countryName, 'slug' => Destinations::slug($countryName), 'label' => Destinations::label($countryName)];
+            $selected_countries = [$countryName];
+            $country_city_ids = $this->Cities->find()
+              ->select(['id'])
+              ->where(['country' => $countryName])
+              ->all()->extract('id')
+              ->toList();
+            $selected_cities = array_values(array_intersect(array_map('strval', $selected_cities), array_map('strval', $country_city_ids)));
+            if (empty($selected_cities)) {
+              $selected_cities = [];
+              $conditions['Attractions.city_id IN'] = $country_city_ids ?: ['00000000-0000-0000-0000-000000000000'];
+            }
+        }
+        $this->set('currentCountry', $currentCountry);
         // Filter by the explicitly checked cities. Fall back to expanding any
         // selected countries to their cities (backward compatibility with older
         // links that passed only `countries`).
         if (!empty($selected_cities)) {
             $conditions['Attractions.city_id IN'] = $selected_cities;
-        } elseif (!empty($selected_countries)) {
+        } elseif (!empty($selected_countries) && $currentCountry === null) {
             $city_ids = $this->Cities->find()
               ->select(['id'])
               ->where(['country IN' => $selected_countries])
@@ -99,7 +122,8 @@ class AttractionsController extends AppController
         if (empty($agent_attraction_ids)) {
           $this->set(compact('attractions','search','selected_categories','selected_countries','selected_cities'));
           $this->set('categories', []);
-          $this->set('citiesByCountry', []);
+          // The country page still shows its destination tiles when the agent has no attractions.
+          $this->set('citiesByCountry', $currentCountry ? [$currentCountry['name'] => $this->Cities->find()->where(['country' => $currentCountry['name']])->orderBy(['name' => 'ASC'])->all()->toList()] : []);
           $this->set('recommended_attractions', []);
           return;
         }
@@ -207,6 +231,7 @@ class AttractionsController extends AppController
         $this->Cities = $this->fetchTable('Cities');
         $cities = $this->Cities->find()
           ->select(['id', 'country', 'name'])
+          ->where($currentCountry ? ['country' => $currentCountry['name']] : [])
           ->orderBy(['country' => 'ASC', 'name' => 'ASC'])
           ->all();
         $citiesByCountry = [];
@@ -348,7 +373,7 @@ class AttractionsController extends AppController
           throw new NotFoundException(__('Attraction not found.'));
         }
         $attraction = $this->Attractions->get($id,
-        contain: ['Merchants', 'Categories', 'AttractionMedias'],
+        contain: ['Merchants', 'Categories', 'AttractionMedias', 'Cities'],
         conditions: ['Attractions.status'=>'published']);
         $attraction->is_favorite = $this->Attractions->FavoriteAttractions->exists(['attraction_id'=>$id,'agent_user_id'=>$this->getAuthUser('id')]);
         if ($this->request->getSession()->check('language')) {
@@ -601,7 +626,7 @@ class AttractionsController extends AppController
         if (!$this->_isAgentAttraction($id)) {
           throw new NotFoundException(__('Attraction not found.'));
         }
-        $attraction = $this->Attractions->get($id, contain: ['Merchants', 'Categories', 'AttractionMedias']);
+        $attraction = $this->Attractions->get($id, contain: ['Merchants', 'Categories', 'AttractionMedias', 'Cities']);
         $attraction->is_favorite = $this->Attractions->FavoriteAttractions->exists(['attraction_id'=>$id,'agent_user_id'=>$this->getAuthUser('id')]);
         if ($this->request->getSession()->check('language')) {
           Translator::translateAttraction($this->request, $attraction);

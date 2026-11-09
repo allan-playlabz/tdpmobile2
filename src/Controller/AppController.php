@@ -84,6 +84,12 @@ class AppController extends Controller
     {
         if ($this->request->is('ajax')) {
             $this->viewBuilder()->setClassName(AjaxView::class);
+
+            return;
+        }
+        // "Popular Destinations" navbar menu (layout/default.php), logged-in pages only.
+        if ($this->getAuthUser() && !$this->viewBuilder()->hasVar('destinations')) {
+            $this->set('destinations', \App\Lib\Destinations::menu());
         }
     }
 

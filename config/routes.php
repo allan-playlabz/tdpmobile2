@@ -93,6 +93,8 @@ return static function (RouteBuilder $routes): void {
 
    //  attractions
    $routes->connect('/attractions', ['controller' => 'Attractions', 'action' => 'index']);
+    // Attractions listing limited to one country (slug from App\Lib\Destinations::slug()).
+    $routes->connect('/country/{country}', ['controller' => 'Attractions', 'action' => 'index'], ['pass' => ['country'], 'country' => '[a-z0-9-]+', '_name' => 'country']);
    $routes->connect('/attractions/test', ['controller' => 'Attractions', 'action' => 'test']);
     $routes->connect('/attractions/view/{id}', ['controller' => 'Attractions', 'action' => 'view'], ['pass' => ['id']]);
     $routes->connect('/attractions/two-way/{id}', ['controller' => 'Attractions', 'action' => 'viewTwoWay'], ['pass' => ['id']]);
