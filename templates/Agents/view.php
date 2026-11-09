@@ -4,7 +4,7 @@
  * @var \App\Model\Entity\Agent $agent
  */
 ?>
-<div class="card m-auto" style="width: 18rem">
+<div class="card m-auto w-18rem">
   <img src="/img/user.jpg" class="card-img-top" alt="...">
   <div class="card-body">
     <div class="text-center">

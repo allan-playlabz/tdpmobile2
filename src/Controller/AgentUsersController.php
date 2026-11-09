@@ -578,13 +578,17 @@ class AgentUsersController extends AppController
         return $this->redirect('/');
       }
       if ($this->request->is('post')) {
-        if ($this->request->getData('subject') && $this->request->getData('message')) {
+        $subject = trim((string)$this->request->getData('subject'));
+        $message = trim((string)$this->request->getData('message'));
+        if ($subject !== '' && $message !== '') {
           $this->loadComponent('Mailer');
           $admin_email = Configure::read('Default.contact_us_email');
-          $this->Mailer->mail('Contact Us','contact_us','Contact Us ('.$this->request->getData('subject').')',$admin_email,['message'=>$this->request->getData('message'),'from'=>$this->getAuthUser('email')]);
+          $this->Mailer->mail('Contact Us','contact_us','Contact Us ('.$subject.')',$admin_email,['message'=>$message,'from'=>$this->getAuthUser('email')]);
           $this->set('sent',true);
           $this->Flash->success(__('Message successfully sent.'));
-          }
+        } else {
+          $this->Flash->error(__('Please enter both a subject and a message.'));
+        }
       }
     }
 

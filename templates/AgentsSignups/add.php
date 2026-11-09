@@ -37,7 +37,7 @@
         // General grouping container for control(). Defines input/label ordering.
         'formGroup' => '{{label}}{{input}}',
         // Wrapper content used to hide other content.
-        'hiddenBlock' => '<div style="display:none;">{{content}}</div>',
+        'hiddenBlock' => '<div class="d-none">{{content}}</div>',
         // Generic input element.
         'input' => '<input type="{{type}}" name="{{name}}" {{attrs}} class="form-control" placeholder="{{name}}"/>',
         // Submit input element.
@@ -47,7 +47,7 @@
         // Container element used by control() when a field has an error.
         'inputContainerError' => '<div class="form-group {{type}}{{required}} has-error">{{content}}{{error}}</div>',
         // Label element when inputs are not nested inside the label.
-        'label' => '<div class="sr-only"><label {{attrs}}>{{text}}</label></div>',
+        'label' => '<div class="visually-hidden"><label {{attrs}}>{{text}}</label></div>',
         // Legends created by allControls()
         'legend' => '<legend>{{text}}</legend>',
         // Multi-Checkbox input set title element.
@@ -71,19 +71,19 @@
     ?>
     <fieldset>
         <legend class="mb-4"><?= __('Sign up') ?></legend>
-        <h5 class="text-left"><?= __('Company Details') ?></h5>
+        <h5 class="text-start"><?= __('Company Details') ?></h5>
         <div class="row">
-            <div class="col-md-6"><?php echo $this->Form->control('company_name', ['class'=>'form-control','placeholder'=>__('Company Name'),'label'=>['class'=>'sr-only']]); ?></div>
-            <div class="col-md-6"><?php echo $this->Form->control('country', ['options'=>\Cake\Core\Configure::read('Options.countries'), 'class'=>'form-control','placeholder'=>__('Country'),'label'=>['class'=>'sr-only']]); ?></div>
+            <div class="col-md-6"><?php echo $this->Form->control('company_name', ['class'=>'form-control','placeholder'=>__('Company Name'),'label'=>['class'=>'visually-hidden']]); ?></div>
+            <div class="col-md-6"><?php echo $this->Form->control('country', ['options'=>\Cake\Core\Configure::read('Options.countries'), 'class'=>'form-control','placeholder'=>__('Country'),'label'=>['class'=>'visually-hidden']]); ?></div>
         </div>
-        <h5 class="text-left"><?= __('Personal Details') ?></h5>
+        <h5 class="text-start"><?= __('Personal Details') ?></h5>
         <div class="row">
-            <div class="col-md-6 col-12"><?php echo $this->Form->control('first_name', ['class'=>'form-control','placeholder'=>__('First Name'),'label'=>['class'=>'sr-only']]); ?></div>
-            <div class="col-md-6 col-12"><?php echo $this->Form->control('last_name', ['class'=>'form-control','placeholder'=>__('Last Name'),'label'=>['class'=>'sr-only']]); ?></div>
+            <div class="col-md-6 col-12"><?php echo $this->Form->control('first_name', ['class'=>'form-control','placeholder'=>__('First Name'),'label'=>['class'=>'visually-hidden']]); ?></div>
+            <div class="col-md-6 col-12"><?php echo $this->Form->control('last_name', ['class'=>'form-control','placeholder'=>__('Last Name'),'label'=>['class'=>'visually-hidden']]); ?></div>
         </div>
         <div class="row">
-            <div class="col-md-6 col-12"><?php echo $this->Form->control('email', ['class'=>'form-control','placeholder'=>__('Email'),'label'=>['class'=>'sr-only']]); ?></div>
-            <div class="col-md-6 col-12"><?php echo $this->Form->control('contact_no', ['class'=>'form-control','placeholder'=>__('Contact No'),'label'=>['class'=>'sr-only']]); ?></div>
+            <div class="col-md-6 col-12"><?php echo $this->Form->control('email', ['class'=>'form-control','placeholder'=>__('Email'),'label'=>['class'=>'visually-hidden']]); ?></div>
+            <div class="col-md-6 col-12"><?php echo $this->Form->control('contact_no', ['class'=>'form-control','placeholder'=>__('Contact No'),'label'=>['class'=>'visually-hidden']]); ?></div>
         </div>
         <div class="row">
 
@@ -91,7 +91,7 @@
     </fieldset>
     <div class="row">
         <div class="col-md-6 offset-md-3">
-            <?= $this->Form->button(__('Submit'), ['class'=>'btn btn-primary btn-block btn-lg']) ?>
+            <?= $this->Form->button(__('Submit'), ['class'=>'btn btn-primary w-100 btn-lg']) ?>
         </div>
     </div>
     <?= $this->Form->end() ?>

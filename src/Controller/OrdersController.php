@@ -909,7 +909,9 @@ class OrdersController extends AppController
 
     public function thankYou() {
       $order_id = $this->request->getSession()->read('order_id');
-      $order = $this->Orders->find()->where(['Orders.id'=>$order_id])->first();
+      // Items (with ticket + attraction) for the summary on the thank-you page.
+      // No order in the session (page reopened later): where(['id' => null]) would throw in 5.x.
+      $order = $order_id ? $this->Orders->find()->where(['Orders.id'=>$order_id])->contain(['OrderItems' => ['Tickets' => ['Attractions']]])->first() : null;
 
       if ($order && in_array($order->status,['in_progress', 'done'])) {
         $this->request->getSession()->delete('order_id');

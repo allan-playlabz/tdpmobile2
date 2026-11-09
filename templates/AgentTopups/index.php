@@ -13,10 +13,10 @@ $to = $this->request->getQuery('to') ?: '';
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2">
       <h1 class="h2"><?= __('Top Up') ?></h1>
       <div class="btn-toolbar mb-2 mb-md-0">
-        <div class="btn-group mr-2">
-        <?php echo  $this->Html->link(__('Add'), ['action' => 'add'], ['class' => 'btn btn-primary float-right']) ?>
-        <button type="button" class="btn btn-success ml-1" data-toggle="modal" data-target="#expressTopupModal"><?= __('Express Topup') ?></button>
-        <?php echo  $this->Form->postLink(__('Download'), ['action'=>'index', '?' => $this->request->getQuery()],['class'=>'btn btn-primary ml-1', 'block' => 'postLink']) ?>
+        <div class="btn-group me-2">
+        <?php echo  $this->Html->link(__('Add'), ['action' => 'add'], ['class' => 'btn btn-primary float-end']) ?>
+        <button type="button" class="btn btn-success ms-1" data-bs-toggle="modal" data-bs-target="#expressTopupModal"><?= __('Express Topup') ?></button>
+        <a href="#" class="btn btn-primary ms-1" data-post-url="<?= $this->Url->build(['action' => 'index', '?' => $this->request->getQuery()]) ?>"><?= __('Download') ?></a>
         </div>
       </div>
     </div>
@@ -26,7 +26,6 @@ $to = $this->request->getQuery('to') ?: '';
   </div>
 </div>
 
-<?= $this->fetch('postLink') ?>
 <div class="agentTopups index large-9 medium-8 columns content">
 
   <div class="table-responsive">
@@ -71,26 +70,22 @@ $to = $this->request->getQuery('to') ?: '';
     <div class="modal-content">
       <div class="modal-header bg-success text-white">
         <h5 class="modal-title" id="expressTopupModalLabel">
-          <i class="fa fa-bolt mr-2"></i><?= __('Express Top Up') ?>
+          <i class="fa fa-bolt me-2"></i><?= __('Express Top Up') ?>
         </h5>
-        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <p class="mb-3">
           <?= __('You can do an express top up. Simply make a bank transfer to the account below and include your Bank Reference Code below in the transfer reference so we can match your payment automatically.') ?>
         </p>
         <div class="form-group mb-3">
-          <label class="font-weight-bold mb-1"><?= __('Your Bank Reference Code') ?></label>
+          <label class="fw-bold mb-1"><?= __('Your Bank Reference Code') ?></label>
           <?php if (!empty($bank_reference_code)) : ?>
             <div class="input-group">
-              <input type="text" id="bankReferenceCode" class="form-control text-monospace font-weight-bold" value="<?= h($bank_reference_code) ?>" readonly>
-              <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button" id="copyReferenceBtn" title="<?= __('Copy') ?>">
-                  <i class="fa fa-copy"></i> <?= __('Copy') ?>
-                </button>
-              </div>
+              <input type="text" id="bankReferenceCode" class="form-control font-monospace fw-bold" value="<?= h($bank_reference_code) ?>" readonly>
+              <button class="btn btn-outline-secondary" type="button" id="copyReferenceBtn" title="<?= __('Copy') ?>" data-copy-target="#bankReferenceCode" data-copied="<?= __('Copied') ?>">
+                <i class="fa fa-copy"></i> <?= __('Copy') ?>
+              </button>
             </div>
             <small class="form-text text-muted"><?= __('Include this code as the payment reference for your bank transfer.') ?></small>
           <?php else : ?>
@@ -103,7 +98,7 @@ $to = $this->request->getQuery('to') ?: '';
         <?php if (!empty($bank_account)) : ?>
           <hr>
           <div>
-            <label class="font-weight-bold mb-2"><?= __('Bank Account Details') ?></label>
+            <label class="fw-bold mb-2"><?= __('Bank Account Details') ?></label>
             <?php
               $bank_fields = [
                 'account_name' => __('Account name'),
@@ -120,8 +115,8 @@ $to = $this->request->getQuery('to') ?: '';
                 <?php foreach ($bank_fields as $key => $label) : ?>
                   <?php if (!empty($bank_account[$key])) : ?>
                     <tr>
-                      <th scope="row" class="text-muted font-weight-normal pl-0" style="width:45%;"><?= $label ?></th>
-                      <td class="font-weight-bold"><?= h($bank_account[$key]) ?></td>
+                      <th scope="row" class="text-muted fw-normal ps-0 w-45"><?= $label ?></th>
+                      <td class="fw-bold"><?= h($bank_account[$key]) ?></td>
                     </tr>
                   <?php endif; ?>
                 <?php endforeach; ?>
@@ -131,7 +126,7 @@ $to = $this->request->getQuery('to') ?: '';
         <?php endif; ?>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal"><?= __('Close') ?></button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= __('Close') ?></button>
       </div>
     </div>
   </div>
@@ -139,20 +134,4 @@ $to = $this->request->getQuery('to') ?: '';
 
 <?= $this->Html->css(['bootstrap-datepicker3.standalone.min'],['block'=>'internal_css']); ?>
 <?= $this->Html->script(['bootstrap-datepicker.min'],['block'=>'scriptBottom']) ?>
-<?php $this->Html->scriptStart(['block' => true]) ?>
-$(document).ready(function() {
-
-  $('.datepicker').datepicker({format:'d M yyyy',endDate:'today'});
-
-  $('#copyReferenceBtn').on('click', function() {
-    var input = document.getElementById('bankReferenceCode');
-    input.select();
-    input.setSelectionRange(0, 99999); // for mobile
-    document.execCommand('copy');
-    var $btn = $(this);
-    var original = $btn.html();
-    $btn.html('<i class="fa fa-check"></i> Copied');
-    setTimeout(function() { $btn.html(original); }, 1500);
-  });
-});
-<?php $this->Html->scriptEnd() ?>
+<?php $this->Html->script('pages/agent-topups-index.js?v=20261106', ['block' => 'script']) ?>

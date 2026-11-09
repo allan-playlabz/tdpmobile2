@@ -14,7 +14,7 @@ $sCategories = $selected_categories;
         <?php echo $this->Form->create(null,['type'=>'post','class'=>'form-inline']) ?>
         <?php echo $this->Form->control('search',['class'=>'form-control','default'=>$this->request->getQuery('search'),'label'=>false,'placeholder'=>'Name of Attractions']) ?>
         <?php echo $this->Form->submit('Search',['class'=>'btn btn-primary form-group']) ?>
-        <?php echo $this->Html->link('Show All',['action'=>'index'],['class'=>'btn btn-primary ml-1 form-group']) ?>
+        <?php echo $this->Html->link('Show All',['action'=>'index'],['class'=>'btn btn-primary ms-1 form-group']) ?>
         <br />
         <div class="search-categories w-100 py-4">
           <h4>Categories</h4>
@@ -24,13 +24,13 @@ $sCategories = $selected_categories;
             <div class="card">
               <div class="card-header" id="heading-<?=$cardCount?>">
                 <h6 class="p-2 mb-0">
-                  <input class="headclass headclass<?=$cardCount?> ml-2" data-headclass-id="<?=$cardCount?>" type="checkbox" /> <?=$value['name']?>
-                  <button class="btn btn-link float-right collapsed" type="button" data-toggle="collapse" data-target="#collapse<?=$cardCount?>" aria-expanded="true" aria-controls="collapse<?=$cardCount?>"><i class="fa fa-angle-down" aria-hidden="true"></i>
+                  <input class="headclass headclass<?=$cardCount?> ms-2" data-headclass-id="<?=$cardCount?>" type="checkbox" /> <?=$value['name']?>
+                  <button class="btn btn-link float-end collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?=$cardCount?>" aria-expanded="true" aria-controls="collapse<?=$cardCount?>"><i class="fa fa-angle-down" aria-hidden="true"></i>
                   </button>
                 </h6>
               </div>
 
-              <div id="collapse<?=$cardCount?>" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+              <div id="collapse<?=$cardCount?>" class="collapse" aria-labelledby="headingOne" data-bs-parent="#accordion">
                 <div class="card-body">
                 <ul>
                   <?php foreach ($value['child_categories'] as $ckey => $cvalue) {
@@ -60,7 +60,7 @@ $sCategories = $selected_categories;
           <div class="col-md-4 mb-2">
             <div class="card attraction-card">
               <a href="/attractions/view/<?=$attraction->id?>" target="_blank">
-                <div class="card-img-top" style="background-image:<?= $attraction->featured_image ? 'url(\''.$base.$attraction->featured_image.'\')' : ''; ?>"></div>
+                <?php if ($attraction->featured_image): ?><img class="card-img-top object-fit-cover" src="<?= h($base . $attraction->featured_image) ?>" alt="" loading="lazy"><?php else: ?><div class="card-img-top"></div><?php endif ?>
 
                   <div class="card-body position-relative">
                     <div class="card-title">
@@ -69,7 +69,7 @@ $sCategories = $selected_categories;
                       <?php
                       if ($attraction->pricing_type == 'settlement') {
                         if (!empty($attraction->tickets) && !empty($attraction->tickets[0]->settlement_agents) && !empty($attraction->tickets[0]->settlement_agents[0]->settlement)) {
-                            echo '<div class="rate"><del class="text-muted old-price">S'.$this->Number->currency($attraction->tickets[0]->price).'</del> <div class="font-weight-bold">S'.$this->Number->currency($attraction->tickets[0]->settlement_agents[0]->settlement->rate).'</div></div>';
+                            echo '<div class="rate"><del class="text-muted old-price">S'.$this->Number->currency($attraction->tickets[0]->price).'</del> <div class="fw-bold">S'.$this->Number->currency($attraction->tickets[0]->settlement_agents[0]->settlement->rate).'</div></div>';
                         }
                       }
                       else {
@@ -126,60 +126,4 @@ $sCategories = $selected_categories;
     </div>
   </div>
 </div>
-<style>
-.attraction-card a {
-  color: #444;
-  text-decoration: none;
-}
-.attraction-card .card-title {
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
-  max-height: 40px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-.attraction-card .rate { font-size: 16px; position:absolute; bottom: 9px; }
-.attraction-card .fixed_date {}
-.attraction-card .instant_confirmation {}
-.attraction-card .card-body { height: 100px; }
-.attraction-card .card-body,.attraction-card .card-footer { padding: 9px; }
-.attraction-card .card-footer { display: flex; }
-.attraction-card .card-footer div { flex:auto; }
-.card-img-top { height: 154px; background-size: cover; background-position: center; }
-.search-categories ul { padding-inline-start: 0px; }
-.search-categories li { list-style-type: none; }
-.search-categories a { color: initial; }
-.rate .old-price {
-  font-size: 12px;
-  position: relative;
-  top: 8px;
-}
-</style>
-<?php $this->Html->scriptStart(['block' => true]) ?>
-$(document).ready(function(){
-  $('.headclass').click(function(){
-    if($(this).prop("checked") == true){
-      $('.subclass'+$(this).data('headclass-id')).prop("checked",true);
-    } else {
-      $('.subclass'+$(this).data('headclass-id')).prop("checked",false);
-    }
-  });
-  $('.headclass').each(function(){
-    var headclass_id = $(this).data('headclass-id');
-    var subclass_total = $('.subclass'+headclass_id).length;
-    var subclass_checked = $('.subclass'+headclass_id+':checked').length;
-    if(subclass_total==subclass_checked) {
-      $(this).prop("checked",true);
-    }
-  });
-  $('.subclass').click(function(){
-    if($(this).prop("checked") == false){
-      $('.headclass'+$(this).data('headclass-id')).prop("checked",false);
-    }
-  });
-});
-<?php $this->Html->scriptEnd() ?>
+<?php $this->Html->script('pages/categories-view.js?v=20261106', ['block' => 'script']) ?>

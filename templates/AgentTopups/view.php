@@ -9,7 +9,7 @@
     <table class="table table-borderless">
         <tr>
             <th scope="row"><?= __('Amount') ?></th>
-            <td><big class="font-weight-bold"><?= $this->Number->currency($agentTopup->amount) ?></big></td>
+            <td><big class="fw-bold"><?= $this->Number->currency($agentTopup->amount) ?></big></td>
         </tr>
         <tr>
             <th scope="row"><?= __('Top Up Date') ?></th>

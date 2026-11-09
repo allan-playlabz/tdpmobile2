@@ -502,17 +502,17 @@ class AttractionsController extends AppController
           } else {
             if ($external_tickets && $external_tickets->supplier_api_id != $supplier_used) {
               $this->set('not_allowed_to_add',true);
-              $this->Flash->warning('<i class="fa fa-warning"></i>' . __('This merchant\'s tickets cannot be bought with other merchants'),['escape'=>false]);
+              $this->Flash->warning(__('This merchant\'s tickets cannot be bought with other merchants'));
             } elseif (!$external_tickets && $supplier_used) {
               $this->set('not_allowed_to_add',true);
-              $this->Flash->warning('<i class="fa fa-warning"></i>' . __('Only tickets from the same merchant as those in your cart can be added to cart'),['escape'=>false]);
+              $this->Flash->warning(__('Only tickets from the same merchant as those in your cart can be added to cart'));
             }
           }
           /* block duplicate supplier_api_id */
           $attractionBlockedTicket = $this->Attractions->Tickets->find()->where(['attraction_id' => $id, 'supplier_api_id IS NOT NULL'])->first();
           if ($attractionBlockedTicket && $this->ShoppingCart->hasDuplicateSupplier($attractionBlockedTicket->supplier_api_id, $id)) {
             $this->set('not_allowed_to_add', true);
-            $this->Flash->warning('<i class="fa fa-warning"></i>' . __('You cannot add more than 1 product from this supplier to your cart'), ['escape' => false]);
+            $this->Flash->warning(__('You cannot add more than 1 product from this supplier to your cart'));
           }
           /* end block duplicate supplier */
           if ($this->ShoppingCart->getCount()) {

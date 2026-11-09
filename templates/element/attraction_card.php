@@ -1,69 +1,76 @@
 <?php
 /**
- * Attraction card body (image + title + price + footer badges).
- * Reused by the main attractions grid and the recommended showcase row.
+ * Attraction card body (image + type badge + title + price + facts), inside .card.attraction-card.
+ * Used by the attractions grid. Styles: theme.css (.attraction-card).
  *
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Attraction $attraction
  * @var string $base Public host prefix for images.
  */
 use App\Lib\PricingType;
+
+$ticket = $attraction->ticket ?? null;
+$url = $attraction->pricing_type == PricingType::TWO_WAY_FDATETIME
+    ? $this->Url->build(['controller' => 'Attractions', 'action' => 'viewTwoWay', $attraction->id])
+    : $this->Url->build(['controller' => 'Attractions', 'action' => 'view', $attraction->id]);
+$typeLabels = [
+    'settlement' => __('Open Date'),
+    'fdate' => __('Fixed Date'),
+    'fdatetime' => __('Fixed Date/Time'),
+    PricingType::TWO_WAY_FDATETIME => __('2-Way Fixed Date/Time'),
+];
+$typeLabel = $ticket ? ($typeLabels[$attraction->pricing_type] ?? null) : null;
+$netRate = null;
+if ($attraction->pricing_type == 'settlement' && $ticket && !empty($ticket->settlement_agents) && !empty($ticket->settlement_agents[0]->settlement)) {
+    $netRate = $ticket->settlement_agents[0]->settlement->rate;
+}
+$isFavourite = isset($attraction->fav_id) && $attraction->fav_id !== null;
 ?>
-<a href="<?= $attraction->pricing_type == PricingType::TWO_WAY_FDATETIME ? $this->Url->build(['controller'=>'Attractions','action'=>'viewTwoWay',$attraction->id]) : $this->Url->build(['controller'=>'Attractions','action'=>'view',$attraction->id]) ?>">
-  <div class="card-img-top" style="background-image:<?= $attraction->featured_image ? 'url(\''.$base.urlencode($attraction->featured_image).'\')' : ''; ?>"></div>
+<a class="attraction-link" href="<?= $url ?>">
+  <div class="attraction-media">
+    <?php if ($attraction->featured_image): ?>
+      <img class="card-img-top object-fit-cover" src="<?= h($base . urlencode($attraction->featured_image)) ?>" alt="" loading="lazy" decoding="async">
+    <?php else: ?>
+      <div class="card-img-top attraction-media-empty"><i class="fa fa-picture-o" aria-hidden="true"></i></div>
+    <?php endif ?>
+    <?php if ($typeLabel): ?>
+      <span class="badge attraction-type attraction-type-<?= h($attraction->pricing_type) ?>"><?= $typeLabel ?></span>
+    <?php endif ?>
+    <?php if ($isFavourite): ?>
+      <span class="fav-attraction" title="<?= __('Favourite') ?>"><i class="fa fa-bookmark text-green" aria-hidden="true"></i><span class="visually-hidden"><?= __('Favourite') ?></span></span>
+    <?php endif ?>
+  </div>
 
-    <div class="card-body position-relative">
-      <div class="card-title">
-        <?= $attraction->title ?>
-        <?= !empty($attraction->title_chinese) ? '<br>'.$attraction->title_chinese :'' ?>
-      </div>
-        <?php
-        if ($attraction->pricing_type == 'settlement') {
-          if (!empty($attraction->ticket) && !empty($attraction->ticket->settlement_agents) && !empty($attraction->ticket->settlement_agents[0]->settlement)) {
-              echo '<div class="rate"><del class="text-muted old-price">RP '.$this->Number->currency($attraction->ticket->price).'</del> <div class="font-weight-bold">'.$this->Number->currency($attraction->ticket->settlement_agents[0]->settlement->rate).'</div></div>';
-          }
-        }
-        else {
-          if (!empty($attraction->ticket)) {
-              echo '<div class="rate"><del class="text-muted old-price">RP '.$this->Number->currency($attraction->ticket->price).'</del> <div><small>'. __('Please select date') . '</small></div></div>';
-          }
-        }
+  <div class="card-body">
+    <div class="card-title">
+      <?= h($attraction->title, false) ?>
+      <?php if (!empty($attraction->title_chinese)): ?><span class="title-zh"><?= h($attraction->title_chinese, false) ?></span><?php endif ?>
+    </div>
+    <?php if ($ticket): ?>
+    <div class="rate">
+      <?php if ($netRate !== null): ?>
+        <div class="price-label"><?= __('Your price') ?></div>
+        <div class="price-net"><?= $this->Number->currency($netRate) ?></div>
+        <div class="price-ref old-price"><del><abbr title="<?= __('Retail price') ?>">RP</abbr> <?= $this->Number->currency($ticket->price) ?></del></div>
+      <?php elseif ($attraction->pricing_type != 'settlement'): ?>
+        <div class="text-navy fw-semibold small"><i class="fa fa-calendar-check-o me-1" aria-hidden="true"></i><?= __('Please select date') ?></div>
+        <div class="price-ref old-price"><del><abbr title="<?= __('Retail price') ?>">RP</abbr> <?= $this->Number->currency($ticket->price) ?></del></div>
+      <?php endif ?>
+    </div>
+    <?php endif ?>
+  </div>
 
-        ?>
-        <?= isset($attraction->fav_id) && $attraction->fav_id !== null ? '<i class="position-absolute fa fa-bookmark fav-attraction text-green"></i>' : '' ?>
-    </div>
-    <div class="card-footer">
-      <div>
-        <?php
-        if (!empty($attraction->ticket) && $attraction->pricing_type == 'settlement') {
-            echo '<div class="fixed_date text-success"><i class="fa fa-ticket" aria-hidden="true"></i>' . __('Open Date') . '</div>';
-        } elseif (!empty($attraction->ticket) && $attraction->pricing_type == 'fdate') {
-            echo '<div class="fixed_date text-success"><i class="fa fa-ticket" aria-hidden="true"></i>' . __('Fixed Date') . '</div>';
-        } elseif (!empty($attraction->ticket) && $attraction->pricing_type == 'fdatetime') {
-            echo '<div class="fixed_date text-success"><i class="fa fa-ticket" aria-hidden="true"></i>' . __('Fixed Date/Time') . '</div>';
-        } elseif (!empty($attraction->ticket) && $attraction->pricing_type == PricingType::TWO_WAY_FDATETIME) {
-          echo '<div class="fixed_date text-success"><i class="fa fa-ticket" aria-hidden="true"></i>' . __('2-Way Fixed Date/Time') . '</div>';
-        }
-        ?>
-        <?php
-        if (!empty($attraction->ticket) && $attraction->first_open_date) {
-            echo '<div class="open_date"><i class="fa fa-calendar" aria-hidden="true"></i> '. $attraction->first_open_date .'</div>';
-          }
-        ?>
-      </div>
-      <div>
-        <?php
-        if (!empty($attraction->ticket) && $attraction->ticket->instant_confirmation) {
-            echo '<div class="instant_confirmation text-success"><i class="fa fa-bolt" aria-hidden="true"></i>' . __('Instant') . '</div>';
-        } else {
-            echo '<div class="instant_confirmation"><i class="fa fa-bolt" aria-hidden="true"></i>' . __('Request') . '</div>';
-        }
-        ?>
-        <?php
-        if (!empty($attraction->ticket) && ($attraction->ticket->require_travellers_info || $attraction->ticket->question_group_id)) {
-            echo '<div class="require_travellers_info"><i class="fa fa-id-card-o" aria-hidden="true"></i>' . __('Require info') . '</div>';
-        }
-        ?>
-      </div>
-    </div>
+  <div class="card-footer">
+    <?php if ($ticket && $ticket->instant_confirmation): ?>
+      <span class="sg-fact text-success instant_confirmation"><i class="fa fa-bolt" aria-hidden="true"></i> <?= __('Instant') ?></span>
+    <?php else: ?>
+      <span class="sg-fact instant_confirmation"><i class="fa fa-clock-o" aria-hidden="true"></i> <?= __('Request') ?></span>
+    <?php endif ?>
+    <?php if ($ticket && $attraction->first_open_date): ?>
+      <span class="sg-fact open_date"><i class="fa fa-calendar" aria-hidden="true"></i> <?= h($attraction->first_open_date) ?></span>
+    <?php endif ?>
+    <?php if ($ticket && ($ticket->require_travellers_info || $ticket->question_group_id)): ?>
+      <span class="sg-fact require_travellers_info"><i class="fa fa-id-card-o" aria-hidden="true"></i> <?= __('Require info') ?></span>
+    <?php endif ?>
+  </div>
 </a>

@@ -1,5 +1,5 @@
 <div class="row">
-  <div class="col px-4 text-right">
+  <div class="col px-4 text-end">
     <?= $this->Html->link('Download Generated Reports', ['controller' => 'Reports', 'action' => 'reports']) ?>
   </div>
 </div>
@@ -119,9 +119,5 @@
 <?php } ?>
 <?= $this->Html->css(['bootstrap-datepicker3.standalone.min'],['block'=>'internal_css']); ?>
 <?= $this->Html->script(['bootstrap-datepicker.min'],['block'=>'scriptBottom']) ?>
-<?php $this->Html->scriptStart(['block' => true]) ?>
-$(document).ready(function() {
-
-  $('.datepicker').datepicker({format:'d M yyyy',endDate:'today','autoclose':true});
-});
-<?php $this->Html->scriptEnd() ?>
+<?php $this->set('pageData', ['datepicker' => ['endDate' => 'today', 'autoclose' => true]]) ?>
+<?php $this->Html->script('pages/date-filters.js?v=20261106', ['block' => 'script']) ?>
