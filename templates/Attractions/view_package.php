@@ -180,7 +180,7 @@ $now = Cake\I18n\DateTime::now();
 </div>
 </div>
 <?= $this->Html->css(['bootstrap-datepicker3.standalone.min'],['block'=>'internal_css']); ?>
-<?= $this->Html->script(['bootstrap-datepicker.min', 'favorite-attraction.js?v=2025'],['block'=>'scriptBottom']) ?>
+<?= $this->Html->script(['bootstrap-datepicker.min', 'favorite-attraction.js'],['block'=>'scriptBottom']) ?>
 <?php $this->Html->scriptStart(['block' => true]) ?>
 var cart_total = 0;
 var cart_has_two_way_fdatetime = <?= !empty($cart_has_two_way_fdatetime) ? 'true' : 'false' ?>;

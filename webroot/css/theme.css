@@ -691,35 +691,105 @@ label { font-weight: 500; }
 /* =====================================================================
    Pages: attraction view / two-way (element/attraction_detail.php, element/ticket_row.php)
    ===================================================================== */
-.attraction-gallery { display: grid; gap: .5rem; }
-.attraction-hero {
+/* Gallery: fixed main box (blurred cover copy behind a contained copy) + one row of thumbnails,
+   overflow collapsed into a "+N" tile by ticket-row.js. */
+.attraction-gallery { overflow: hidden; }
+.gallery-main {
+  position: relative;
   display: block;
   width: 100%;
+  aspect-ratio: 16 / 10;
+  max-height: 480px;
   padding: 0;
   border: 0;
-  border-radius: var(--sg-radius);
   overflow: hidden;
   background: var(--sg-navy-50);
-  aspect-ratio: 16 / 9;
   cursor: zoom-in;
 }
-.attraction-hero img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease; }
-.attraction-hero:hover img { transform: scale(1.02); }
-.attraction-hero.attraction-media-empty { cursor: default; }
-.attraction-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: .5rem; }
-.attraction-thumb {
+.gallery-main-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(18px);
+  transform: scale(1.15);
+  z-index: 0;
+}
+.gallery-main-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 1;
+}
+.gallery-main.attraction-media-empty { cursor: default; }
+.gallery-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  background: rgba(0, 0, 0, 0);
+  transition: background .2s ease;
+  pointer-events: none;
+}
+.gallery-overlay .fa { font-size: 2.5rem; color: #fff; opacity: 0; transform: scale(.8); transition: opacity .2s ease, transform .2s ease; }
+.gallery-overlay .gallery-count { color: #fff; font-size: .875rem; font-weight: 500; opacity: 0; transition: opacity .2s ease; }
+.gallery-main:hover .gallery-overlay,
+.gallery-main:focus-visible .gallery-overlay { background: rgba(0, 0, 0, .4); }
+.gallery-main:hover .gallery-overlay .fa,
+.gallery-main:focus-visible .gallery-overlay .fa,
+.gallery-main:hover .gallery-overlay .gallery-count,
+.gallery-main:focus-visible .gallery-overlay .gallery-count { opacity: 1; transform: scale(1); }
+
+.gallery-thumbnails-row { display: flex; flex-wrap: nowrap; gap: .5rem; overflow: hidden; }
+.gallery-thumb-link {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  width: 84px;
   padding: 0;
-  border: 2px solid transparent;
+  border: 0;
   border-radius: var(--sg-radius-sm);
   overflow: hidden;
-  aspect-ratio: 4 / 3;
   background: var(--sg-navy-50);
 }
-.attraction-thumb img { width: 100%; height: 100%; }
-.attraction-thumb:hover,
-.attraction-thumb:focus-visible { border-color: var(--sg-yellow); }
-.gallery-image { max-height: 80vh; object-fit: contain; }
-@media (prefers-reduced-motion: reduce) { .attraction-hero img { transition: none; } }
+@media (min-width: 576px) { .gallery-thumb-link { width: 104px; } }
+@media (min-width: 768px) { .gallery-thumb-link { width: 124px; } }
+.gallery-thumb-link.gallery-thumb-hidden { display: none; }
+.gallery-thumb-link.gallery-thumb-more::after {
+  content: "+" attr(data-more);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, .6);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+  pointer-events: none;
+}
+.gallery-thumb-img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  transition: transform .3s ease, opacity .15s ease;
+}
+.gallery-thumb-link:hover .gallery-thumb-img { transform: scale(1.1); opacity: .85; }
+.gallery-thumb-link:focus-visible { outline: 3px solid rgba(var(--sg-navy-rgb), .45); outline-offset: -3px; }
+.gallery-main, .gallery-thumb-link { text-decoration: none; }
+/* Lightbox2 caption in the theme font. */
+.lightbox .lb-data .lb-caption { font-family: var(--sg-font-display); font-size: 1.05rem; font-weight: 600; }
+@media (prefers-reduced-motion: reduce) {
+  .gallery-thumb-img, .gallery-overlay, .gallery-overlay .fa { transition: none; }
+}
 
 .attraction-head { display: flex; align-items: flex-start; gap: 1rem; }
 .attraction-title-zh { color: var(--sg-muted); font-size: 1.05rem; }

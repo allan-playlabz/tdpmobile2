@@ -60,7 +60,7 @@ $this->set('pageData', [
     ],
 ]);
 $this->Html->css(['bootstrap-datepicker3.standalone.min'], ['block' => 'internal_css']);
-$this->Html->script(['bootstrap-datepicker.min', 'pages/orders-checkout.js?v=20261106'], ['block' => 'script']);
+$this->Html->script(['bootstrap-datepicker.min', 'pages/orders-checkout.js'], ['block' => 'script']);
 ?>
 <?= $this->element('checkout_steps', ['current' => 2]) ?>
 

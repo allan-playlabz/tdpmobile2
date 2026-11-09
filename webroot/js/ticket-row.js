@@ -238,12 +238,60 @@
     }
   });
 
-  // Photo gallery modal (element/attraction_detail.php): open on the clicked image.
-  $(document).on('click', '[data-gallery-index]', function () {
-    var el = document.getElementById('galleryCarousel');
-    if (el && window.bootstrap) {
-      window.bootstrap.Carousel.getOrCreateInstance(el, { ride: false }).to(Number($(this).data('gallery-index')) || 0);
+  // Photo gallery (element/attraction_detail.php): Lightbox2 binds [data-lightbox] links itself;
+  // hidden "+N" thumbnails stay in the album. Only the options are set here.
+  $(function () {
+    if (!window.lightbox || typeof window.lightbox.option !== 'function') return;
+    window.lightbox.option({
+      albumLabel: $('.attraction-gallery').attr('data-album-label') || 'Photo %1 of %2',
+      wrapAround: true,
+      disableScrolling: true,
+      fadeDuration: 200,
+      imageFadeDuration: 200,
+      sanitizeTitle: true,
+      resizeDuration: 200
+    });
+  });
+
+  // Gallery thumbnails: show only the ones that fit one row; the rest are hidden (still reachable in the
+  // modal carousel) and the last visible one gets a "+N" overlay. Classes/data attributes only (CSP).
+  function layoutThumbs(row) {
+    var thumbs = Array.prototype.slice.call(row.querySelectorAll('.gallery-thumb-link'));
+    if (!thumbs.length) return;
+    thumbs.forEach(function (t) {
+      t.classList.remove('gallery-thumb-hidden', 'gallery-thumb-more');
+      t.removeAttribute('data-more');
+      if (!t.hasAttribute('data-label')) t.setAttribute('data-label', t.getAttribute('aria-label') || '');
+      t.setAttribute('aria-label', t.getAttribute('data-label'));
+    });
+    var style = window.getComputedStyle(row);
+    var gap = parseFloat(style.columnGap || style.gap) || 8;
+    var available = row.clientWidth;
+    var used = 0, fit = 0;
+    for (var i = 0; i < thumbs.length; i++) {
+      var add = (i === 0 ? 0 : gap) + thumbs[i].offsetWidth;
+      if (used + add > available) break;
+      used += add;
+      fit++;
     }
+    if (fit >= thumbs.length) return;
+    fit = Math.max(fit, 1);
+    for (var j = fit; j < thumbs.length; j++) thumbs[j].classList.add('gallery-thumb-hidden');
+    var last = thumbs[fit - 1];
+    last.classList.add('gallery-thumb-more');
+    last.setAttribute('data-more', String(thumbs.length - fit));
+    last.setAttribute('aria-label', last.getAttribute('data-label') + ' (+' + (thumbs.length - fit) + ')');
+  }
+  $(function () {
+    var rows = document.querySelectorAll('.gallery-thumbnails-row');
+    if (!rows.length) return;
+    var run = function () { Array.prototype.forEach.call(rows, layoutThumbs); };
+    run();
+    var timer;
+    window.addEventListener('resize', function () {
+      clearTimeout(timer);
+      timer = setTimeout(run, 150);
+    });
   });
 
   window.sgTickets = sgTickets;

@@ -15,7 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow" />
     <title><?= __('Redirecting to payment') ?></title>
-    <?= $this->Html->css(['bootstrap.min.css', 'theme.css?v=20261109']) ?>
+    <?= $this->Html->css(['bootstrap.min.css', 'theme.css']) ?>
 </head>
 <body class="page-orders-execute-stripe">
     <div id="stripe-redirect"
@@ -26,6 +26,6 @@
         <p class="lead"><?= __('Taking you to the payment page…') ?></p>
         <div id="stripe-error" class="alert alert-danger d-none" role="alert"></div>
     </div>
-    <?= $this->Html->script(['https://js.stripe.com/v3/', 'pages/orders-execute-stripe.js?v=20261106']) ?>
+    <?= $this->Html->script(['https://js.stripe.com/v3/', 'pages/orders-execute-stripe.js']) ?>
 </body>
 </html>

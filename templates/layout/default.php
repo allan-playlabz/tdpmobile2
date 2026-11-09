@@ -40,8 +40,8 @@ $cartCount = $this->getRequest()->getSession()->check('ShoppingCart') ? count((a
                           'simple-sidebar.css',
                           'jsgrid.min.css',
                           'jsgrid-theme.min.css',
-                          'admin.css?v=20250829',
-                          'theme.css?v=20261109']); ?>
+                          'admin.css',
+                          'theme.css']); ?>
 
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('internal_css') ?>
@@ -174,7 +174,7 @@ $cartCount = $this->getRequest()->getSession()->check('ShoppingCart') ? count((a
   <?php if (!empty($pageData)): ?>
   <script type="application/json" id="page-data"><?= json_encode($pageData, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) ?></script>
   <?php endif ?>
-  <?= $this->Html->script(['jquery.min.js', 'bootstrap.bundle.min.js', '/plugins/slimScroll/jquery.slimscroll.min.js', 'app.js?v=20261106c']); ?>
+  <?= $this->Html->script(['jquery.min.js', 'bootstrap.bundle.min.js', '/plugins/slimScroll/jquery.slimscroll.min.js', 'app.js']); ?>
   <?= $this->fetch('scriptBottom') ?>
   <?= $this->fetch('script') ?>
 </body>

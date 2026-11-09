@@ -59,7 +59,7 @@ $hasResults = !empty($attractions) && count($attractions) > 0;
 $this->set('pageData', [
     'openAnnouncements' => ($auth_user['announcements_read'] ?? 1) == 0,
 ]);
-$this->Html->script('pages/attractions-index.js?v=20261109b', ['block' => 'script']);
+$this->Html->script('pages/attractions-index.js', ['block' => 'script']);
 ?>
 <?php if (!empty($recommended_attractions)): ?>
 <section class="recommended-section" aria-label="<?= __('Recommend') ?>">

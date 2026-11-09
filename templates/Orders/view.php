@@ -384,7 +384,7 @@ function getBadgeInfo($voucher)
           'orderRef' => $order['order_ref_id'],
           'urls' => ['mergingStatus' => $this->Url->build(['controller' => 'VoucherMerging', 'action' => 'getStatus'])],
       ]);
-      $this->Html->script('pages/orders-view.js?v=20261106', ['block' => 'script']);
+      $this->Html->script('pages/orders-view.js', ['block' => 'script']);
       ?>
     </div>
   </div>
