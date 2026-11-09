@@ -134,4 +134,4 @@ $to = $this->request->getQuery('to') ?: '';
 
 <?= $this->Html->css(['bootstrap-datepicker3.standalone.min'],['block'=>'internal_css']); ?>
 <?= $this->Html->script(['bootstrap-datepicker.min'],['block'=>'scriptBottom']) ?>
-<?php $this->Html->script('pages/agent-topups-index.js?v=20261106', ['block' => 'script']) ?>
+<?php $this->Html->script('pages/agent-topups-index.js', ['block' => 'script']) ?>

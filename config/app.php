@@ -94,7 +94,10 @@ return [
      * enable timestamping regardless of debug value.
      */
     'Asset' => [
-        //'timestamp' => true,
+        // 'force': append the file's modified time (?1731139200) to every Html->css/script/image URL,
+        // so browsers reload changed assets without manual ?v= bumps. Don't add ?v= by hand: Cake skips
+        // timestamping URLs that already have a query string.
+        'timestamp' => 'force',
         // 'cacheTime' => '+1 year'
     ],
 

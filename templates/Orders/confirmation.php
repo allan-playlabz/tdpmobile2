@@ -48,7 +48,7 @@ $this->set('pageData', [
         'noFee' => __('No fee'),
     ],
 ]);
-$this->Html->script('pages/orders-confirmation.js?v=20261106', ['block' => 'script']);
+$this->Html->script('pages/orders-confirmation.js', ['block' => 'script']);
 ?>
 <?= $this->element('checkout_steps', ['current' => 3]) ?>
 

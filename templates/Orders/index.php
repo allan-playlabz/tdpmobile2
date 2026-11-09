@@ -110,4 +110,4 @@ $color_map = [
 
 <?= $this->Html->css(['bootstrap-datepicker3.standalone.min'], ['block' => 'internal_css']); ?>
 <?= $this->Html->script(['bootstrap-datepicker.min'], ['block' => 'scriptBottom']) ?>
-<?php $this->Html->script('pages/date-filters.js?v=20261106', ['block' => 'script']) ?>
+<?php $this->Html->script('pages/date-filters.js', ['block' => 'script']) ?>

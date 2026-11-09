@@ -26,4 +26,4 @@ $this->Html->css(['two-factor'], ['block' => true]);
     <?= $this->Form->button($loggedIn ? __('I\'ve saved these codes') : __('I\'ve saved these codes, continue'), ['class' => 'btn btn-primary w-100']) ?>
     <?= $this->Form->end() ?>
 </div>
-<?php $this->Html->script('pages/agent-users-two-factor-backup-codes.js?v=20261106', ['block' => 'script']) ?>
+<?php $this->Html->script('pages/agent-users-two-factor-backup-codes.js', ['block' => 'script']) ?>

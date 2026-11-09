@@ -14,7 +14,7 @@ $base = Configure::read('AWSPublic.public_host');
 $total = 0;
 $itemCount = 0;
 $this->set('pageData', ['i18n' => ['total' => __('Total')]]);
-$this->Html->script('pages/orders-cart.js?v=20261106', ['block' => 'script']);
+$this->Html->script('pages/orders-cart.js', ['block' => 'script']);
 ?>
 <?= $this->element('checkout_steps', ['current' => 1]) ?>
 <h1 class="mb-3"><?= __('Your Cart') ?></h1>

@@ -126,4 +126,4 @@ $sCategories = $selected_categories;
     </div>
   </div>
 </div>
-<?php $this->Html->script('pages/categories-view.js?v=20261106', ['block' => 'script']) ?>
+<?php $this->Html->script('pages/categories-view.js', ['block' => 'script']) ?>

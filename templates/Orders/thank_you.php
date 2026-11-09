@@ -29,7 +29,7 @@ if (!empty($order) && !in_array($status, ['done', 'failed'], true)) {
             'completingEnd' => __('.</p>'),
         ],
     ]);
-    $this->Html->script('pages/orders-thank-you.js?v=20261106', ['block' => 'script']);
+    $this->Html->script('pages/orders-thank-you.js', ['block' => 'script']);
 }
 ?>
 <?= $this->element('checkout_steps', ['current' => $status === 'done' ? 5 : 4]) ?>
