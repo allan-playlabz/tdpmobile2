@@ -100,6 +100,32 @@ $(function () {
     startAuto();
   })();
 
+  // ---- Country page: "Top destinations" tile row; arrows scroll by one tile, hidden at the ends. ----
+  $('.sg-dest-wrap').each(function () {
+    var $wrap = $(this);
+    var row = $wrap.find('.sg-dest-row')[0];
+    var $prev = $wrap.find('.sg-dest-prev');
+    var $next = $wrap.find('.sg-dest-next');
+    if (!row) return;
+    function step() {
+      var tile = row.querySelector('.sg-dest-tile');
+      return tile ? tile.getBoundingClientRect().width + 16 : row.clientWidth * 0.8;
+    }
+    function update() {
+      var max = row.scrollWidth - row.clientWidth - 2;
+      $prev.toggleClass('d-none', row.scrollLeft <= 2);
+      $next.toggleClass('d-none', row.scrollLeft >= max);
+    }
+    $prev.on('click', function () { row.scrollBy({ left: -step() }); });
+    $next.on('click', function () { row.scrollBy({ left: step() }); });
+    row.addEventListener('scroll', update, { passive: true });
+    $(window).on('resize', update);
+    // Bring a selected city into view.
+    var selected = row.querySelector('.sg-dest-tile.is-selected');
+    if (selected) row.scrollLeft = selected.offsetLeft - row.offsetLeft - 8;
+    update();
+  });
+
   // Unread announcements open on the listing (was an inline script).
   if (window.sgUi && sgUi.page.openAnnouncements) {
     $('#read-new').trigger('click');
