@@ -134,7 +134,7 @@ $this->Html->css(['bootstrap-datepicker3.standalone.min'], ['block' => 'internal
 $this->Html->script([
     'bootstrap-datepicker.min',
     'favorite-attraction.js?v=20261106',
-    'ticket-row.js?v=20261109',
+    'ticket-row.js?v=20261109c',
     'pages/attractions-view-two-way.js?v=20261106',
 ], ['block' => 'script']);
 ?>

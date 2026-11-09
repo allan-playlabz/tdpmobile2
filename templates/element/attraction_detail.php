@@ -27,6 +27,12 @@ foreach ((array)$attraction->attraction_medias as $media) {
     }
 }
 $isFavorite = !empty($attraction->is_favorite);
+if ($images) {
+    // Lightbox2 (https://lokeshdhakar.com/projects/lightbox2/, MIT), local copy without bundled jQuery; options in ticket-row.js.
+    $this->Html->css('/plugins/lightbox2/css/lightbox.min.css', ['block' => 'css']);
+    $this->Html->script('/plugins/lightbox2/js/lightbox.min.js', ['block' => 'script']);
+}
+$title = (string)$attraction->title;
 $favLabel = $isFavorite ? __('Click to remove from favorites') : __('Click to add to favorites');
 ?>
 <nav aria-label="breadcrumb">
@@ -40,22 +46,30 @@ $favLabel = $isFavorite ? __('Click to remove from favorites') : __('Click to ad
 </nav>
 
 <div class="attraction-detail">
-  <div class="attraction-gallery">
+  <div class="card attraction-gallery" data-album-label="<?= h(__('Photo %1 of %2')) ?>">
     <?php if ($images): ?>
-      <button type="button" class="attraction-hero" data-bs-toggle="modal" data-bs-target="#galleryModal" data-gallery-index="0" aria-label="<?= __('Open photo gallery') ?>">
-        <img src="<?= h($images[0]) ?>" alt="<?= h($attraction->title) ?>" class="img-fluid">
-      </button>
+      <?php /* Main photo: a blurred cover copy fills the box behind a contained copy, so portrait/square photos show in full. */ ?>
+      <a href="<?= h($images[0]) ?>" class="gallery-main" data-lightbox="gallery" data-title="<?= h($title) ?>" aria-label="<?= __('Open photo gallery') ?>">
+        <img src="<?= h($images[0]) ?>" class="gallery-main-bg" alt="" aria-hidden="true">
+        <img src="<?= h($images[0]) ?>" class="gallery-main-img" alt="<?= h($attraction->title) ?>">
+        <span class="gallery-overlay" aria-hidden="true">
+          <i class="fa fa-search-plus"></i>
+          <span class="gallery-count"><?= count($images) ?> <?= count($images) === 1 ? __('Photo') : __('Photos') ?></span>
+        </span>
+      </a>
       <?php if (count($images) > 1): ?>
-      <div class="attraction-thumbs">
-        <?php foreach (array_slice($images, 1) as $i => $src): ?>
-          <button type="button" class="attraction-thumb" data-bs-toggle="modal" data-bs-target="#galleryModal" data-gallery-index="<?= $i + 1 ?>" aria-label="<?= __('Photo {0}', $i + 2) ?>">
-            <img src="<?= h($src) ?>" alt="" loading="lazy" class="object-fit-cover">
-          </button>
-        <?php endforeach; ?>
+      <div class="card-body p-2">
+        <div class="gallery-thumbnails-row">
+          <?php foreach (array_slice($images, 1) as $i => $src): ?>
+            <a href="<?= h($src) ?>" class="gallery-thumb-link" data-lightbox="gallery" data-title="<?= h($title) ?>" aria-label="<?= __('Photo {0}', $i + 2) ?>">
+              <img src="<?= h($src) ?>" class="gallery-thumb-img" alt="" loading="lazy">
+            </a>
+          <?php endforeach; ?>
+        </div>
       </div>
       <?php endif ?>
     <?php else: ?>
-      <div class="attraction-hero attraction-media-empty"><i class="fa fa-picture-o" aria-hidden="true"></i></div>
+      <div class="gallery-main attraction-media-empty"><i class="fa fa-picture-o" aria-hidden="true"></i></div>
     <?php endif ?>
   </div>
 
@@ -107,33 +121,3 @@ $favLabel = $isFavorite ? __('Click to remove from favorites') : __('Click to ad
   </div>
 </div>
 
-<?php if ($images): ?>
-<div class="modal fade" id="galleryModal" tabindex="-1" aria-label="<?= __('Photo gallery') ?>" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content bg-dark border-0">
-      <div class="modal-header border-0 py-2">
-        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="<?= __('Close') ?>"></button>
-      </div>
-      <div class="modal-body p-0">
-        <div id="galleryCarousel" class="carousel slide" data-bs-ride="false">
-          <div class="carousel-inner">
-            <?php foreach ($images as $i => $src): ?>
-              <div class="carousel-item <?= $i === 0 ? 'active' : '' ?>">
-                <img src="<?= h($src) ?>" class="d-block w-100 gallery-image" alt="" loading="lazy">
-              </div>
-            <?php endforeach; ?>
-          </div>
-          <?php if (count($images) > 1): ?>
-          <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden"><?= __('Previous') ?></span>
-          </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden"><?= __('Next') ?></span>
-          </button>
-          <?php endif ?>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<?php endif ?>

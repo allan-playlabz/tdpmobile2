@@ -41,7 +41,7 @@ $cartCount = $this->getRequest()->getSession()->check('ShoppingCart') ? count((a
                           'jsgrid.min.css',
                           'jsgrid-theme.min.css',
                           'admin.css?v=20250829',
-                          'theme.css?v=20261109']); ?>
+                          'theme.css?v=20261109c']); ?>
 
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('internal_css') ?>

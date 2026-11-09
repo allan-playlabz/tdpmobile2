@@ -15,7 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow" />
     <title><?= __('Redirecting to payment') ?></title>
-    <?= $this->Html->css(['bootstrap.min.css', 'theme.css?v=20261109']) ?>
+    <?= $this->Html->css(['bootstrap.min.css', 'theme.css?v=20261109c']) ?>
 </head>
 <body class="page-orders-execute-stripe">
     <div id="stripe-redirect"

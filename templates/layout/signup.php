@@ -15,7 +15,7 @@
         'jsgrid.min.css',
         'jsgrid-theme.min.css',
         'admin.css',
-                          'theme.css?v=20261109']); ?>
+                          'theme.css?v=20261109c']); ?>
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('internal_css') ?>
     <?= $this->fetch('css') ?>
