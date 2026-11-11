@@ -1404,6 +1404,26 @@ legend.booking-step-label { float: none; width: auto; }
   object-fit: cover;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, .08);
 }
+/* Attractions sidebar: country dropdown above the filter card (same links as the navbar menu). */
+.sg-country-toggle {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  min-height: 52px;
+  padding: .65rem 1rem;
+  background: #fff;
+  border: 1px solid var(--sg-border);
+  border-radius: var(--sg-radius);
+  box-shadow: var(--sg-shadow);
+  color: var(--sg-ink);
+  font-weight: 600;
+  text-align: start;
+}
+.sg-country-toggle:hover, .sg-country-toggle:focus-visible, .sg-country-toggle.show { border-color: var(--sg-navy); color: var(--sg-navy); background: #fff; }
+.sg-country-toggle .sg-destination-name { flex: 1 1 auto; }
+.sg-country-menu { max-height: 320px; overflow-y: auto; padding: .35rem; }
+.sg-country-menu .dropdown-item { display: flex; align-items: center; gap: .65rem; padding: .5rem .6rem; border-radius: var(--sg-radius-sm); font-weight: 600; }
+.sg-country-menu .dropdown-item.active, .sg-country-menu .dropdown-item:active { background: var(--sg-navy-50); color: var(--sg-navy); }
 .sg-flag-empty { display: inline-flex; align-items: center; justify-content: center; background: var(--sg-navy-50); color: var(--sg-navy); font-size: .8rem; }
 @media (max-width: 991.98px) {
   /* Inside the collapsed navbar: full width, 2 columns. */
@@ -1413,7 +1433,7 @@ legend.booking-step-label { float: none; width: auto; }
 
 /* Country page: "Top Destinations" city cards (Attractions/index.php on /country/{slug}).
    One scrollable row; arrows (attractions-index.js) scroll by a card. The light background (until
-   destination images exist) is .sg-dest-c0..11, by position so a country never repeats one. */
+   destination images exist) is .sg-dest-c0..11, in an order shuffled per country so one never repeats. */
 .sg-dest-wrap { position: relative; }
 .sg-dest-row {
   display: flex;

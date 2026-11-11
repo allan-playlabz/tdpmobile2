@@ -54,10 +54,10 @@ class RedesignRenderTest extends TestCase
     public static function pages(): array
     {
         return [
-            'attractions index' => ['/attractions', ['id="attraction-filters"', 'name="search"', 'No attractions found.', 'page-attractions-index']],
+            'attractions index' => ['/attractions', ['id="attraction-filters"', 'name="search"', 'No attractions found.', 'page-attractions-index', 'sg-country-toggle', '<span class="sg-destination-name">All Countries</span>']],
             'empty cart' => ['/orders/cart', ['Your Cart', 'No items on cart.', 'class="sg-steps"', 'page-orders-cart']],
             'thank you without order' => ['/orders/thank-you', ['Thank you for your purchase!', 'page-orders-thank-you']],
-            'country page' => ['/country/singapore', ['Top Destinations in Singapore', 'placeholder="Search attractions in Singapore"', '<li class="breadcrumb-item active" aria-current="page">Singapore</li>', 'Sentosa', 'cities%5B0%5D=' . self::CITY, 'action="/country/singapore"', 'Popular Destinations']],
+            'country page' => ['/country/singapore', ['Top Destinations in Singapore', 'placeholder="Search attractions in Singapore"', '<li class="breadcrumb-item active" aria-current="page">Singapore</li>', 'Sentosa', 'cities%5B0%5D=' . self::CITY, 'action="/country/singapore"', 'Popular Destinations', '<a class="dropdown-item active" href="/country/singapore" aria-current="page">']],
             'contact us' => ['/agent-users/contact', ['Contact Us', 'id="contact-form"', 'name="subject"', 'page-agent-users-contact']],
         ];
     }
