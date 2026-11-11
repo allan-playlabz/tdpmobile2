@@ -93,11 +93,16 @@ $this->Html->script('pages/attractions-index.js', ['block' => 'script']);
   </div>
   <div class="sg-dest-wrap">
     <button type="button" class="rec-nav sg-dest-nav sg-dest-prev d-none" aria-label="<?= __('Previous') ?>"><i class="fa fa-chevron-left" aria-hidden="true"></i></button>
+    <?php
+    // The 12 light colours in an order shuffled per country (seeded by its slug, so it stays the same
+    // on every visit): countries don't all start with the same colours, and one country never repeats one.
+    $tilePalette = range(0, 11);
+    usort($tilePalette, fn(int $a, int $b): int => md5($currentCountry['slug'] . ':' . $a) <=> md5($currentCountry['slug'] . ':' . $b));
+    ?>
     <div class="sg-dest-row">
       <?php foreach (array_values($countryCities) as $cityIndex => $city): ?>
         <?php $isSelected = in_array((string)$city->id, $selected_city_strings, true); ?>
-        <?php /* Light colour by position, so cities in one country never repeat a colour (12 colours). */ ?>
-        <a class="sg-dest-tile sg-dest-c<?= $cityIndex % 12 ?><?= $isSelected ? ' is-selected' : '' ?>"
+        <a class="sg-dest-tile sg-dest-c<?= $tilePalette[$cityIndex % 12] ?><?= $isSelected ? ' is-selected' : '' ?>"
            href="<?= $this->Url->build($listUrl(['cities' => [$city->id]])) ?>"<?= $isSelected ? ' aria-current="true"' : '' ?>>
           <span class="sg-dest-name"><?= h($city->name) ?></span>
         </a>
@@ -135,6 +140,43 @@ $this->Html->script('pages/attractions-index.js', ['block' => 'script']);
 
 <?= $this->Form->create(null, ['type' => 'get', 'url' => $listUrl(), 'id' => 'attraction-filters', 'class' => 'row g-4 py-2']) ?>
   <aside class="col-lg-3">
+    <?php if (!empty($destinations)): ?>
+    <?php /* Same links as the navbar "Popular Destinations" menu: /country/{slug}, or the full listing. */ ?>
+    <?php $activeDestination = $currentCountry ? ($destinations[$currentCountry['slug']] ?? null) : null; ?>
+    <div class="sg-country-picker mb-3">
+      <div class="dropdown">
+        <button class="btn sg-country-toggle dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <?php if ($activeDestination && $activeDestination['flag']): ?>
+            <?= $this->Html->image($activeDestination['flag'], ['alt' => '', 'class' => 'sg-flag', 'width' => 28, 'height' => 21]) ?>
+          <?php else: ?>
+            <span class="sg-flag sg-flag-empty" aria-hidden="true"><i class="fa fa-globe"></i></span>
+          <?php endif ?>
+          <span class="sg-destination-name"><?= $activeDestination ? h($activeDestination['label']) : __('All Countries') ?></span>
+        </button>
+        <ul class="dropdown-menu w-100 sg-country-menu">
+          <li>
+            <a class="dropdown-item<?= $currentCountry ? '' : ' active' ?>" href="<?= $this->Url->build(['controller' => 'Attractions', 'action' => 'index']) ?>"<?= $currentCountry ? '' : ' aria-current="page"' ?>>
+              <span class="sg-flag sg-flag-empty" aria-hidden="true"><i class="fa fa-globe"></i></span>
+              <span class="sg-destination-name"><?= __('All Countries') ?></span>
+            </a>
+          </li>
+          <?php foreach ($destinations as $slug => $destination): ?>
+            <?php $isCurrent = ($currentCountry['slug'] ?? null) === $slug; ?>
+            <li>
+              <a class="dropdown-item<?= $isCurrent ? ' active' : '' ?>" href="<?= $this->Url->build(['_name' => 'country', 'country' => $slug]) ?>"<?= $isCurrent ? ' aria-current="page"' : '' ?>>
+                <?php if ($destination['flag']): ?>
+                  <?= $this->Html->image($destination['flag'], ['alt' => '', 'class' => 'sg-flag', 'width' => 28, 'height' => 21, 'loading' => 'lazy']) ?>
+                <?php else: ?>
+                  <span class="sg-flag sg-flag-empty" aria-hidden="true"><i class="fa fa-globe"></i></span>
+                <?php endif ?>
+                <span class="sg-destination-name"><?= h($destination['label']) ?></span>
+              </a>
+            </li>
+          <?php endforeach ?>
+        </ul>
+      </div>
+    </div>
+    <?php endif ?>
     <div class="offcanvas-lg offcanvas-start sg-filters" tabindex="-1" id="filtersPanel" aria-labelledby="filtersPanelLabel">
       <div class="offcanvas-header border-bottom">
         <h2 class="offcanvas-title h5 mb-0" id="filtersPanelLabel"><?= __('Filters') ?></h2>
