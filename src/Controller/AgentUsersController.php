@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use App\Lib\Turnstile;
 use App\Lib\TwoFactor;
 use App\Util\ClientIp;
 use Cake\I18n\DateTime;
@@ -22,7 +23,7 @@ class AgentUsersController extends AppController
 
     public function initialize(): void {
       parent::initialize();
-      $this->Authentication->addUnauthenticatedActions(['otp','resendOtp','twoFactorSetup','twoFactorBackupCodes','forgotPassword','resetPassword','setPassword']);
+      $this->Authentication->addUnauthenticatedActions(['otp','otpAnotherWay','resendOtp','twoFactorSetup','twoFactorBackupCodes','forgotPassword','resetPassword','setPassword']);
       $this->Logins = $this->fetchTable('Logins');
       $this->Logs = $this->fetchTable('Logs');
     }
@@ -223,8 +224,12 @@ class AgentUsersController extends AppController
                   ->where(['AgentUsers.id'=>$agent_id])
                   ->contain(['Agents'])
                   ->first() : null;
-      // The method comes from the user's record, never from the session.
-      $use_app = $agent && TwoFactor::usesAuthenticator($agent) && TwoFactor::isSetUp($agent);
+      // The method comes from the user's record, never from the session. The session can
+      // only switch an authenticator user to an emailed code after the Turnstile check
+      // ("Try another way", otpAnotherWay()), never the other way round.
+      $has_app = $agent && TwoFactor::usesAuthenticator($agent) && TwoFactor::isSetUp($agent);
+      $fallback = $has_app && (bool)$session->read('TwoFactor.email_fallback');
+      $use_app = $has_app && !$fallback;
       // No login waiting for its second factor: nothing to verify here.
       if (!$agent && !$this->request->is('post')) {
         return $this->redirect(['action'=>'login']);
@@ -300,8 +305,68 @@ class AgentUsersController extends AppController
         }
       }
 
-      $this->set('method', $use_app ? TwoFactor::METHOD_AUTHENTICATOR : TwoFactor::METHOD_EMAIL);
+      $this->set([
+        'method' => $use_app ? TwoFactor::METHOD_AUTHENTICATOR : TwoFactor::METHOD_EMAIL,
+        'fallback' => $fallback,
+        'canTryAnotherWay' => $use_app && Turnstile::isEnabled(),
+      ]);
       $this->viewBuilder()->setLayout('login');
+    }
+
+    /**
+     * "Try another way" for an authenticator user without their phone: after a
+     * Cloudflare Turnstile check, emails a one-time code, which the OTP page then
+     * accepts instead of an app code (for this login only).
+     *
+     * @return \Cake\Http\Response|null
+     */
+    public function otpAnotherWay() {
+      $session = $this->request->getSession();
+      $agent_id = $session->read('agent_id');
+      $agent = is_string($agent_id) && $agent_id !== '' ? $this->AgentUsers->find()
+                  ->where(['AgentUsers.id' => $agent_id, 'AgentUsers.status' => 'active'])
+                  ->contain(['Agents'])
+                  ->first() : null;
+      if (!$agent) {
+        return $this->_restartLogin();
+      }
+      if (!TwoFactor::usesAuthenticator($agent) || !TwoFactor::isSetUp($agent) || !Turnstile::isEnabled()) {
+        return $this->redirect(['action'=>'otp']);
+      }
+      $this->viewBuilder()->setLayout('login');
+
+      if ($this->request->is('post')) {
+        if ($this->request->getData('do') === 'cancel') {
+          $session->delete('TwoFactor.email_fallback');
+          return $this->redirect(['action'=>'otp']);
+        }
+        if ($this->_otpAttemptsExceeded()) {
+          $session->destroy();
+          $this->Flash->error(__('You have exceeded maximum attempts. Please log in again.'));
+          return $this->redirect(['action'=>'login']);
+        }
+        // One code per login from here; "Resend OTP" (limited) covers lost emails.
+        if ($session->read('TwoFactor.email_fallback')) {
+          return $this->redirect(['action'=>'otp']);
+        }
+        $clientIp = ClientIp::fromRequest($this->request);
+        if (!Turnstile::verify((string)$this->request->getData('cf-turnstile-response'), $clientIp, 'email-otp')) {
+          $this->_countOtpAttempt();
+          $this->Flash->error(__('We could not verify you. Please complete the check and try again.'));
+          return $this->redirect(['action'=>'otpAnotherWay']);
+        }
+        $this->_sendEmailOtp($agent, $clientIp, 'two_factor_fallback');
+        $session->write('TwoFactor.email_fallback', time());
+        $session->delete('otp_resends');
+        $this->Logs->logCustom('two_factor_email_fallback', 'agent_users', 'agent_users', $agent->id, [], ['two_factor' => 'emailed code requested instead of authenticator', 'ip' => $clientIp]);
+        $this->Flash->success(__('Please check your email for your One Time Password (OTP).'));
+        return $this->redirect(['action'=>'otp']);
+      }
+
+      $this->set([
+        'maskedEmail' => $this->_maskEmail((string)$agent->email),
+        'siteKey' => Turnstile::siteKey(),
+      ]);
     }
 
     public function resendOtp() {
@@ -310,8 +375,9 @@ class AgentUsersController extends AppController
       $agent_id = $session->read('agent_id');
       if (!empty($agent_id)) {
         $agent_user = $this->AgentUsers->find()->where(['AgentUsers.id' => $agent_id])->contain(['Agents'])->first();
-        // Authenticator users have no emailed code.
-        if (!empty($agent_user) && !(TwoFactor::usesAuthenticator($agent_user) && TwoFactor::isSetUp($agent_user))) {
+        // Authenticator users have no emailed code, unless they passed "Try another way".
+        $has_app = !empty($agent_user) && TwoFactor::usesAuthenticator($agent_user) && TwoFactor::isSetUp($agent_user);
+        if (!empty($agent_user) && (!$has_app || $session->read('TwoFactor.email_fallback'))) {
           // Limit re-sends per password login (each re-send emails a fresh code).
           $resends = (int)$session->read('otp_resends');
           if ($resends >= 3) {
@@ -319,7 +385,7 @@ class AgentUsersController extends AppController
             return $this->redirect(['action'=>'otp']);
           }
           $session->write('otp_resends', $resends + 1);
-          $this->_sendEmailOtp($agent_user, ClientIp::fromRequest($this->request));
+          $this->_sendEmailOtp($agent_user, ClientIp::fromRequest($this->request), $has_app ? 'two_factor_fallback' : 'new_ip');
         }
       }
 
@@ -738,15 +804,26 @@ class AgentUsersController extends AppController
      * @param string $clientIp IP shown in the email
      * @return void
      */
-    private function _sendEmailOtp($agent_user, string $clientIp): void {
+    private function _sendEmailOtp($agent_user, string $clientIp, string $reason = 'new_ip'): void {
       $agent_user->otp = random_int(100001, 999999);
       $date = new \DateTime();
       $agent_user->otp_created = $date->format('Y-m-d H:i:s');
       $agent_user->clientIp = $clientIp;
       $this->loadComponent('Mailer');
       // ($name,$template, $subject, $to, $data, $cc = null)
-      $this->Mailer->mail('OTP','new_ip_otp','Please confirm account access',$agent_user->email,['user'=>$agent_user]);
+      $this->Mailer->mail('OTP','new_ip_otp','Please confirm account access',$agent_user->email,['user'=>$agent_user, 'reason'=>$reason]);
       $this->AgentUsers->save($agent_user);
+    }
+
+    /**
+     * "ma•••@example.com": enough for the user to recognise their address.
+     */
+    private function _maskEmail(string $email): string {
+      $at = strrpos($email, '@');
+      if ($at === false) {
+        return '•••';
+      }
+      return mb_substr($email, 0, min(2, $at)) . '•••' . substr($email, $at);
     }
 
     /**

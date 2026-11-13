@@ -545,6 +545,16 @@ return [
         'issuer' => 'TDP Agent',
     ],
 
+    /*
+     * Cloudflare Turnstile (src/Lib/Turnstile.php): bot check before an authenticator
+     * user can get an emailed sign-in code instead ("Try another way" on the OTP page).
+     * The option is hidden unless both keys are set.
+     */
+    'Turnstile' => [
+        'siteKey' => env('TURNSTILE_SITE_KEY'),
+        'secretKey' => env('TURNSTILE_SECRET_KEY'),
+    ],
+
     'DebugKit' => [
         'forceEnable' => filter_var(env('DEBUG_KIT_FORCE_ENABLE', false), FILTER_VALIDATE_BOOLEAN),
         'safeTld' => env('DEBUG_KIT_SAFE_TLD', null),

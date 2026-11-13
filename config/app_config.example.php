@@ -91,6 +91,13 @@ return [
         // 'encryptionKey' => '',
         // 'issuer' => 'TDP Agent',
     ],
+    // Cloudflare Turnstile for "Try another way" on the authenticator code page (or the
+    // TURNSTILE_SITE_KEY / TURNSTILE_SECRET_KEY env). Local testing: site 1x00000000000000000000AA,
+    // secret 1x0000000000000000000000000000000AA always pass (2x... always fail).
+    'Turnstile' => [
+        // 'siteKey' => '',
+        // 'secretKey' => '',
+    ],
     'Mailer' => [
         'api_url' => '',
         'secret' => '',
