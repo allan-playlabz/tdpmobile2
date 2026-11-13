@@ -3,9 +3,13 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
+use App\Lib\Turnstile;
 use App\Lib\TwoFactor;
 use Authentication\PasswordHasher\DefaultPasswordHasher;
+use Cake\Core\Configure;
 use Cake\Database\Connection;
+use Cake\Http\Client;
+use Cake\Http\Client\Response;
 use Cake\I18n\DateTime;
 use Cake\TestSuite\EmailTrait;
 use Cake\TestSuite\IntegrationTestTrait;
@@ -13,6 +17,8 @@ use Cake\TestSuite\TestCase;
 use Cake\Utility\Hash;
 use RobThree\Auth\Providers\Qr\BaconQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
+use RuntimeException;
+use Throwable;
 
 /**
  * Login with the second factor: authenticator app, emailed OTP, backup codes,
@@ -341,5 +347,171 @@ class TwoFactorLoginTest extends TestCase
         $row = $this->row(self::NORMAL_A);
         $this->assertNull($row['totp_secret']);
         $this->assertNull($row['backup_codes']);
+    }
+
+    /**
+     * Turnstile configured with Cloudflare's test keys; siteverify answers $json.
+     */
+    private function turnstile(array|Throwable $json = ['success' => true, 'action' => 'email-otp']): void
+    {
+        Configure::write('Turnstile', ['siteKey' => '1x00000000000000000000AA', 'secretKey' => '1x0000000000000000000000000000000AA']);
+        $client = $this->createStub(Client::class);
+        if ($json instanceof Throwable) {
+            $client->method('post')->willThrowException($json);
+        } else {
+            $client->method('post')->willReturn(new Response(['Content-Type: application/json'], (string)json_encode($json)));
+        }
+        Turnstile::setClient($client);
+    }
+
+    private function postAnotherWay(array $data = ['cf-turnstile-response' => 'token'], array $session = ['agent_id' => self::MASTER_A]): void
+    {
+        $this->session($session);
+        $this->enableCsrfToken();
+        $this->post('/agent-users/otp/another-way', $data);
+    }
+
+    protected function tearDown(): void
+    {
+        Turnstile::setClient(null);
+        Configure::delete('Turnstile');
+        parent::tearDown();
+    }
+
+    public function testTryAnotherWayLinkOnlyWithTurnstileKeys(): void
+    {
+        $this->linkAuthenticator(self::MASTER_A);
+        $this->session(['agent_id' => self::MASTER_A]);
+        $this->get('/agent-users/otp');
+        $this->assertResponseNotContains('Try another way');
+
+        $this->turnstile();
+        $this->session(['agent_id' => self::MASTER_A]);
+        $this->get('/agent-users/otp');
+        $this->assertResponseContains('href="/agent-users/otp/another-way"');
+    }
+
+    public function testAnotherWayPageNeedsPendingAuthenticatorLogin(): void
+    {
+        $this->turnstile();
+        $this->get('/agent-users/otp/another-way');
+        $this->assertRedirectContains('/agent-users/login');
+
+        // Email-method user: nothing to fall back from.
+        $this->setUser(self::MASTER_A, ['two_factor_method' => 'email_otp']);
+        $this->session(['agent_id' => self::MASTER_A]);
+        $this->get('/agent-users/otp/another-way');
+        $this->assertRedirectContains('/agent-users/otp');
+    }
+
+    public function testAnotherWayPageShowsWidget(): void
+    {
+        $this->linkAuthenticator(self::MASTER_A);
+        $this->turnstile();
+        $this->session(['agent_id' => self::MASTER_A]);
+        $this->get('/agent-users/otp/another-way');
+
+        $this->assertResponseOk();
+        $this->assertResponseContains('class="cf-turnstile');
+        $this->assertResponseContains('data-sitekey="1x00000000000000000000AA"');
+        $this->assertResponseContains('ma•••@example.com');
+        $this->assertResponseContains('challenges.cloudflare.com/turnstile/v0/api.js');
+    }
+
+    public function testFailedTurnstileSendsNoCode(): void
+    {
+        $this->linkAuthenticator(self::MASTER_A);
+        $this->turnstile(['success' => false, 'error-codes' => ['invalid-input-response']]);
+        $this->postAnotherWay();
+
+        $this->assertRedirectContains('/agent-users/otp/another-way');
+        $this->assertNoMailSent();
+        $this->assertNull($this->row(self::MASTER_A)['otp']);
+        $this->assertSession(null, 'TwoFactor.email_fallback');
+        $this->assertSession(1, 'otp_attempts');
+    }
+
+    public function testMissingTokenOrNetworkErrorFailsClosed(): void
+    {
+        $this->linkAuthenticator(self::MASTER_A);
+        $this->turnstile();
+        $this->postAnotherWay([]);
+        $this->assertNoMailSent();
+
+        $this->turnstile(new RuntimeException('timeout'));
+        $this->postAnotherWay();
+        $this->assertNoMailSent();
+        $this->assertNull($this->row(self::MASTER_A)['otp']);
+    }
+
+    public function testEmailedCodeAfterTurnstileLogsInOnce(): void
+    {
+        [$secret] = $this->linkAuthenticator(self::MASTER_A);
+        $this->turnstile();
+        $this->postAnotherWay();
+
+        $this->assertRedirectContains('/agent-users/otp');
+        $this->assertMailSentTo('master.a@example.com');
+        $this->assertMailContains('without the authenticator app');
+        $otp = (string)$this->row(self::MASTER_A)['otp'];
+        $this->assertNotSame('', $otp);
+        $fallback = ['agent_id' => self::MASTER_A, 'TwoFactor' => ['email_fallback' => time()]];
+
+        // The OTP page now asks for the emailed code, and an app code is not accepted.
+        $this->session($fallback);
+        $this->get('/agent-users/otp');
+        $this->assertResponseContains('sent to your email');
+        $this->assertResponseContains('Use my authenticator app instead');
+        $this->postCode($this->appCode($secret), $fallback);
+        $this->assertSession(null, 'Auth.User');
+
+        $this->postCode($otp, $fallback);
+        $this->assertRedirectContains('city_id');
+        $this->assertSession(self::MASTER_A, 'Auth.User.id');
+        $this->assertNull($this->row(self::MASTER_A)['otp']);
+
+        $this->postCode($otp, $fallback);
+        $this->assertSession(null, 'Auth.User');
+    }
+
+    public function testFallbackModeNeedsAnEmailedCode(): void
+    {
+        // Only otpAnotherWay() sets the flag; without a sent code nothing is accepted.
+        $this->linkAuthenticator(self::MASTER_A);
+        $this->postCode('123456', ['agent_id' => self::MASTER_A, 'TwoFactor' => ['email_fallback' => time()]]);
+
+        $this->assertSession(null, 'Auth.User');
+    }
+
+    public function testCancelReturnsToAppCode(): void
+    {
+        $this->linkAuthenticator(self::MASTER_A);
+        $this->turnstile();
+        $this->postAnotherWay(['do' => 'cancel'], ['agent_id' => self::MASTER_A, 'TwoFactor' => ['email_fallback' => time()]]);
+
+        $this->assertRedirectContains('/agent-users/otp');
+        $this->assertSession(null, 'TwoFactor.email_fallback');
+    }
+
+    public function testOneSendPerLoginThenResendIsLimited(): void
+    {
+        $this->linkAuthenticator(self::MASTER_A);
+        $this->turnstile();
+        $fallback = ['agent_id' => self::MASTER_A, 'TwoFactor' => ['email_fallback' => time()]];
+
+        $this->postAnotherWay(['cf-turnstile-response' => 'token'], $fallback);
+        $this->assertNoMailSent();
+
+        $this->session($fallback);
+        $this->enableCsrfToken();
+        $this->post('/agent-users/resend-otp');
+        $this->assertMailSentTo('master.a@example.com');
+        $this->assertNotNull($this->row(self::MASTER_A)['otp']);
+
+        $this->cleanupEmailTrait();
+        $this->session($fallback + ['otp_resends' => 3]);
+        $this->enableCsrfToken();
+        $this->post('/agent-users/resend-otp');
+        $this->assertNoMailSent();
     }
 }

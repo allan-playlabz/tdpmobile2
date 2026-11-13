@@ -126,6 +126,7 @@ return static function (RouteBuilder $routes): void {
     $routes->connect('/agent-users/login', ['controller' => 'AgentUsers', 'action' => 'login']);
     $routes->connect('/agent-users/logout', ['controller' => 'AgentUsers', 'action' => 'logout']);
     $routes->connect('/agent-users/otp', ['controller' => 'AgentUsers', 'action' => 'otp']);
+    $routes->connect('/agent-users/otp/another-way', ['controller' => 'AgentUsers', 'action' => 'otpAnotherWay']);
     $routes->connect('/agent-users/resend-otp', ['controller' => 'AgentUsers', 'action' => 'resendOtp']);
     $routes->connect('/agent-users/two-factor', ['controller' => 'AgentUsers', 'action' => 'twoFactor']);
     $routes->connect('/agent-users/two-factor/setup', ['controller' => 'AgentUsers', 'action' => 'twoFactorSetup']);
